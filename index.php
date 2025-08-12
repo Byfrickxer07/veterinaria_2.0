@@ -304,5 +304,6 @@
     <script src="index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="alertas.js"></script>
+    <script src="form-validation.js"></script>
 </body>
 </html>
