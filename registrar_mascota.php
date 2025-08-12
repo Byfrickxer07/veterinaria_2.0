@@ -6,22 +6,45 @@ $mensaje = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] == 'registrar_mascota') {
-        if (isset($_POST['nombre_mascota']) && isset($_POST['especie']) && isset($_POST['raza']) && isset($_POST['edad'])) {
-            $nombre_mascota = $_POST['nombre_mascota'];
-            $especie = $_POST['especie'];
-            $raza = $_POST['raza'];
-            $edad = $_POST['edad'];
-            $user_id = $_SESSION['user_id']; 
+        if (isset($_POST['nombre_mascota'], $_POST['especie'], $_POST['raza'], $_POST['edad'], $_POST['sexo'], $_POST['peso'], $_POST['esterilizado'])) {
+            if (!isset($_SESSION['user_id'])) {
+                header('Location: login.php');
+                exit();
+            }
+            $nombre_mascota = trim($_POST['nombre_mascota']);
+            $especie = trim($_POST['especie']);
+            $raza = trim($_POST['raza']);
+            $edad = (int)$_POST['edad'];
+            $sexo = $_POST['sexo'];
+            $peso = (float)$_POST['peso'];
+            $esterilizado = (int)$_POST['esterilizado'];
+            $user_id = (int)$_SESSION['user_id'];
+            $stored_foto = null;
 
-            $query = "INSERT INTO mascotas (user_id, nombre, especie, raza, edad) VALUES (?, ?, ?, ?, ?)";
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = 'uploads/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+                $stored_foto = basename($_FILES['foto']['name']);
+                $dest_path = $upload_dir . $stored_foto;
+                if (!move_uploaded_file($_FILES['foto']['tmp_name'], $dest_path)) {
+                    $mensaje = "<p>Error al subir la foto.</p>";
+                }
+            }
+
+            $query = "INSERT INTO mascotas (user_id, nombre, especie, raza, edad, sexo, peso, esterilizado, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
             if ($stmt) {
-                $stmt->bind_param("isssi", $user_id, $nombre_mascota, $especie, $raza, $edad);
-                $stmt->execute();
+                $stmt->bind_param("isssisdis", $user_id, $nombre_mascota, $especie, $raza, $edad, $sexo, $peso, $esterilizado, $stored_foto);
+                if ($stmt->execute()) {
+                    $mensaje = "<p>Mascota registrada con éxito.</p>";
+                } else {
+                    $mensaje = "<p>Error al registrar: " . htmlspecialchars($stmt->error) . "</p>";
+                }
                 $stmt->close();
-                $mensaje = "<p>Mascota registrada con éxito.</p>";
             } else {
-                $mensaje = "<p>Error en la consulta: " . $conn->error . "</p>";
+                $mensaje = "<p>Error en la consulta: " . htmlspecialchars($conn->error) . "</p>";
             }
         } else {
             $mensaje = "<p>Por favor, completa todos los campos.</p>";
@@ -43,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             margin: 0;
             padding: 0;
             display: flex;
-            overflow: hidden;
+            overflow-y: auto; /* permitir scroll vertical */
             background-color: #f4f4f9;
             color: #333;
         }
@@ -155,21 +178,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
         .content {
             flex-grow: 1;
-            padding: 50px 20px; 
+            padding: 32px 16px; 
             text-align: center;
-            height: 100vh;
+            min-height: 100vh; /* permite crecer más allá de la ventana */
         }
 
 .container {
     background: #ffffff;
-    border-radius: 15px;
-    padding: 40px;
-    max-width: 500px;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 420px;
     width: 100%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
     text-align: center;
     margin: 0 auto;
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.2s ease-in-out;
 }
 
 .container:hover {
@@ -178,8 +201,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
 h1 {
     color: #333;
-    font-size: 28px;
-    margin-bottom: 30px;
+    font-size: 24px;
+    margin-bottom: 16px;
     font-weight: 700;
 }
 
@@ -192,15 +215,18 @@ label {
     font-weight: 500;
 }
 
-input[type="text"] {
-    width: calc(100% - 20px);
-    padding: 12px;
-    margin-bottom: 20px;
+input[type="text"],
+input[type="number"],
+select,
+input[type="file"] {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 14px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 15px;
     background: #fafafa;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input[type="text"]:focus {
@@ -212,15 +238,15 @@ input[type="text"]:focus {
 
 button {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background:  #027a8d;
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s ease, transform 0.3s ease;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
 button:hover {
@@ -312,7 +338,7 @@ button:hover {
     <div class="content">
         <div class="container">
             <h1>Registrar Mascota</h1>
-            <form action="" method="POST">
+            <form action="" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="registrar_mascota">
                 <label for="nombre_mascota">Nombre de la Mascota</label>
                 <input type="text" id="nombre_mascota" name="nombre_mascota" required>
@@ -324,7 +350,25 @@ button:hover {
                 <input type="text" id="raza" name="raza" required>
 
                 <label for="edad">Edad</label>
-                <input type="text" id="edad" name="edad" required>
+                <input type="number" id="edad" name="edad" min="0" max="30" step="1" required>
+
+                <label for="sexo">Sexo</label>
+                <select id="sexo" name="sexo" required>
+                    <option value="Macho">Macho</option>
+                    <option value="Hembra">Hembra</option>
+                </select>
+
+                <label for="peso">Peso (kg)</label>
+                <input type="number" id="peso" name="peso" step="0.01" required>
+
+                <label for="esterilizado">Esterilizado</label>
+                <select id="esterilizado" name="esterilizado" required>
+                    <option value="1">Sí</option>
+                    <option value="0">No</option>
+                </select>
+
+                <label for="foto">Foto de la Mascota</label>
+                <input type="file" id="foto" name="foto" accept="image/*">
 
                 <button type="submit">Registrar Mascota</button>
             </form>
