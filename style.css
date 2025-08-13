@@ -1,3 +1,7 @@
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
 
 * {
     padding: 0;
@@ -23,7 +27,15 @@
     max-width: 900px;
     transition: all 1s ease;
     margin: 10px;
-  }
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+}
   
   .information {
     width: 40%;
@@ -136,8 +148,7 @@
   }
   
   .hide {
-    position: absolute;
-    transform: translateY(-300%);
+    display: none !important;
   }
   
  

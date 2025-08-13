@@ -227,13 +227,13 @@
                     <div>
                         <label>
                             <i class='bx bx-user'></i>
-                            <input type="text" placeholder="Nombre Usuario" name="userName" required>
+                            <input type="text" placeholder="Nombre Usuario" name="userName" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$" maxlength="15" title="Solo letras, máximo 15 caracteres">
                         </label>
                     </div>
                     <div>
                         <label>
                             <i class='bx bx-user'></i>
-                            <input type="text" placeholder="Apellido" name="userLastName">
+                            <input type="text" placeholder="Apellido" name="userLastName" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$" maxlength="15" title="Solo letras, máximo 15 caracteres">
                         </label>
                     </div>
                     <div>
@@ -245,13 +245,13 @@
                     <div>
                         <label>
                             <i class='bx bx-globe'></i>
-                            <input type="text" placeholder="DNI" name="userDNI">
+                            <input type="text" placeholder="DNI" name="userDNI" required pattern="^[0-9]{1,15}$" maxlength="15" title="Solo números, máximo 15 caracteres">
                         </label>
                     </div>
                     <div>
                         <label>
                             <i class='bx bx-phone'></i>
-                            <input type="tel" placeholder="Teléfono" name="userPhone">
+                            <input type="tel" placeholder="Teléfono" name="userPhone" required pattern="^[0-9]{1,15}$" maxlength="15" title="Solo números, máximo 15 caracteres">
                         </label>
                     </div>
                     <div>
