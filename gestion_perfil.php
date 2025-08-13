@@ -101,161 +101,392 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestionar Perfil</title>
     <style>
+        :root {
+            --primary-color: #025162;
+            --primary-dark: #03485f;
+            --secondary-color: #027a8d;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --bg-primary: #f4f4f9;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #6b7280;
+            --border-color: #e0e0e0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 0;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
         }
+
         .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #027a8d;
-            font-size: 32px;
-            text-align: center;
-            margin-top: 20px;
-        }
-        h2 {
-            color: #027a8d;
-            font-size: 24px;
-            margin-top: 20px;
-            border-bottom: 2px solid #027a8d;
-            padding-bottom: 10px;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 16px;
-            color: #027a8d;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            border-color: #027a8d;
-        }
-        button {
-            background-color: #027a8d;
-            color: #fff;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #025b6c;
-        }
-        .message,
-        .error {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 16px;
-        }
-        .message {
-            color: green;
-        }
-        .error {
-            color: red;
-        }
-        .return-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #027a8d;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        .return-link:hover {
-            color: #025b6c;
-        }
-        .pet-list {
-            list-style: none;
-            padding: 0;
-        }
-        .pet-list li {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            padding: 10px;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-        .pet-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .pet-actions form {
-            display: flex;
-            align-items: center;
-            margin: 0;
-        }
-        .pet-actions button {
-            font-size: 14px;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .pet-actions button:hover {
-            background-color: #025b6c;
-        }
-        .pet-actions .edit-button {
-            background-color: #027a8d;
-            color: #fff;
-            padding: 6px 10px;
-        }
-        .pet-actions .edit-button:hover {
-            background-color: #025b6c;
-        }
-        .pet-actions .delete-button {
-            background-color: #d9534f;
-            color: #fff;
-        }
-        .pet-actions .delete-button:hover {
-            background-color: #c9302c;
-        }
-        .pet-info {
-            margin-bottom: 10px;
-        }
-        .pet-edit-fields {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        .pet-edit-fields label {
-            margin-bottom: 4px;
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
         }
-        .pet-edit-fields input {
-            margin-bottom: 8px;
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            align-items: stretch;
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-card,
+        .pets-card {
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: 600;
+            margin: 0 auto 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--bg-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: white;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .pets-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .pets-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .pets-grid::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 3px;
+        }
+
+        .pets-grid::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .pets-grid::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        .pet-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pet-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .pet-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .pet-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pet-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .pet-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .pet-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .pet-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pet-detail {
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .pet-detail-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .pet-detail-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pet-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: auto;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -264,38 +495,108 @@ try {
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
+            backdrop-filter: blur(4px);
+            z-index: 1000;
             align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
+
         .modal-content {
-            background: #fff;
-            border-radius: 5px;
-            padding: 20px;
-            width: 80%;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            width: 100%;
             max-width: 500px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
         }
-        .modal-content h2 {
-            margin-top: 0;
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
         .modal-close {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #d9534f;
-            color: #fff;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 1.25rem;
+            transition: background 0.2s ease;
         }
+
         .modal-close:hover {
-            background: #c9302c;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .return-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            width: fit-content;
+        }
+
+        .return-link:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
         }
     </style>
     <script>
@@ -314,80 +615,187 @@ try {
     </script>
 </head>
 <body>
-
-
-
-
-
     <div class="container">
-        <h1>Perfil del Usuario</h1>
+        <div class="header">
+            <h1>Gestión de Perfil</h1>
+            <p>Administra tu información personal y la de tus mascotas</p>
+        </div>
+
         <?php if (isset($mensaje)): ?>
-            <div class="<?php echo strpos($mensaje, 'Error') === false ? 'message' : 'error'; ?>">
+            <div class="alert <?php echo strpos($mensaje, 'Error') === false ? 'alert-success' : 'alert-error'; ?>">
+                <span><?php echo strpos($mensaje, 'Error') === false ? '✅' : '❌'; ?></span>
                 <?php echo $mensaje; ?>
             </div>
         <?php endif; ?>
-        <form action="gestion_perfil.php" method="post">
-            <h2>Actualizar Perfil</h2>
-            <div class="form-group">
-                <label for="username">Nombre de Usuario:</label>
-                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Correo Electrónico:</label>
-                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($usuario['correo_electronico']); ?>" required>
-            </div>
-            <div class="form-group">
-                <label for="current_password">Contraseña Actual:</label>
-                <input type="password" id="current_password" name="current_password">
-            </div>
-            <div class="form-group">
-                <label for="new_password">Nueva Contraseña:</label>
-                <input type="password" id="new_password" name="new_password">
-            </div>
-            <button type="submit" name="update_profile">Actualizar Perfil</button>
-        </form>
 
-        <h2>Mis Mascotas</h2>
-        <ul class="pet-list">
-            <?php foreach ($mascotas as $pet): ?>
-                <li class="pet-info">
-                    <strong>Nombre:</strong> <?php echo htmlspecialchars($pet['nombre']); ?><br>
-                    <strong>Especie:</strong> <?php echo htmlspecialchars($pet['especie']); ?><br>
-                    <strong>Raza:</strong> <?php echo htmlspecialchars($pet['raza']); ?><br>
-                    <strong>Edad:</strong> <?php echo htmlspecialchars($pet['edad']); ?>
-                    <div class="pet-actions">
-                        <button class="edit-button" onclick="openModal('<?php echo $pet['id']; ?>', '<?php echo htmlspecialchars($pet['nombre']); ?>', '<?php echo htmlspecialchars($pet['especie']); ?>', '<?php echo htmlspecialchars($pet['raza']); ?>', '<?php echo htmlspecialchars($pet['edad']); ?>')">Editar</button>
-                        <form action="gestion_perfil.php" method="post">
-                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($pet['id']); ?>">
-                            <button type="submit" name="delete_pet" class="delete-button">Eliminar</button>
-                        </form>
+        <div class="main-grid">
+            <!-- Perfil del Usuario -->
+            <div class="card profile-card">
+                <div class="card-header">
+                    <h2>Información Personal</h2>
+                </div>
+                <div class="card-body">
+                    <div class="profile-avatar">
+                        <?php echo strtoupper(substr($usuario['nombre_usuario'], 0, 1)); ?>
                     </div>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+                    
+                    <form action="gestion_perfil.php" method="post">
+                        <div class="form-group">
+                            <label class="form-label" for="username">Nombre de Usuario</label>
+                            <div class="input-group">
+                                <span class="input-icon">@</span>
+                                <input type="text" id="username" name="username" class="form-input" 
+                                       value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="email">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-icon">✉</span>
+                                <input type="email" id="email" name="email" class="form-input" 
+                                       value="<?php echo htmlspecialchars($usuario['correo_electronico']); ?>" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="current_password">Contraseña Actual</label>
+                            <div class="input-group">
+                                <span class="input-icon">●</span>
+                                <input type="password" id="current_password" name="current_password" class="form-input">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="new_password">Nueva Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-icon">◐</span>
+                                <input type="password" id="new_password" name="new_password" class="form-input">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" name="update_profile" class="btn btn-primary" style="width: 100%;">
+                            Actualizar Perfil
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-        <a href="client_dashboard.php" class="return-link">Volver a la Página Principal</a>
+            <!-- Mascotas -->
+            <div class="card pets-card">
+                <div class="card-header">
+                    <h2>Registro de Mascotas</h2>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($mascotas)): ?>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">◯</div>
+                            <h3>No tienes mascotas registradas</h3>
+                            <p>Registra tu primera mascota para comenzar</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="pets-grid">
+                            <?php foreach ($mascotas as $pet): ?>
+                                <div class="pet-card">
+                                    <div class="pet-header">
+                                        <div class="pet-avatar">
+                                            <?php echo strtoupper(substr($pet['nombre'], 0, 1)); ?>
+                                        </div>
+                                        <div class="pet-info">
+                                            <h3><?php echo htmlspecialchars($pet['nombre']); ?></h3>
+                                            <p><?php echo htmlspecialchars($pet['especie']); ?> • <?php echo htmlspecialchars($pet['raza']); ?></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pet-details">
+                                        <div class="pet-detail">
+                                            <div class="pet-detail-label">Especie</div>
+                                            <div class="pet-detail-value"><?php echo htmlspecialchars($pet['especie']); ?></div>
+                                        </div>
+                                        <div class="pet-detail">
+                                            <div class="pet-detail-label">Raza</div>
+                                            <div class="pet-detail-value"><?php echo htmlspecialchars($pet['raza']); ?></div>
+                                        </div>
+                                        <div class="pet-detail">
+                                            <div class="pet-detail-label">Edad</div>
+                                            <div class="pet-detail-value"><?php echo htmlspecialchars($pet['edad']); ?> años</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="pet-actions">
+                                        <button class="btn btn-secondary" 
+                                                onclick="openModal('<?php echo $pet['id']; ?>', '<?php echo htmlspecialchars($pet['nombre']); ?>', '<?php echo htmlspecialchars($pet['especie']); ?>', '<?php echo htmlspecialchars($pet['raza']); ?>', '<?php echo htmlspecialchars($pet['edad']); ?>')"> 
+                                            Editar
+                                        </button>
+                                        <form action="gestion_perfil.php" method="post" style="display: inline;">
+                                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($pet['id']); ?>">
+                                            <button type="submit" name="delete_pet" class="btn btn-danger" 
+                                                    onclick="return confirm('¿Estás seguro de que quieres eliminar a <?php echo htmlspecialchars($pet['nombre']); ?>?')">
+                                                Eliminar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <a href="client_dashboard.php" class="return-link">
+            ← Volver a la Página Principal
+        </a>
     </div>
 
     <!-- Modal para editar mascota -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">×</button>
-            <h2>Editar Mascota</h2>
-            <form action="gestion_perfil.php" method="post">
-                <input type="hidden" id="edit-pet-id" name="id">
-                <div class="pet-edit-fields">
-                    <label for="edit-nombre">Nombre:</label>
-                    <input type="text" id="edit-nombre" name="nombre" required>
-                    <label for="edit-especie">Especie:</label>
-                    <input type="text" id="edit-especie" name="especie" required>
-                    <label for="edit-raza">Raza:</label>
-                    <input type="text" id="edit-raza" name="raza" required>
-                    <label for="edit-edad">Edad:</label>
-                    <input type="text" id="edit-edad" name="edad" required>
-                </div>
-                <button type="submit" name="edit_pet">Guardar Cambios</button>
-            </form>
+            <div class="modal-header">
+                <h2>Editar Información de Mascota</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form action="gestion_perfil.php" method="post">
+                    <input type="hidden" id="edit-pet-id" name="id">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-nombre">Nombre de la Mascota</label>
+                        <div class="input-group">
+                            <span class="input-icon">◆</span>
+                            <input type="text" id="edit-nombre" name="nombre" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-especie">Especie</label>
+                        <div class="input-group">
+                            <span class="input-icon">▲</span>
+                            <input type="text" id="edit-especie" name="especie" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-raza">Raza</label>
+                        <div class="input-group">
+                            <span class="input-icon">#</span>
+                            <input type="text" id="edit-raza" name="raza" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-edad">Edad (años)</label>
+                        <div class="input-group">
+                            <span class="input-icon">+</span>
+                            <input type="number" id="edit-edad" name="edad" class="form-input" min="0" max="30" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" name="edit_pet" class="btn btn-primary" style="width: 100%;">
+                        Guardar Cambios
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </body>
