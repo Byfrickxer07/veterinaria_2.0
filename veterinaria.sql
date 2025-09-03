@@ -3,19 +3,13 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 09-09-2024 a las 23:49:38
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.2.4
+-- Tiempo de generación: 03-09-2025 a las 04:30:21
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Base de datos: `veterinaria`
@@ -51,15 +45,12 @@ CREATE TABLE `mascotas` (
   `nombre` varchar(50) NOT NULL,
   `especie` varchar(50) NOT NULL,
   `raza` varchar(50) NOT NULL,
-  `edad` int(11) NOT NULL
+  `edad` int(11) NOT NULL,
+  `sexo` varchar(10) NOT NULL,
+  `peso` decimal(5,2) NOT NULL,
+  `esterilizado` tinyint(1) NOT NULL,
+  `foto` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `mascotas`
---
-
-INSERT INTO `mascotas` (`id`, `user_id`, `nombre`, `especie`, `raza`, `edad`) VALUES
-(12, 15, 'peter', 'perro', 'dalmata', 3);
 
 -- --------------------------------------------------------
 
@@ -76,13 +67,6 @@ CREATE TABLE `turnos` (
   `tipo_servicio` enum('cirugia','castracion','peluqueria') NOT NULL,
   `estado` enum('Pendiente','Terminado') DEFAULT 'Pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `turnos`
---
-
-INSERT INTO `turnos` (`id`, `user_id`, `mascota_id`, `fecha`, `hora`, `tipo_servicio`, `estado`) VALUES
-(13, 15, 12, '2024-09-11', '10:18:00', 'castracion', 'Pendiente');
 
 -- --------------------------------------------------------
 
@@ -106,12 +90,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `nombre_usuario`, `correo_electronico`, `contrasena`, `rol`, `telefono`, `dni`, `apellido`) VALUES
-(1, 'nahi3', 'nahiara.sasson@gmail.com', '$2y$10$L6LNB9O22Jj1bDI/Xz/xsesZxweRNJA24/GZuys.avVnOxSLabR2y', 'cliente', NULL, NULL, NULL),
-(2, 'nahi2', 'nahiara.sassone@gmail.com', '$2y$10$GNHr/bYCplTPeGJAQpdEiuW1B8oiovM3.TgIdNtM770t9ygsu5Yyu', 'cliente', NULL, NULL, NULL),
-(3, 'nahi21', 'ho@gmail.com', '$2y$10$SccbAhpjB9T84QtYAv3vJOI21msGHirx0pqp.JWsS1xyqAdfizFgq', 'cliente', NULL, NULL, NULL),
-(8, 'hugo', 'hugo@gmail.com', '$2y$10$4XtLKXBeqHhkf3IrC7CDAuTpMG.5MzpWI7E/Ib5FBfKL64PmTSXly', 'admin', NULL, NULL, NULL),
-(10, 'maxi', 'maxi@gmail.com', '$2y$10$Zorfk2/Gn6iKufrhFduPj.554aZz4IEQIKjQPPHTkrgXuFuJaAAxW', 'doctor', NULL, NULL, NULL),
-(15, 'thomas', 'thomas@gmail.com', '$2y$10$/ZZNo47cZeKcddzj1dzIOui.19bo/wIn61eDEf5lN9n/nre1fwnNi', 'cliente', '1122334455', '1122334455', 'fricker');
+(17, 'thomas', 'thomas@gmail.com', '$2y$10$M7peRymumORu1XH9GmXcluSla1guALQsu71nrXKdOPtwLe.9bblhW', 'admin', '1121212121', '2222222', 'fricker');
 
 --
 -- Índices para tablas volcadas
@@ -160,7 +139,7 @@ ALTER TABLE `historial_clinico`
 -- AUTO_INCREMENT de la tabla `mascotas`
 --
 ALTER TABLE `mascotas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `turnos`
@@ -172,7 +151,7 @@ ALTER TABLE `turnos`
 -- AUTO_INCREMENT de la tabla `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restricciones para tablas volcadas
@@ -197,7 +176,3 @@ ALTER TABLE `turnos`
   ADD CONSTRAINT `turnos_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `turnos_ibfk_2` FOREIGN KEY (`mascota_id`) REFERENCES `mascotas` (`id`) ON DELETE CASCADE;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

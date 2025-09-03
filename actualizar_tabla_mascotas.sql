@@ -1,5 +1,0 @@
-ALTER TABLE `mascotas` 
-ADD COLUMN `sexo` VARCHAR(10) NOT NULL AFTER `edad`,
-ADD COLUMN `peso` DECIMAL(5,2) NOT NULL AFTER `sexo`,
-ADD COLUMN `esterilizado` BOOLEAN NOT NULL AFTER `peso`,
-ADD COLUMN `foto` VARCHAR(255) DEFAULT NULL AFTER `esterilizado`;
