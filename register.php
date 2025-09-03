@@ -22,27 +22,8 @@ $userDNI = $_POST['userDNI'];
 $userLastName = $_POST['userLastName'];
 
 // Validaciones
-// Nombre: solo letras y espacios, máximo 15 caracteres
-if (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$/', $userName)) {
-    echo "El nombre solo debe contener letras y máximo 15 caracteres.";
-    exit;
-}
-
-// Apellido: solo letras y espacios, máximo 15 caracteres
-if (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$/', $userLastName)) {
-    echo "El apellido solo debe contener letras y máximo 15 caracteres.";
-    exit;
-}
-
-// DNI: solo números, máximo 15 caracteres
-if (!preg_match('/^[0-9]{1,15}$/', $userDNI)) {
-    echo "El DNI solo debe contener números y máximo 15 caracteres.";
-    exit;
-}
-
-// Teléfono: solo números, máximo 15 caracteres
-if (!preg_match('/^[0-9]{1,15}$/', $userPhone)) {
-    echo "El teléfono solo debe contener números y máximo 15 caracteres.";
+if (strlen($userName) < 4) {
+    echo "El nombre de usuario debe tener más de 4 caracteres.";
     exit;
 }
 

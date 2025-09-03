@@ -227,13 +227,13 @@
                     <div>
                         <label>
                             <i class='bx bx-user'></i>
-                            <input type="text" placeholder="Nombre Usuario" name="userName" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$" maxlength="15" title="Solo letras, máximo 15 caracteres">
+                            <input type="text" placeholder="Nombre Usuario" name="userName" required>
                         </label>
                     </div>
                     <div>
                         <label>
                             <i class='bx bx-user'></i>
-                            <input type="text" placeholder="Apellido" name="userLastName" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$" maxlength="15" title="Solo letras, máximo 15 caracteres">
+                            <input type="text" placeholder="Apellido" name="userLastName">
                         </label>
                     </div>
                     <div>
@@ -245,13 +245,13 @@
                     <div>
                         <label>
                             <i class='bx bx-globe'></i>
-                            <input type="text" placeholder="DNI" name="userDNI" required pattern="^[0-9]{1,15}$" maxlength="15" title="Solo números, máximo 15 caracteres">
+                            <input type="text" placeholder="DNI" name="userDNI">
                         </label>
                     </div>
                     <div>
                         <label>
                             <i class='bx bx-phone'></i>
-                            <input type="tel" placeholder="Teléfono" name="userPhone" required pattern="^[0-9]{1,15}$" maxlength="15" title="Solo números, máximo 15 caracteres">
+                            <input type="tel" placeholder="Teléfono" name="userPhone">
                         </label>
                     </div>
                     <div>
@@ -304,6 +304,5 @@
     <script src="index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="alertas.js"></script>
-    <script src="form-validation.js"></script>
 </body>
 </html>
