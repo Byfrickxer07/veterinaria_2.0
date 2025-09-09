@@ -70,78 +70,169 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservar Turno</title>
+    <title>Reservar Turno - Veterinaria</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --primary-color: #025162;
+            --primary-dark: #03485f;
+            --secondary-color: #027a8d;
+            --danger-color: #dc2626;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --bg-light: #f9fafb;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            overflow: hidden;
-            background-color: #f4f4f9;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
+            box-sizing: border-box;
         }
 
-        .dark-mode {
-            background-color: #1c1c1c;
-            color: #e0e0e0;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.6;
         }
 
-        .sidebar {
-            width: 275px;
-            background-color: #025162;
-            color: #ecf0f1;
-            padding-top: 40px;
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            transition: width 0.3s, background-color 0.3s;
-            position: fixed;
-            top: 0;
-            left: 0;
         }
 
-        .sidebar.collapsed {
-            width: 75px;
-        }
-
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span {
-            display: none;
-        }
-
-        .sidebar.collapsed .profile-section {
+        .header {
+            position: relative;
             text-align: center;
+            margin-bottom: 2rem;
         }
 
-        .sidebar .toggle-menu {
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .return-link {
             position: absolute;
-            top: 30px;
-            right: -15px;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            background-color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .return-link:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Additional styles for the form elements */
+        .text-muted {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(2, 81, 98, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            background-color: #027a8d;
-            padding: 10px;
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            transition: right 0.3s ease, background-color 0.3s;
+            transition: all 0.2s ease;
+            text-decoration: none;
         }
 
-        .sidebar.collapsed .toggle-menu {
-            right: -15px;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
         }
 
-        .profile-section {
-            text-align: center;
-            margin-bottom: 20px;
-            transition: margin-bottom 0.3s;
-        }
-
-        .profile-image {
-            width: 120px;
-            height: 120px;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 81, 98, 0.2);
+        
             border-radius: 50%;
             object-fit: cover;
             margin-bottom: 10px;
@@ -259,123 +350,161 @@ $conn->close();
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-
-        .btn-reservar:hover {
-            background-color: #025162;
-        }
-
-        .mensaje {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-
-        .btn-volver {
-            background-color: #e74c3c;
-            color: #fff;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .btn-volver:hover {
-            background-color: #c0392b;
-        }
-    </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="toggle-menu">
-        <i class='bx bx-chevron-left' id="menu-toggle"></i> 
+    <div class="container">
+        <div class="header">
+            <a href="client_dashboard.php" class="return-link">
+                <i class='bx bx-arrow-back'></i> Volver
+            </a>
+            <div class="header-content">
+                <h1>Reservar Turno</h1>
+                <p>Agenda un turno para tu mascota</p>
+            </div>
         </div>
-        <div class="profile-section">
-            <img src="logo_perro.jpg" alt="Perfil" class="profile-image">
+
+        <?php if (!empty($mensaje)): ?>
+            <div class="alert <?php echo strpos($mensaje, 'éxito') !== false ? 'alert-success' : 'alert-error'; ?>">
+                <span><?php echo strpos($mensaje, 'éxito') !== false ? '✓' : '✗'; ?></span>
+                <?php echo $mensaje; ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Datos del Turno</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="sacar_turno.php">
+                    <div class="form-group">
+                        <label for="fecha" class="form-label">Fecha del Turno</label>
+                        <input type="date" id="fecha" name="fecha" class="form-control" 
+                               required min="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hora" class="form-label">Hora del Turno</label>
+                        <input type="time" id="hora" name="hora" class="form-control" 
+                               min="08:00" max="18:00" required>
+                        <small class="text-muted">Horario de atención: 8:00 AM - 6:00 PM</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipo_servicio" class="form-label">Tipo de Servicio</label>
+                        <select id="tipo_servicio" name="tipo_servicio" class="form-control" required>
+                            <option value="" disabled selected>Seleccione un servicio</option>
+                            <option value="Consulta General">Consulta General</option>
+                            <option value="Vacunación">Vacunación</option>
+                            <option value="Peluquería">Peluquería</option>
+                            <option value="Cirugía">Cirugía</option>
+                            <option value="Desparasitación">Desparasitación</option>
+                            <option value="Control">Control</option>
+                            <option value="Urgencia">Urgencia</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mascota" class="form-label">Mascota</label>
+                        <select id="mascota" name="mascota" class="form-control" required>
+                            <option value="" disabled selected>Seleccione una mascota</option>
+                            <?php foreach ($mascotas as $mascota): ?>
+                                <option value="<?php echo $mascota['id']; ?>">
+                                    <?php echo htmlspecialchars($mascota['nombre']); ?>
+                                    (<?php echo htmlspecialchars($mascota['especie']); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class='bx bx-calendar-check'></i> Reservar Turno
+                    </button>
+                </form>
+            </div>
+        </div>
+                <i class='bx bx-arrow-back'></i> Volver al Inicio
+            </a>
+            <div class="header-content">
+                <h1>Reservar Turno</h1>
+                <p>Agenda un turno para tu mascota</p>
+            </div>
+        </div>
+
+        <?php if (!empty($mensaje)): ?>
+            <div class="alert <?php echo strpos($mensaje, 'éxito') !== false ? 'alert-success' : 'alert-error'; ?>">
+                <span><?php echo strpos($mensaje, 'éxito') !== false ? '✓' : '✗'; ?></span>
+                <?php echo $mensaje; ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Datos del Turno</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="sacar_turno.php">
+                    <div class="form-group">
+                        <label for="fecha" class="form-label">Fecha del Turno</label>
+                        <input type="date" id="fecha" name="fecha" class="form-control" 
+                               required min="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hora" class="form-label">Hora del Turno</label>
+                        <input type="time" id="hora" name="hora" class="form-control" 
+                               min="08:00" max="18:00" required>
+                        <small class="text-muted">Horario de atención: 8:00 AM - 6:00 PM</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipo_servicio" class="form-label">Tipo de Servicio</label>
+                        <select id="tipo_servicio" name="tipo_servicio" class="form-control" required>
+                            <option value="" disabled selected>Seleccione un servicio</option>
+                            <option value="Consulta General">Consulta General</option>
+                            <option value="Vacunación">Vacunación</option>
+                            <option value="Peluquería">Peluquería</option>
+                            <option value="Cirugía">Cirugía</option>
+                            <option value="Desparasitación">Desparasitación</option>
+                            <option value="Control">Control</option>
+                            <option value="Urgencia">Urgencia</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mascota" class="form-label">Mascota</label>
+                        <select id="mascota" name="mascota" class="form-control" required>
+                            <option value="" disabled selected>Seleccione una mascota</option>
+                            <?php foreach ($mascotas as $mascota): ?>
+                                <option value="<?php echo $mascota['id']; ?>">
+                                    <?php echo htmlspecialchars($mascota['nombre']); ?> 
+                                    (<?php echo htmlspecialchars($mascota['especie']); ?> - <?php echo htmlspecialchars($mascota['raza']); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class='bx bx-calendar-check'></i> Reservar Turno
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configurar la fecha mínima como hoy
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaInput = document.getElementById('fecha');
+            const hoy = new Date().toISOString().split('T')[0];
+            fechaInput.min = hoy;
             
-        </div>
-        <a href="client_dashboard.php"><i class='bx bx-home'></i><span> Inicio</span></a>
-    <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Ver Turnos</span></a>
-    <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Gestionar Perfil</span></a>
-    <a href="registrar_mascota.php"><i class='bx bx-plus'></i><span>Añadir tus mascotas</span></a>
-
-        <div class="bottom-menu">
-        <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
-        </div>
-    </div>
-
-
-    <div class="content">
-        <h1>Reservar Turno</h1>
-        <form method="POST" class="form-reserva-turno">
-            <div class="form-group">
-                <label for="fecha">Fecha:</label>
-                <input type="date" id="fecha" name="fecha" required>
-            </div>
-            <div class="form-group">
-                <label for="hora">Hora:</label>
-                <input type="time" id="hora" name="hora" required>
-            </div>
-            <div class="form-group">
-                <label for="tipo_servicio">Tipo de Servicio:</label>
-                <select id="tipo_servicio" name="tipo_servicio" required>
-                    <option value="cirugia">Cirugía</option>
-                    <option value="castracion">Castración</option>
-                    <option value="baño">Baño</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="mascota">Mascota:</label>
-                <select id="mascota" name="mascota" required>
-                    <?php foreach ($mascotas as $mascota): ?>
-                        <option value="<?= $mascota['id'] ?>"><?= htmlspecialchars($mascota['nombre']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <button type="submit" class="btn-reservar">Reservar</button>
-         
-        </form>
-        <div class="mensaje"><?= $mensaje ?></div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="alertas_clientes.js"></script>
-<script>
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const body = document.body;
-
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        menuToggle.classList.toggle('bx-chevron-left');
-        menuToggle.classList.toggle('bx-chevron-right');
-    });
-
-    darkModeToggle.addEventListener('change', () => {
-        body.classList.toggle('dark-mode');
-    });
-
-        const logoutButton = document.getElementById('logout-button');
-        logoutButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            Swal.fire({
-                title: '¿Estás seguro de que deseas cerrar sesión?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, cerrar sesión'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = 'index.php';
-                }
-            });
+            // Establecer la fecha actual si no hay valor
+            if (!fechaInput.value) {
+                fechaInput.value = hoy;
+            }
         });
-   
-
-</script>
-
+    </script>
+    <script src="alertas_clientes.js"></script>
 </body>
 </html>
