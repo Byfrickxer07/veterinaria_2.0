@@ -145,8 +145,26 @@ try {
         }
 
         .header {
+            position: relative;
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .return-link {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .header-content {
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: var(--primary-color);
         }
 
         .header h1 {
@@ -301,15 +319,17 @@ try {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.875rem 1.5rem;
+            padding: 0.5rem 1rem;
             border: none;
             border-radius: var(--radius-md);
             font-weight: 500;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
             justify-content: center;
+            flex: 1;
+            white-space: nowrap;
         }
 
         .btn-primary {
@@ -366,12 +386,13 @@ try {
         }
 
         .pets-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
             height: 100%;
             overflow-y: auto;
             padding-right: 0.5rem;
+            align-content: flex-start;
         }
 
         .pets-grid::-webkit-scrollbar {
@@ -401,8 +422,11 @@ try {
             position: relative;
             overflow: hidden;
             min-height: 180px;
+            width: calc(33.333% - 0.75rem);
             display: flex;
             flex-direction: column;
+            flex-grow: 1;
+            min-width: 250px;
         }
 
         .pet-card::before {
@@ -451,20 +475,35 @@ try {
         .pet-info p {
             color: var(--text-secondary);
             font-size: 0.875rem;
+            margin: 0.25rem 0;
+        }
+        
+        .pet-age-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            display: inline-block;
+            margin-top: 0.25rem;
+            border: 1px solid #bae6fd;
         }
 
         .pet-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .pet-detail {
             text-align: center;
-            padding: 0.75rem;
+            padding: 0.5rem 0.75rem;
             background: var(--bg-primary);
             border-radius: var(--radius-md);
+            flex: 1;
+            min-width: calc(50% - 0.5rem);
         }
 
         .pet-detail-label {
@@ -482,8 +521,8 @@ try {
 
         .pet-actions {
             display: flex;
-            gap: 0.75rem;
-            justify-content: flex-end;
+            gap: 0.5rem;
+            justify-content: space-between;
             margin-top: auto;
         }
 
@@ -494,74 +533,162 @@ try {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
         }
 
         .modal-content {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-xl);
+            background: white;
+            border-radius: 16px;
             width: 100%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            padding: 1.5rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            opacity: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
         }
-
-        .modal-header h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0;
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
         }
 
         .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
             background: rgba(255, 255, 255, 0.2);
-            color: white;
             border: none;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             font-size: 1.25rem;
-            transition: background 0.2s ease;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
         }
-
+        
         .modal-close:hover {
             background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-header {
+            padding: 1.75rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
         }
 
         .modal-body {
             padding: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        
+        .form-input, select.form-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23025162' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+        
+        select.form-input {
+            padding-right: 2.5rem;
+        }
+        
+        .form-input:focus, select.form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(2, 81, 98, 0.1);
+            background-color: white;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 81, 98, 0.2);
         }
 
         .return-link {
@@ -569,10 +696,12 @@ try {
             align-items: center;
             gap: 0.5rem;
             color: white;
+            background-color: var(--primary-color);
             text-decoration: none;
             font-weight: 500;
-            margin-top: 1.5rem;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
             background: var(--primary-color);
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-md);
@@ -582,9 +711,7 @@ try {
         }
 
         .return-link:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-lg);
+            background: var(--primary-color);
         }
 
         .empty-state {
@@ -600,25 +727,85 @@ try {
         }
     </style>
     <script>
+        // Datos de razas por especie
+        const razasPorEspecie = {
+            'Perro': ['Labrador Retriever', 'Pastor Alemán', 'Bulldog', 'Golden Retriever', 'Poodle', 'Beagle', 'Chihuahua', 'Boxer', 'Dálmata', 'Husky Siberiano', 'Sin raza definida'],
+            'Gato': ['Siamés', 'Persa', 'Maine Coon', 'Bengalí', 'Esfinge', 'Azul Ruso', 'Angora Turco', 'Ragdoll', 'British Shorthair', 'Siberiano', 'Sin raza definida'],
+            'Conejo': ['Holandés Enano', 'Cabeza de León', 'Angora', 'Rex', 'Belier', 'Gigante de Flandes', 'Mini Lop', 'Conejo Enano', 'Sin raza definida'],
+            'Ave': ['Periquito', 'Canario', 'Cacatúa', 'Agapornis', 'Loro', 'Ninfa', 'Diamante Mandarín', 'Jilguero', 'Sin raza definida'],
+            'Roedor': ['Hámster Sirio', 'Cobaya', 'Conejillo de Indias', 'Ratón Doméstico', 'Rata Doméstica', 'Jerbo', 'Chinchilla', 'Degú', 'Sin raza definida']
+        };
+
+        function actualizarRazas(especieSeleccionada) {
+            const razaSelect = document.getElementById('edit-raza');
+            // Limpiar opciones actuales
+            razaSelect.innerHTML = '';
+            
+            // Agregar opción predeterminada
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = 'Seleccione una raza...';
+            razaSelect.appendChild(defaultOption);
+            
+            // Agregar razas correspondientes
+            if (especieSeleccionada && razasPorEspecie[especieSeleccionada]) {
+                razasPorEspecie[especieSeleccionada].forEach(raza => {
+                    const option = document.createElement('option');
+                    option.value = raza;
+                    option.textContent = raza;
+                    razaSelect.appendChild(option);
+                });
+            }
+        }
+
         function openModal(id, nombre, especie, raza, edad) {
             document.getElementById('edit-pet-id').value = id;
             document.getElementById('edit-nombre').value = nombre;
-            document.getElementById('edit-especie').value = especie;
-            document.getElementById('edit-raza').value = raza;
+            
+            // Establecer la especie
+            const especieSelect = document.getElementById('edit-especie');
+            especieSelect.value = especie;
+            
+            // Actualizar las razas basadas en la especie
+            actualizarRazas(especie);
+            
+            // Establecer la raza después de que se hayan cargado las opciones
+            setTimeout(() => {
+                const razaSelect = document.getElementById('edit-raza');
+                razaSelect.value = raza;
+            }, 10);
+            
             document.getElementById('edit-edad').value = edad;
-            document.getElementById('editModal').style.display = 'flex';
+            // Mostrar el modal con animación
+            const modal = document.getElementById('editModal');
+            modal.style.display = 'flex';
+            // Forzar reflow para que funcione la animación
+            void modal.offsetWidth;
+            modal.classList.add('active');
         }
 
         function closeModal() {
-            document.getElementById('editModal').style.display = 'none';
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('active');
+            // Esperar a que termine la animación antes de ocultar
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
         }
     </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Gestión de Perfil</h1>
-            <p>Administra tu información personal y la de tus mascotas</p>
+            <a href="client_dashboard.php" class="return-link">
+                <i class='bx bx-arrow-back'></i> Volver al Inicio
+            </a>
+            <div class="header-content">
+                <h1>Gestión de Perfil</h1>
+                <p>Administra tu información personal y la de tus mascotas</p>
+            </div>
         </div>
 
         <?php if (isset($mensaje)): ?>
@@ -704,6 +891,9 @@ try {
                                         <div class="pet-info">
                                             <h3><?php echo htmlspecialchars($pet['nombre']); ?></h3>
                                             <p><?php echo htmlspecialchars($pet['especie']); ?> • <?php echo htmlspecialchars($pet['raza']); ?></p>
+                                            <div class="pet-age-badge">
+                                                <?php echo htmlspecialchars($pet['edad']); ?> años
+                                            </div>
                                         </div>
                                     </div>
                                     
@@ -743,9 +933,6 @@ try {
             </div>
         </div>
 
-        <a href="client_dashboard.php" class="return-link">
-            ← Volver a la Página Principal
-        </a>
     </div>
 
     <!-- Modal para editar mascota -->
@@ -771,21 +958,30 @@ try {
                         <label class="form-label" for="edit-especie">Especie</label>
                         <div class="input-group">
                             <span class="input-icon">▲</span>
-                            <input type="text" id="edit-especie" name="especie" class="form-input" required>
+                            <select id="edit-especie" name="especie" class="form-input" required onchange="actualizarRazas(this.value)">
+                                <option value="" disabled selected>Seleccionar especie...</option>
+                                <option value="Perro">Perro</option>
+                                <option value="Gato">Gato</option>
+                                <option value="Conejo">Conejo</option>
+                                <option value="Ave">Ave</option>
+                                <option value="Roedor">Roedor</option>
+                            </select>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="edit-raza">Raza</label>
                         <div class="input-group">
-                            <span class="input-icon">#</span>
-                            <input type="text" id="edit-raza" name="raza" class="form-input" required>
+                            <span class="input-icon">◆</span>
+                            <select id="edit-raza" name="raza" class="form-input" required>
+                                <option value="" disabled selected>Seleccione una especie primero</option>
+                            </select>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="edit-edad">Edad (años)</label>
-                        <div class="input-group">
+<!-- ... -->
                             <span class="input-icon">+</span>
                             <input type="number" id="edit-edad" name="edad" class="form-input" min="0" max="30" required>
                         </div>
