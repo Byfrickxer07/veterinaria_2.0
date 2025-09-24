@@ -216,6 +216,11 @@ $mysqli->close();
         .historial-item strong {
             color: #03879C;
         }
+        /* Desactivar colapso del sidebar en esta página */
+        .sidebar .toggle-menu { display: none !important; }
+        .sidebar.collapsed { width: 275px !important; }
+        .sidebar.collapsed .user-name,
+        .sidebar.collapsed span { display: inline !important; }
     </style>
 </head>
 <body>

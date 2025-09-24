@@ -25,6 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else if ($hora < '08:00' || $hora > '18:00') {
         $mensaje = "error:El horario de atención es de 8:00 AM a 6:00 PM.";
     } else {
+        // Validar tipo de servicio contra los valores del ENUM en la BD
+        $servicios_permitidos = ['vacunacion', 'Control', 'castracion', 'baño'];
+        if (!in_array($tipo_servicio, $servicios_permitidos, true)) {
+            $mensaje = "error:Tipo de servicio no válido.";
+        } else {
         $query = "SELECT * FROM turnos WHERE fecha = ? AND hora = ? AND tipo_servicio = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("sss", $fecha, $hora, $tipo_servicio);
@@ -49,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             } else {
                 $mensaje = "error:Error en la base de datos: " . $conn->error;
             }
+        }
         }
     }
 }
@@ -488,6 +494,15 @@ $conn->close();
             background-size: 16px;
             padding-right: 50px;
         }
+
+        /* Desactivar colapso del sidebar en esta página */
+        .sidebar .toggle-menu { display: none !important; }
+        .sidebar.collapsed { width: 280px !important; }
+        .sidebar.collapsed ~ .content { margin-left: 280px !important; }
+        @media (max-width: 768px) {
+            .sidebar.collapsed { width: 70px !important; }
+            .sidebar.collapsed ~ .content { margin-left: 70px !important; }
+        }
     </style>
 </head>
 <body>
@@ -703,10 +718,10 @@ $conn->close();
 
         // Configurar horarios según el tipo de servicio
         const serviceTimeSlots = {
-            'vacunacion': 20,    // 20 minutos
-            'Control': 20,       // 20 minutos
-            'castracion': 60,    // 1 hora
-            'baño': 60           // 1 hora
+            'vacunacion': 20,   // 20 minutos
+            'Control': 20,      // 20 minutos
+            'castracion': 60,   // 1 hora
+            'baño': 60          // 1 hora
         };
 
         // Función para generar los horarios disponibles

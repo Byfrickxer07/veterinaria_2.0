@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             margin: 0;
             padding: 0;
             display: flex;
-            overflow-y: auto;
+            overflow: hidden; /* Igual que sacar_turno: evitamos scroll horizontal bajo el menú */
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: #2c3e50;
             min-height: 100vh;
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         }
 
         .sidebar {
-            width: 275px;
+            width: 280px;
             background: linear-gradient(180deg, #025162 0%, #027a8d 100%);
             color: #ecf0f1;
             padding-top: 40px;
@@ -109,12 +109,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             align-items: center;
             height: 100vh;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+            position: fixed; /* igual que en sacar_turno */
+            top: 0;
+            left: 0;
+            overflow-y: auto; /* scroll propio si es más alta que la pantalla */
+            overflow-x: hidden; /* evita barra horizontal por elementos que sobresalen */
+            z-index: 1000;
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .sidebar.collapsed {
-            width: 75px;
+            width: 80px;
         }
 
         .sidebar.collapsed .user-name,
@@ -125,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         .sidebar .toggle-menu {
             position: absolute;
             top: 30px;
-            right: -15px;
+            right: 10px; /* dentro del contenedor para no generar overflow horizontal */
             cursor: pointer;
             background: linear-gradient(45deg, #027a8d, #03a9c2);
             padding: 12px;
@@ -230,7 +236,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            min-height: 100vh;
+            height: 100vh; /* fuerza a usar el alto de la pantalla para que el scroll sea del contenido */
+            margin-left: 280px; /* dejamos espacio para el menú fijo */
+            overflow-y: auto;   /* el scroll estará en todo el contenido, más fácil de usar */
+        }
+
+        /* Cuando se colapsa la sidebar, movemos el contenido a la izquierda */
+        .sidebar.collapsed ~ .content {
+            margin-left: 80px;
         }
 
         .container {
@@ -244,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* sin scroll interno, lo maneja .content */
         }
 
         .container::before {
@@ -497,7 +510,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         /* Responsive design */
         @media (max-width: 768px) {
             .sidebar {
-                width: 75px;
+                width: 70px; /* igual que en sacar_turno */
             }
             
             .sidebar .user-name,
@@ -514,7 +527,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                 margin: 20px 10px;
                 padding: 30px 20px;
             }
+
+            .content {
+                margin-left: 70px; /* coincide con el ancho móvil del menú */
+                padding: 20px 15px;
+            }
         }
+
+        /* Desactivar colapso del sidebar en esta página */
+        .sidebar .toggle-menu { display: none !important; }
+        .sidebar.collapsed { width: 280px !important; }
+        .sidebar.collapsed .user-name,
+        .sidebar.collapsed span { display: inline !important; opacity: 1 !important; transform: none !important; }
+        .sidebar.collapsed ~ .content { margin-left: 280px !important; }
     </style>
 </head>
 <body>
@@ -524,7 +549,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         </div>
         <div class="profile-section">
             <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
-            <h2 class="user-name">Bienvenido</h2>
         </div>
         <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
         <a href="sacar_turno.php"><i class='bx bx-calendar'></i><span>Sacar turno</span></a>
