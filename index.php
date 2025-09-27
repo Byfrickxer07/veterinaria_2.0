@@ -227,13 +227,13 @@
                     <div>
                         <label>
                             <i class='bx bx-user'></i>
-                            <input type="text" placeholder="Nombre Usuario" name="userName" required>
+                            <input type="text" placeholder="Nombre Usuario" name="userName" required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+" inputmode="text" maxlength="50" oninput="this.value=this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]+/g,'')">
                         </label>
                     </div>
                     <div>
                         <label>
                             <i class='bx bx-user'></i>
-                            <input type="text" placeholder="Apellido" name="userLastName">
+                            <input type="text" placeholder="Apellido" name="userLastName" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+" inputmode="text" maxlength="50" oninput="this.value=this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]+/g,'')">
                         </label>
                     </div>
                     <div>
@@ -245,19 +245,13 @@
                     <div>
                         <label>
                             <i class='bx bx-globe'></i>
-                            <input type="text" placeholder="DNI" name="userDNI">
+                            <input type="text" placeholder="DNI" name="userDNI" pattern="\d+" inputmode="numeric" maxlength="15" oninput="this.value=this.value.replace(/\D/g,'')">
                         </label>
                     </div>
                     <div>
                         <label>
                             <i class='bx bx-phone'></i>
-                            <input type="tel" placeholder="Teléfono" name="userPhone">
-                        </label>
-                    </div>
-                    <div>
-                        <label>
-                            <i class='bx bx-lock-alt'></i>
-                            <input type="password" placeholder="Contraseña" name="userPassword" required>
+                            <input type="tel" placeholder="Teléfono" name="userPhone" pattern="\d+" inputmode="numeric" maxlength="15" oninput="this.value=this.value.replace(/\D/g,'')">
                         </label>
                     </div>
                     

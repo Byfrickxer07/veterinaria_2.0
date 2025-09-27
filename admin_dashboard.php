@@ -42,6 +42,9 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veterinaria - Panel de Administrador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
@@ -53,9 +56,9 @@ $conn->close();
             padding: 0;
             display: flex;
             overflow: hidden;
-            background-color: #f4f4f9;
             color: #333;
             transition: background-color 0.3s, color 0.3s;
+            background-color: #f4f4f9;
         }
 
         .dark-mode {
@@ -72,8 +75,9 @@ $conn->close();
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            transition: width 0.3s, background-color 0.3s;
+            transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
             position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         .sidebar.collapsed {
@@ -137,7 +141,7 @@ $conn->close();
             background-color: #027a8d;
             border-radius: 12px;
             font-size: 16px;
-            transition: background-color 0.3s, padding 0.3s;
+            transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
             box-sizing: border-box;
         }
 
@@ -148,6 +152,7 @@ $conn->close();
 
         .sidebar a:hover {
             background-color: #03485f;
+            transform: translateY(-1px);
         }
 
         .sidebar i {
@@ -161,7 +166,7 @@ $conn->close();
         .sidebar .bottom-menu {
             margin-top: auto;
             width: 100%;
-            padding-bottom: 20px;
+            padding-bottom: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -169,14 +174,13 @@ $conn->close();
 
         .content {
             flex-grow: 1;
-            padding: 50px 20px; 
-            text-align: center;
-            height: 100vh;
-            transition: padding 0.3s;
+            padding: 40px 30px; 
+            min-height: 100vh;
         }
 
         h1 {
             margin-top: 0;
+            font-weight: 600;
         }
 
         .toggle-switch-container {
