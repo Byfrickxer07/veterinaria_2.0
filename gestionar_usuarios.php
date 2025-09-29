@@ -572,6 +572,7 @@ $result = $conn->query($sql);
         <a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i><span>Inicio</span></a>
         
         <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span> Gestión de Turnos</span></a>
+        <a href="gestionar_mascotas.php"><i class='bx bx-bone'></i><span> Gestionar Mascotas</span></a>
         <div class="bottom-menu">
             <a href="logout.php"><i class='bx bx-log-out'></i> <span>Cerrar Sesión</span></a>
         </div>

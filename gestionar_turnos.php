@@ -9,30 +9,11 @@ if ($mysqli->connect_error) {
     die("Conexión fallida: " . $mysqli->connect_error);
 }
 
-
 if (!isset($_SESSION['user_id'])) {
     die("Debe iniciar sesión para acceder a esta página.");
 }
 
 
-// Auto-completar: cualquier turno 'pendiente' en el pasado pasa a 'completado'
-// Requiere columna 'estado' en la tabla turnos
-@$mysqli->query("UPDATE turnos 
-                 SET estado='completado' 
-                 WHERE estado='pendiente' 
-                   AND (fecha < CURDATE() OR (fecha = CURDATE() AND hora < CURTIME()))");
-
-// Listado de turnos
-$sql = "SELECT t.id, t.fecha, t.hora, t.tipo_servicio, t.estado, m.nombre AS mascota, u.nombre_usuario AS cliente
-        FROM turnos t
-        JOIN mascotas m ON t.mascota_id = m.id
-        JOIN user u ON t.user_id = u.id";
-$result = $mysqli->query($sql);
-
-// Listas para selects
-$doctores = $mysqli->query("SELECT id, nombre_usuario FROM user WHERE rol='doctor' ORDER BY nombre_usuario ASC");
-$clientes = $mysqli->query("SELECT id, nombre_usuario FROM user WHERE rol='cliente' ORDER BY nombre_usuario ASC");
-$mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC");
 
 $message = "";
 $message_type = "";
@@ -131,18 +112,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (isset($_POST['confirm_delete'])) {
-        $id = $_POST['confirm_delete'];
-        // Marcar como cancelado en lugar de eliminar físicamente
-        $stmt = $mysqli->prepare("UPDATE turnos SET estado='cancelado' WHERE id=?");
-        $stmt->bind_param('i', $id);
-        if ($stmt->execute()) {
-            $message = "Turno cancelado correctamente.";
-            $message_type = "success";
+        $id = (int)$_POST['confirm_delete'];
+        // Eliminar físicamente el turno
+        $stmt = $mysqli->prepare("DELETE FROM turnos WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param('i', $id);
+            if ($stmt->execute()) {
+                $message = "Turno eliminado correctamente.";
+                $message_type = "success";
+            } else {
+                $message = "Error eliminando el turno: " . $mysqli->error;
+                $message_type = "error";
+            }
+            $stmt->close();
         } else {
-            $message = "Error cancelando el turno: " . $mysqli->error;
+            $message = "No se pudo preparar la eliminación del turno.";
             $message_type = "error";
         }
-        $stmt->close();
     }
 
     // Reasignación de turno entre veterinarios (requiere columna doctor_id en turnos)
@@ -168,6 +154,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
+// Auto-completar: cualquier turno 'pendiente' en el pasado pasa a 'completado'
+// Requiere columna 'estado' en la tabla turnos
+@$mysqli->query("UPDATE turnos 
+                 SET estado='completado' 
+                 WHERE estado='pendiente' 
+                   AND (fecha < CURDATE() OR (fecha = CURDATE() AND hora < CURTIME()))");
+
+// Listado de turnos (ejecutar SIEMPRE después de procesar POST)
+$sql = "SELECT t.id, t.fecha, t.hora, t.tipo_servicio, t.estado, m.nombre AS mascota, u.nombre_usuario AS cliente
+        FROM turnos t
+        JOIN mascotas m ON t.mascota_id = m.id
+        JOIN user u ON t.user_id = u.id";
+$result = $mysqli->query($sql);
+
+// Listas para selects
+$doctores = $mysqli->query("SELECT id, nombre_usuario FROM user WHERE rol='doctor' ORDER BY nombre_usuario ASC");
+$clientes = $mysqli->query("SELECT id, nombre_usuario FROM user WHERE rol='cliente' ORDER BY nombre_usuario ASC");
+$mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC");
 
 ?>
 
@@ -483,6 +488,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
         <a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i><span>Inicio</span></a>
         <a href="gestionar_usuarios.php"><i class='bx bx-user'></i><span>Gestion Usuarios</span></a>
+        <a href="gestionar_mascotas.php"><i class='bx bx-bone'></i><span>Gestionar Mascotas</span></a>
        
      
         <div class="bottom-menu">
@@ -547,11 +553,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <label for="editFecha">Fecha:</label>
                     <input type="date" id="editFecha" name="fecha" required>
 
-                    <label for="editHora">Hora:</label>
-                    <input type="time" id="editHora" name="hora" required>
-
                     <label for="editTipoServicio">Tipo de Servicio:</label>
-                    <input type="text" id="editTipoServicio" name="tipo_servicio" required>
+                    <select id="editTipoServicio" name="tipo_servicio" required>
+                        <option value="">Selecciona un servicio</option>
+                        <option value="vacunacion">Vacunación</option>
+                        <option value="Control">Control</option>
+                        <option value="castracion">Castración</option>
+                        <option value="baño">Baño</option>
+                    </select>
+
+                    <label for="editHora">Hora:</label>
+                    <select id="editHora" name="hora" required disabled>
+                        <option value="">Selecciona el horario</option>
+                    </select>
+                    <small class="text-muted">Los horarios disponibles se actualizan según el servicio seleccionado</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" onclick="closeEditModal()" class="close-button">Cancelar</button>
@@ -614,11 +629,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </select>
 
                     <label for="createMascota">Mascota:</label>
-                    <select id="createMascota" name="mascota_id" required>
-                        <option value="">Seleccione una mascota</option>
-                        <?php if ($mascotas) { while($m = $mascotas->fetch_assoc()) { ?>
-                            <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['nombre']) ?></option>
-                        <?php } } ?>
+                    <select id="createMascota" name="mascota_id" required disabled>
+                        <option value="">Seleccione primero un cliente</option>
                     </select>
                 </div>
                 <div class="modal-footer">
@@ -657,11 +669,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script>
         function openEditModal(id) {
             document.getElementById('editId').value = id;
-          
             const row = event.target.closest('tr');
-            document.getElementById('editFecha').value = row.cells[0].innerText;
-            document.getElementById('editHora').value = row.cells[1].innerText;
-            document.getElementById('editTipoServicio').value = row.cells[2].innerText;
+            const fecha = row.cells[0].innerText.trim();
+            const hora = row.cells[1].innerText.trim();
+            const servicio = row.cells[2].innerText.trim();
+            const editFecha = document.getElementById('editFecha');
+            const editServicio = document.getElementById('editTipoServicio');
+            const editHora = document.getElementById('editHora');
+            editFecha.value = fecha;
+            editServicio.value = servicio;
+            updateEditTimeSlots();
+            // Seleccionar la hora existente si está en la lista
+            setTimeout(() => {
+                for (const opt of editHora.options) {
+                    if (opt.value === hora) { editHora.value = hora; break; }
+                }
+            }, 0);
             document.getElementById('editModal').style.display = 'block';
         }
 
@@ -748,6 +771,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
+        function updateEditTimeSlots() {
+            const serviceType = document.getElementById('editTipoServicio')?.value;
+            const timeSelect = document.getElementById('editHora');
+            if (!timeSelect) return;
+            timeSelect.innerHTML = '';
+            if (!serviceType) {
+                timeSelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Selecciona el horario';
+                timeSelect.appendChild(opt);
+                return;
+            }
+            const interval = serviceTimeSlots[serviceType] || 30;
+            timeSelect.disabled = false;
+            const startHour = 8;
+            const endHour = 18;
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
+                    if (hour === endHour - 1 && minute + interval > 60) break;
+                    const hh = hour.toString().padStart(2, '0');
+                    const mm = minute.toString().padStart(2, '0');
+                    const option = document.createElement('option');
+                    option.value = `${hh}:${mm}`;
+                    option.textContent = `${hh}:${mm}`;
+                    timeSelect.appendChild(option);
+                }
+            }
+        }
+
         // Fecha mínima hoy y eventos
         document.addEventListener('DOMContentLoaded', function() {
             const fechaInput = document.getElementById('createFecha');
@@ -759,6 +812,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             const tipoSelect = document.getElementById('createTipoServicio');
             if (tipoSelect) {
                 tipoSelect.addEventListener('change', updateCreateTimeSlots);
+            }
+            const editTipoSelect = document.getElementById('editTipoServicio');
+            if (editTipoSelect) {
+                editTipoSelect.addEventListener('change', updateEditTimeSlots);
+            }
+
+            // Dependencia Mascota <- Cliente
+            const clienteSelect = document.getElementById('createCliente');
+            const mascotaSelect = document.getElementById('createMascota');
+            if (clienteSelect && mascotaSelect) {
+                clienteSelect.addEventListener('change', async function() {
+                    const userId = this.value;
+                    mascotaSelect.innerHTML = '';
+                    if (!userId) {
+                        mascotaSelect.disabled = true;
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = 'Seleccione primero un cliente';
+                        mascotaSelect.appendChild(opt);
+                        return;
+                    }
+                    try {
+                        const resp = await fetch(`get_mascotas.php?user_id=${encodeURIComponent(userId)}`);
+                        const data = await resp.json();
+                        mascotaSelect.disabled = false;
+                        const def = document.createElement('option');
+                        def.value = '';
+                        def.textContent = 'Seleccione una mascota';
+                        mascotaSelect.appendChild(def);
+                        if (data && Array.isArray(data.mascotas)) {
+                            data.mascotas.forEach(m => {
+                                const o = document.createElement('option');
+                                o.value = m.id;
+                                o.textContent = m.nombre;
+                                mascotaSelect.appendChild(o);
+                            });
+                        }
+                    } catch (e) {
+                        mascotaSelect.disabled = true;
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = 'Error cargando mascotas';
+                        mascotaSelect.appendChild(opt);
+                    }
+                });
             }
         });
     </script>

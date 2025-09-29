@@ -303,6 +303,7 @@ $conn->close();
   
     <a href="gestionar_usuarios.php"><i class='bx bx-user'></i><span>Gestionar Usuarios</span></a>
     <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span>Gestionar Turnos</span></a>
+    <a href="gestionar_mascotas.php"><i class='bx bx-bone'></i><span>Gestionar Mascotas</span></a>
   
 
     <div class="bottom-menu">

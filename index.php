@@ -254,6 +254,12 @@
                             <input type="tel" placeholder="Teléfono" name="userPhone" pattern="\d+" inputmode="numeric" maxlength="15" oninput="this.value=this.value.replace(/\D/g,'')">
                         </label>
                     </div>
+                    <div>
+                        <label>
+                            <i class='bx bx-lock-alt'></i>
+                            <input type="password" placeholder="Contraseña" name="userPassword" required>
+                        </label>
+                    </div>
                     
                     <input type="submit" value="Registrarse">
                     <div class="alerta-error">Todos los campos son obligatorios</div>
