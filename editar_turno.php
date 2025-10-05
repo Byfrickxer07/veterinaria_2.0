@@ -183,14 +183,17 @@ try {
         </div>
         <div>
             <label for="hora">Hora:</label>
-            <input type="time" id="hora" name="hora" value="<?php echo htmlspecialchars($turno['hora']); ?>" min="08:00" max="18:00" required>
+            <select id="hora" name="hora" required>
+                <option value="">Selecciona el horario</option>
+            </select>
         </div>
         <div>
             <label for="tipo_servicio">Tipo de Servicio:</label>
             <select id="tipo_servicio" name="tipo_servicio" required>
-                <option value="cirugia" <?php echo $turno['tipo_servicio'] == 'cirugia' ? 'selected' : ''; ?>>Cirugía</option>
+                <option value="vacunacion" <?php echo $turno['tipo_servicio'] == 'vacunacion' ? 'selected' : ''; ?>>Vacunación</option>
+                <option value="Control" <?php echo $turno['tipo_servicio'] == 'Control' ? 'selected' : ''; ?>>Control</option>
                 <option value="castracion" <?php echo $turno['tipo_servicio'] == 'castracion' ? 'selected' : ''; ?>>Castración</option>
-                <option value="bano" <?php echo $turno['tipo_servicio'] == 'bano' ? 'selected' : ''; ?>>Baño</option>
+                <option value="baño" <?php echo $turno['tipo_servicio'] == 'baño' ? 'selected' : ''; ?>>Baño</option>
             </select>
         </div>
         <div>
@@ -204,6 +207,68 @@ try {
         <button type="submit">Actualizar Turno</button>
     </form>
     <p><a href="ver_turnos.php">Volver a Mis Turnos</a></p>
+    <script>
+        // Config intervalos por servicio
+        const serviceTimeSlots = {
+            'vacunacion': 20,
+            'Control': 20,
+            'castracion': 60,
+            'baño': 60
+        };
+
+        function pad(n){ return String(n).padStart(2,'0'); }
+        function buildSlots(interval){
+            const slots = [];
+            const startHour = 8, endHour = 18;
+            for (let h=startHour; h<endHour; h++){
+                for(let m=0; m<60; m+=interval){
+                    if (h===endHour-1 && m+interval>60) break;
+                    slots.push(`${pad(h)}:${pad(m)}`);
+                }
+            }
+            return slots;
+        }
+
+        async function refreshHoraOptions(){
+            const selectHora = document.getElementById('hora');
+            const selectServicio = document.getElementById('tipo_servicio');
+            const inputFecha = document.getElementById('fecha');
+            const turnoId = <?php echo (int)$turno['id']; ?>;
+            selectHora.innerHTML = '';
+            const serv = selectServicio.value;
+            const fecha = inputFecha.value;
+            if (!serv || !fecha){
+                const opt = document.createElement('option'); opt.value=''; opt.textContent='Selecciona el horario';
+                selectHora.appendChild(opt); return;
+            }
+            const interval = serviceTimeSlots[serv] || 30;
+            const all = buildSlots(interval);
+            try {
+                const res = await fetch(`api_horas_ocupadas.php?fecha=${encodeURIComponent(fecha)}&tipo_servicio=${encodeURIComponent(serv)}&exclude_id=${encodeURIComponent(turnoId)}`);
+                const data = await res.json();
+                const ocupadas = (data && data.ok) ? (data.ocupadas||[]) : [];
+                const disponibles = all.filter(h=>!ocupadas.includes(h));
+                if (disponibles.length===0){
+                    const opt = document.createElement('option'); opt.value=''; opt.textContent='Sin horarios disponibles'; selectHora.appendChild(opt); selectHora.disabled=true; return;
+                }
+                selectHora.disabled=false;
+                for (const h of disponibles){ const o=document.createElement('option'); o.value=h; o.textContent=h; selectHora.appendChild(o); }
+                // Seleccionar hora original si sigue disponible
+                const original = '<?php echo htmlspecialchars(substr($turno['hora'],0,5)); ?>';
+                if (disponibles.includes(original)) selectHora.value = original; else selectHora.value = disponibles[0];
+            } catch(e){
+                // Fallback: todos
+                for (const h of all){ const o=document.createElement('option'); o.value=h; o.textContent=h; selectHora.appendChild(o); }
+                selectHora.value = '<?php echo htmlspecialchars(substr($turno['hora'],0,5)); ?>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', ()=>{
+            refreshHoraOptions();
+            document.getElementById('tipo_servicio').addEventListener('change', refreshHoraOptions);
+            document.getElementById('fecha').addEventListener('change', refreshHoraOptions);
+        });
+    </script>
 </body>
 </html>
 

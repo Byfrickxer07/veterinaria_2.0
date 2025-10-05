@@ -479,9 +479,7 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
 </head>
 <body>
     <div class="sidebar">
-        <div class="toggle-menu" onclick="toggleSidebar()">
-        <i class='bx bx-chevron-left'></i>
-        </div>
+       
         <div class="profile-section">
             <img src="logo_perro.jpg" alt="Foto de Perfil" class="profile-image">
          
@@ -734,14 +732,16 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
             'baño': 60
         };
 
-        function updateCreateTimeSlots() {
+        async function updateCreateTimeSlots() {
             const serviceType = document.getElementById('createTipoServicio')?.value;
+            const dateInput = document.getElementById('createFecha');
             const timeSelect = document.getElementById('createHora');
             if (!timeSelect) return;
             // Limpiar opciones existentes
             timeSelect.innerHTML = '';
 
-            if (!serviceType) {
+            const fecha = dateInput?.value || '';
+            if (!serviceType || !fecha) {
                 timeSelect.disabled = true;
                 const opt = document.createElement('option');
                 opt.value = '';
@@ -753,30 +753,52 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
             const interval = serviceTimeSlots[serviceType] || 30; // fallback 30m
             timeSelect.disabled = false;
 
-            const startHour = 8; // 08:00
-            const endHour = 18;  // 18:00
-            for (let hour = startHour; hour < endHour; hour++) {
+            // Generar slots
+            const slots = [];
+            for (let hour = 8; hour < 18; hour++) {
                 for (let minute = 0; minute < 60; minute += interval) {
-                    if (hour === endHour - 1 && minute + interval > 60) break;
+                    if (hour === 17 && minute + interval > 60) break;
                     const hh = hour.toString().padStart(2, '0');
                     const mm = minute.toString().padStart(2, '0');
-                    const option = document.createElement('option');
-                    option.value = `${hh}:${mm}`;
-                    option.textContent = `${hh}:${mm}`;
-                    timeSelect.appendChild(option);
+                    slots.push(`${hh}:${mm}`);
                 }
             }
-            if (timeSelect.options.length > 0) {
-                timeSelect.value = timeSelect.options[0].value;
+
+            // Traer ocupadas
+            let ocupadas = [];
+            try {
+                const resp = await fetch(`api_horas_ocupadas.php?fecha=${encodeURIComponent(fecha)}&tipo_servicio=${encodeURIComponent(serviceType)}`);
+                const data = await resp.json();
+                if (data && data.ok && Array.isArray(data.ocupadas)) ocupadas = data.ocupadas;
+            } catch (e) { /* mostrar todas si falla */ }
+
+            const disponibles = slots.filter(h => !ocupadas.includes(h));
+            if (disponibles.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Sin horarios disponibles';
+                timeSelect.appendChild(opt);
+                timeSelect.disabled = true;
+                return;
             }
+            for (const h of disponibles) {
+                const option = document.createElement('option');
+                option.value = h;
+                option.textContent = h;
+                timeSelect.appendChild(option);
+            }
+            timeSelect.value = disponibles[0];
         }
 
-        function updateEditTimeSlots() {
+        async function updateEditTimeSlots() {
             const serviceType = document.getElementById('editTipoServicio')?.value;
+            const dateInput = document.getElementById('editFecha');
             const timeSelect = document.getElementById('editHora');
+            const idInput = document.getElementById('editId');
             if (!timeSelect) return;
             timeSelect.innerHTML = '';
-            if (!serviceType) {
+            const fecha = dateInput?.value || '';
+            if (!serviceType || !fecha) {
                 timeSelect.disabled = true;
                 const opt = document.createElement('option');
                 opt.value = '';
@@ -786,18 +808,27 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
             }
             const interval = serviceTimeSlots[serviceType] || 30;
             timeSelect.disabled = false;
-            const startHour = 8;
-            const endHour = 18;
-            for (let hour = startHour; hour < endHour; hour++) {
+            const slots = [];
+            for (let hour = 8; hour < 18; hour++) {
                 for (let minute = 0; minute < 60; minute += interval) {
-                    if (hour === endHour - 1 && minute + interval > 60) break;
+                    if (hour === 17 && minute + interval > 60) break;
                     const hh = hour.toString().padStart(2, '0');
                     const mm = minute.toString().padStart(2, '0');
-                    const option = document.createElement('option');
-                    option.value = `${hh}:${mm}`;
-                    option.textContent = `${hh}:${mm}`;
-                    timeSelect.appendChild(option);
+                    slots.push(`${hh}:${mm}`);
                 }
+            }
+            let ocupadas = [];
+            try {
+                const resp = await fetch(`api_horas_ocupadas.php?fecha=${encodeURIComponent(fecha)}&tipo_servicio=${encodeURIComponent(serviceType)}&exclude_id=${encodeURIComponent(idInput?.value||0)}`);
+                const data = await resp.json();
+                if (data && data.ok && Array.isArray(data.ocupadas)) ocupadas = data.ocupadas;
+            } catch (e) { }
+            const disponibles = slots.filter(h => !ocupadas.includes(h));
+            if (disponibles.length === 0) {
+                const opt = document.createElement('option'); opt.value=''; opt.textContent='Sin horarios disponibles'; timeSelect.appendChild(opt); timeSelect.disabled=true; return;
+            }
+            for (const h of disponibles) {
+                const option = document.createElement('option'); option.value=h; option.textContent=h; timeSelect.appendChild(option);
             }
         }
 
@@ -813,9 +844,17 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
             if (tipoSelect) {
                 tipoSelect.addEventListener('change', updateCreateTimeSlots);
             }
+            const fechaCreate = document.getElementById('createFecha');
+            if (fechaCreate) {
+                fechaCreate.addEventListener('change', updateCreateTimeSlots);
+            }
             const editTipoSelect = document.getElementById('editTipoServicio');
             if (editTipoSelect) {
                 editTipoSelect.addEventListener('change', updateEditTimeSlots);
+            }
+            const editFecha = document.getElementById('editFecha');
+            if (editFecha) {
+                editFecha.addEventListener('change', updateEditTimeSlots);
             }
 
             // Dependencia Mascota <- Cliente

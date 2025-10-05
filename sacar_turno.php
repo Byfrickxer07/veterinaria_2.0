@@ -724,46 +724,80 @@ $conn->close();
             'baño': 60          // 1 hora
         };
 
-        // Función para generar los horarios disponibles
-        function updateTimeSlots() {
+        // Utilidades
+        function pad(n){ return String(n).padStart(2,'0'); }
+
+        function buildSlots(interval){
+            const slots = [];
+            const startHour = 8, endHour = 18; // 8:00 a 18:00
+            for (let h = startHour; h < endHour; h++){
+                for (let m = 0; m < 60; m += interval){
+                    if (h === endHour - 1 && m + interval > 60) break;
+                    slots.push(`${pad(h)}:${pad(m)}`);
+                }
+            }
+            return slots;
+        }
+
+        // Función para generar los horarios disponibles (ocultando ocupados)
+        async function updateTimeSlots() {
             const serviceType = document.getElementById('tipo_servicio').value;
+            const dateInput = document.getElementById('fecha');
             const timeInput = document.getElementById('hora');
-            const interval = serviceTimeSlots[serviceType] || 30; // Por defecto 30 minutos
-            
+            const fecha = dateInput.value;
+
             // Limpiar opciones existentes
             timeInput.innerHTML = '';
-            
-            // Si no hay servicio seleccionado, deshabilitar el campo
-            if (!serviceType) {
+
+            // Estado inicial
+            if (!serviceType || !fecha) {
+                timeInput.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Selecciona el horario';
+                timeInput.appendChild(opt);
+                return;
+            }
+
+            timeInput.disabled = false;
+
+            const interval = serviceTimeSlots[serviceType] || 30; // Por defecto 30 minutos
+            const allSlots = buildSlots(interval);
+
+            // Obtener horas ocupadas para la fecha y servicio
+            let ocupadas = [];
+            try {
+                const res = await fetch(`api_horas_ocupadas.php?fecha=${encodeURIComponent(fecha)}&tipo_servicio=${encodeURIComponent(serviceType)}`);
+                const data = await res.json();
+                if (data && data.ok && Array.isArray(data.ocupadas)) {
+                    ocupadas = data.ocupadas;
+                }
+            } catch (err) {
+                // Si falla la API, continuamos mostrando todas las horas (el backend igualmente valida)
+            }
+
+            // Filtrar horas ocupadas
+            const disponibles = allSlots.filter(h => !ocupadas.includes(h));
+
+            // Rellenar opciones
+            if (disponibles.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Sin horarios disponibles';
+                timeInput.appendChild(opt);
                 timeInput.disabled = true;
                 return;
             }
-            
-            timeInput.disabled = false;
-            
-            // Generar horarios de 8:00 AM a 6:00 PM
-            const startHour = 8; // 8 AM
-            const endHour = 18;  // 6 PM
-            
-            for (let hour = startHour; hour < endHour; hour++) {
-                for (let minute = 0; minute < 60; minute += interval) {
-                    if (hour === endHour - 1 && minute + interval > 60) {
-                        // No permitir horarios después de las 6 PM
-                        break;
-                    }
-                    
-                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                    const option = document.createElement('option');
-                    option.value = timeString;
-                    option.textContent = timeString;
-                    timeInput.appendChild(option);
-                }
+
+            for (const h of disponibles) {
+                const option = document.createElement('option');
+                option.value = h;
+                option.textContent = h;
+                timeInput.appendChild(option);
             }
-            
+
             // Seleccionar el primer horario disponible
-            if (timeInput.options.length > 0) {
-                timeInput.value = timeInput.options[0].value;
-            }
+            timeInput.value = disponibles[0];
         }
 
         // Configurar fecha mínima
@@ -779,9 +813,10 @@ $conn->close();
             
             // Inicializar los horarios
             updateTimeSlots();
-            
-            // Actualizar horarios cuando cambie el tipo de servicio
+
+            // Actualizar horarios cuando cambie el tipo de servicio o la fecha
             document.getElementById('tipo_servicio').addEventListener('change', updateTimeSlots);
+            document.getElementById('fecha').addEventListener('change', updateTimeSlots);
         });
     </script>
 </body>

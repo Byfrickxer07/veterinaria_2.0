@@ -325,6 +325,22 @@ $result = $conn->query($sql);
             min-height: 100vh;
         }
 
+        /* Toolbar de filtros/búsqueda */
+        .table-toolbar { display:flex; gap:10px; align-items:center; padding:12px 16px; background:#f9fcfd; border:1px solid #e6f0f2; border-radius:14px; margin: 10px 0 16px; }
+        .toolbar-input, .toolbar-select { padding:10px 12px; border:1px solid #ccd9de; border-radius:10px; background:#fff; font-size:14px; }
+        .toolbar-input { flex:1; }
+        .toolbar-button { background: linear-gradient(135deg,#027a8d,#025162); color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(2,122,141,0.2); }
+        .toolbar-button.secondary { background:linear-gradient(135deg,#6b7280,#374151); }
+        .toolbar-button:hover { filter:brightness(1.05); transform: translateY(-1px); }
+
+        /* Badges y acciones modernas */
+        .badge { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+        .badge-admin { background:#EDE9FE; color:#5B21B6; border:1px solid #DDD6FE; }
+        .badge-doctor { background:#E0F2FE; color:#0369A1; border:1px solid #BAE6FD; }
+        .badge-cliente { background:#DCFCE7; color:#065F46; border:1px solid #BBF7D0; }
+        .actions .icon-btn { background:#fff; border:1px solid #e6f0f2; padding:8px 10px; border-radius:10px; cursor:pointer; box-shadow:0 2px 6px rgba(2,122,141,.08); }
+        .actions .icon-btn:hover { box-shadow:0 4px 12px rgba(2,122,141,.15); transform: translateY(-1px); }
+
         .card {
             background: #fff;
             border-radius: 20px;
@@ -481,27 +497,32 @@ $result = $conn->query($sql);
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(2px);
+            padding: 24px 12px;
         }
 
         .modal-content {
             background-color: #fff;
-            margin: 5% auto;
+            margin: 40px auto;
             padding: 0;
             border: none;
-            width: 90%;
-            max-width: 560px;
+            width: 92%;
+            max-width: 620px;
             border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 30px 70px rgba(2,122,141,0.22);
+            transform: translateY(10px);
+            animation: modalIn .25s ease-out;
         }
+
+        @keyframes modalIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0);} }
 
         .modal-header {
             padding: 16px 20px;
-            background-color: #027a8d;
+            background: linear-gradient(135deg,#027a8d,#035c6b);
             color: white;
+            display:flex; align-items:center; justify-content:space-between;
         }
 
         .modal-body {
@@ -537,27 +558,15 @@ $result = $conn->query($sql);
         .modal-footer {
             padding: 12px 18px;
             background-color: #f0f4f8;
-            color: #333;
-        }
-
-        .close {
             color: #fff;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: #000;
-            text-decoration: none;
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1;
             cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background .2s ease;
         }
-        /* Desactivar colapso del sidebar en esta página */
-        .sidebar .toggle-menu { display: none !important; }
-        .sidebar.collapsed { width: 275px !important; }
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span { display: inline !important; }
     </style>
 </head>
 <body>
@@ -566,9 +575,7 @@ $result = $conn->query($sql);
             <img src="logo_perro.jpg" alt="Profile Image" class="profile-image">
             
         </div>
-        <div class="toggle-menu">
-            <i class='bx bx-chevron-left'></i>
-        </div>
+    
         <a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i><span>Inicio</span></a>
         
         <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span> Gestión de Turnos</span></a>

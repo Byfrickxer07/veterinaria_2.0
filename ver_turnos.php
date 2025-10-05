@@ -12,6 +12,14 @@ try {
 
     $user_id = $_SESSION['user_id'];
 
+    // Actualizar automáticamente a 'Terminado' los turnos pendientes con fecha/hora pasada
+    $auto = $conn->prepare("UPDATE turnos 
+                            SET estado = 'Terminado'
+                            WHERE user_id = :uid
+                              AND estado = 'Pendiente'
+                              AND (fecha < CURDATE() OR (fecha = CURDATE() AND hora < CURTIME()))");
+    $auto->execute([':uid' => $user_id]);
+
     // Manejo de acciones POST: editar/eliminar turno
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'], $_POST['id'])) {
         $accion = $_POST['accion'];
@@ -32,6 +40,14 @@ try {
             // Validaciones básicas
             $permitidos = ['vacunacion','Control','castracion','baño'];
             if (!$fecha || !$hora || !in_array($tipo_servicio, $permitidos, true)) {
+                header("Location: ver_turnos.php");
+                exit();
+            }
+
+            // Evitar doble reserva: si existe otro turno pendiente mismo dia/hora/servicio
+            $chk = $conn->prepare("SELECT COUNT(*) FROM turnos WHERE id <> :id AND fecha = :fecha AND hora = :hora AND tipo_servicio = :serv AND estado = 'Pendiente'");
+            $chk->execute([':id'=>$id, ':fecha'=>$fecha, ':hora'=>$hora, ':serv'=>$tipo_servicio]);
+            if ((int)$chk->fetchColumn() > 0) {
                 header("Location: ver_turnos.php");
                 exit();
             }
@@ -179,7 +195,7 @@ try {
         .sidebar .bottom-menu {
             margin-top: auto;
             width: 100%;
-            padding-bottom: 20px;
+            padding-bottom: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -187,14 +203,14 @@ try {
 
         .content {
             flex-grow: 1;
-            padding: 50px 20px; 
+            padding: 40px 20px 40px; 
             text-align: center;
             height: 100vh;
             transition: padding 0.3s;
         }
 
         h1 {
-            margin-top: 0;
+            margin: 0 0 12px;
         }
 
         table {
@@ -262,17 +278,17 @@ try {
         .sidebar.collapsed span { display: inline !important; }
 
         /* Calendario - estilos básicos */
-        .cal-container { max-width: 1100px; margin: 20px auto; background: #fff; border-radius: 18px; box-shadow: 0 20px 50px rgba(2,122,141,0.15); overflow: hidden; border:1px solid #e6f0f2; }
-        .cal-header { display:flex; align-items:center; justify-content:space-between; padding:18px 22px; color:#fff; background: linear-gradient(135deg, #027a8d, #035c6b); }
+        .cal-container { max-width: 1100px; margin: 16px auto 90px; background: #fff; border-radius: 18px; box-shadow: 0 20px 50px rgba(2,122,141,0.15); overflow: hidden; border:1px solid #e6f0f2; }
+        .cal-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; color:#fff; background: linear-gradient(135deg, #027a8d, #035c6b); }
         .cal-header h2 { margin:0; font-size: 22px; font-weight:800; letter-spacing: .3px; }
         .cal-nav { display:flex; gap:8px; align-items:center; }
         .cal-btn { background: rgba(255,255,255,0.14); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; transition:.2s ease; box-shadow: 0 2px 6px rgba(0,0,0,.08) inset; }
         .cal-btn:hover { background: rgba(255,255,255,0.28); transform: translateY(-1px); }
         .cal-week { display:grid; grid-template-columns: repeat(7, 1fr); background:linear-gradient(180deg,#f8fbfc,#f3f7fa); border-bottom:1px solid #e5e7eb; }
-        .cal-week div { padding:12px; text-align:center; font-weight:700; color:#456; border-right:1px solid #e5e7eb; text-transform:uppercase; font-size:12px; letter-spacing:.5px; }
+        .cal-week div { padding:6px; text-align:center; font-weight:700; color:#456; border-right:1px solid #e5e7eb; text-transform:uppercase; font-size:12px; letter-spacing:.5px; }
         .cal-week div:last-child { border-right: none; }
         .cal-grid { display:grid; grid-template-columns: repeat(7, 1fr); }
-        .cal-cell { min-height:130px; border-right:1px solid #edf2f7; border-bottom:1px solid #edf2f7; padding:10px; background:#fff; transition:.2s ease; }
+        .cal-cell { min-height:100px; border-right:1px solid #edf2f7; border-bottom:1px solid #edf2f7; padding:8px; background:#fff; transition:.2s ease; }
         .cal-cell:hover { background:#f8feff; box-shadow: inset 0 0 0 1px #cdeff5; }
         .cal-cell:last-child { border-right:none; }
         .cal-day-badge { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:10px; font-weight:700; color:#334155; background:#eef7f9; border:1px solid #dbeef2; }
@@ -371,7 +387,8 @@ try {
                     </div>
                     <div>
                         <label><strong>Hora</strong></label>
-                        <input type="time" name="hora" id="form-hora" class="btn-secondary" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d1d5db;">
+                        <select name="hora" id="form-hora" class="btn-secondary" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d1d5db;"></select>
+                        <div style="font-size:12px;color:#6b7280;margin-top:6px;">Las opciones se ajustan según el servicio y la disponibilidad.</div>
                     </div>
                     <div>
                         <label><strong>Servicio</strong></label>
@@ -422,12 +439,62 @@ try {
     const modalClose = document.getElementById('modal-close');
     const modalOk = document.getElementById('modal-ok');
     const modalBody = document.getElementById('modal-body');
+    const formHora = document.getElementById('form-hora');
+    const formFecha = document.getElementById('form-fecha');
+    const formServicio = document.getElementById('form-servicio');
 
     let fechaActual = new Date();
 
     function pad(n){ return String(n).padStart(2,'0'); }
     function keyFecha(date){ return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`; }
     function keyYMD(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }
+
+    // Configuración de intervalos por servicio (igual que en sacar_turno.php)
+    const serviceTimeSlots = {
+        'vacunacion': 20,
+        'Control': 20,
+        'castracion': 60,
+        'baño': 60
+    };
+
+    function buildSlots(interval){
+        const slots = [];
+        const startHour = 8, endHour = 18;
+        for (let h = startHour; h < endHour; h++){
+            for (let m = 0; m < 60; m += interval){
+                if (h === endHour - 1 && m + interval > 60) break;
+                slots.push(`${pad(h)}:${pad(m)}`);
+            }
+        }
+        return slots;
+    }
+
+    async function refreshHoraOptions(currentId){
+        const service = formServicio.value;
+        const fecha = formFecha.value;
+        formHora.innerHTML = '';
+        if (!service || !fecha){ return; }
+
+        const interval = serviceTimeSlots[service] || 30;
+        const allSlots = buildSlots(interval);
+        try {
+            const url = `api_horas_ocupadas.php?fecha=${encodeURIComponent(fecha)}&tipo_servicio=${encodeURIComponent(service)}&exclude_id=${encodeURIComponent(currentId||0)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            const ocupadas = (data && data.ok) ? (data.ocupadas||[]) : [];
+            const disponibles = allSlots.filter(t => !ocupadas.includes(t));
+            for (const t of disponibles){
+                const opt = document.createElement('option');
+                opt.value = t; opt.textContent = t; formHora.appendChild(opt);
+            }
+        } catch(e){
+            // fallback: si falla la API, mostrar todos los slots
+            for (const t of allSlots){
+                const opt = document.createElement('option');
+                opt.value = t; opt.textContent = t; formHora.appendChild(opt);
+            }
+        }
+    }
 
     function renderCalendar(){
         const y = fechaActual.getFullYear();
@@ -482,10 +549,15 @@ try {
         // Prefill form
         document.getElementById('form-id').value = turno.id;
         document.getElementById('form-fecha').value = fechaKey;
-        document.getElementById('form-hora').value = turno.hora;
         document.getElementById('form-servicio').value = turno.servicio;
         document.getElementById('form-accion').value = 'editar';
         document.getElementById('form-detalles').innerHTML = `<div><strong>Mascota:</strong> ${turno.mascota || ''}</div><div><strong>Estado:</strong> ${turno.estado || ''}</div>`;
+        // Cargar horas disponibles según servicio/fecha, excluyendo la propia reserva
+        refreshHoraOptions(turno.id).then(()=>{
+            // Seleccionar la hora original si sigue disponible; si no, dejar primera
+            const exists = Array.from(formHora.options).some(o=>o.value===turno.hora);
+            if (exists){ formHora.value = turno.hora; }
+        });
         modalOverlay.style.display = 'flex';
     }
 
@@ -497,6 +569,16 @@ try {
     modalClose.addEventListener('click', closeModal);
     document.getElementById('modal-cancel').addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', (e)=>{ if(e.target===modalOverlay) closeModal(); });
+
+    // Reactualizar horas al cambiar servicio o fecha
+    formServicio.addEventListener('change', ()=>{
+        const id = document.getElementById('form-id').value;
+        refreshHoraOptions(id);
+    });
+    formFecha.addEventListener('change', ()=>{
+        const id = document.getElementById('form-id').value;
+        refreshHoraOptions(id);
+    });
 
     document.addEventListener('DOMContentLoaded', renderCalendar);
 

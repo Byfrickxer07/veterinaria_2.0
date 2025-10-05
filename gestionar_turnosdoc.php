@@ -47,19 +47,21 @@ $mysqli->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veterinaria - Turnos</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
         margin: 0;
         padding: 0;
         display: flex;
-        overflow: hidden;
-        background-color: #f4f4f9;
-        color: #333;
-        transition: background-color 0.3s, color 0.3s;
+        overflow: auto;
+        background: #f5f7fb; /* más neutro y limpio */
+        color: #0f172a;
+        transition: background 0.3s, color 0.3s;
+        font-size: 15px;
     }
 
     .dark-mode {
@@ -173,64 +175,96 @@ $mysqli->close();
 
     .content {
         flex-grow: 1;
-        padding: 50px 20px; 
-        text-align: center;
-        height: 100vh;
+        padding: 24px 20px 32px;
+        text-align: left; /* alinear contenido a la izquierda */
+        min-height: 100vh; /* evitar cortes por altura fija */
         transition: padding 0.3s;
     }
-        h1 {
-            text-align: center;
-            margin: 20px 0;
-        }
-        table {
-            width: 100%;
-            margin: 0 auto;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);            
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #03879C;
-            color: #fff;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        .status-completed {
-            color: green;
-            font-weight: bold;
-        }
-        .status-pending {
-            color: red;
-            font-weight: bold;
-        }
-        .action-links a {
-            color: #03879C;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-        .action-links a:hover {
-            text-decoration: underline;
-        }
-        .mark-completed {
-            background-color: #03879C;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .mark-completed:hover {
-            background-color: #026c82;
-        }
-        .turnos{
-            margin-left: 5vw
-        }
+    h1 {
+        margin: 4px 0 16px;
+        font-weight: 700;
+        color: #0f172a; /* sin gradiente para mejor legibilidad */
+        letter-spacing: .2px;
+    }
+
+    /* Card que envuelve la tabla */
+    .table-card {
+        width: 95%;
+        max-width: 1180px;
+        margin: 0 auto 20px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(2,122,141,0.08); /* sombra más sutil */
+        overflow: hidden;
+        border: 1px solid #e9eef2;
+        text-align: left;
+    }
+
+    .table-scroll { max-height: calc(100vh - 260px); overflow: auto; }
+    .table-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
+    .table-scroll::-webkit-scrollbar-thumb { background:#cfe6ea; border-radius: 10px; }
+    .table-scroll::-webkit-scrollbar-track { background: #f3f7f9; }
+
+    .table-card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-card thead th {
+        position: sticky;
+        top: 0;
+        background: #025162; /* sólido y con mayor contraste */
+        color: #fff;
+        padding: 14px 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: .4px;
+    }
+
+    .table-card tbody td { padding: 12px 16px; border-bottom: 1px solid #eef2f7; color: #0f172a; vertical-align: middle; font-size: 14px; }
+    .table-card tbody tr:nth-child(even) { background: #fafcff; }
+
+    .table-card tbody tr { transition: background .15s ease, transform .08s ease; }
+    .table-card tbody tr:hover { background: #f7fbfd; }
+
+    .action-links a {
+        color: #027a8d;
+        text-decoration: none;
+        margin-right: 10px;
+        font-weight: 600;
+    }
+    .action-links a:hover { text-decoration: underline; }
+
+    /* Estado (minimal) */
+    .badge { display:inline-block; padding:4px 8px; border-radius:8px; font-size:12px; font-weight:700; }
+    .badge-terminado { background:#e7f6ee; color:#116149; border:1px solid #cfe9dc; }
+    .badge-pendiente { background:#f8f1e7; color:#8a3b12; border:1px solid #efd8bf; }
+
+    /* Botón acción */
+    .mark-completed {
+        background: linear-gradient(135deg,#027a8d,#025162);
+        color:#fff; border:none; padding:8px 14px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:700;
+        box-shadow:0 6px 16px rgba(2,122,141,0.18);
+    }
+    .mark-completed:hover { filter:brightness(1.05); transform: translateY(-1px); }
+
+    .turnos{ margin-left: 0; }
+    
+    /* Toolbar de filtros/búsqueda */
+    .table-toolbar { display:flex; gap:10px; align-items:center; padding:12px 16px; background:#ffffff; border-bottom:1px solid #eef2f7; position: sticky; top: 0; z-index: 2; }
+    .toolbar-input, .toolbar-select { padding:10px 12px; border:1px solid #d6dee3; border-radius:10px; background:#fff; font-size:14px; transition: box-shadow .15s ease, border-color .15s ease; }
+    .toolbar-input { flex:1; }
+    .toolbar-button { background: #027a8d; color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(2,122,141,0.18); }
+    .toolbar-button:hover { filter:brightness(1.03); }
+    .toolbar-input:focus, .toolbar-select:focus { border-color:#027a8d; box-shadow:0 0 0 3px rgba(2,122,141,0.15); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .table-card { width: 96%; }
+        .table-card thead th, .table-card tbody td { padding: 12px 14px; }
+        .toolbar-input { min-width: 160px; }
+    }
        
     </style>
     <style>
@@ -248,9 +282,7 @@ $mysqli->close();
         <div class="profile-section">
             <img src="logo_perro.jpg" alt="Profile Image" class="profile-image">
         </div>
-        <div class="toggle-menu">
-            <i class='bx bx-chevron-left'></i>
-        </div>
+        
         <a href="doctor_dashboard.php"><i class='bx bxs-dashboard'></i><span>Inicio</span></a>
        
         <a href="gestionar_usudoc.php"><i class='bx bxs-user'></i><span>Gestión de Usuarios</span></a>
@@ -259,53 +291,74 @@ $mysqli->close();
         </div>
     </div>
 
-<div class="contec" >
+<div class="content">
     <h1>Lista de Turnos</h1>
     <div class="turnos">
     <?php if ($no_turnos): ?>
         <p>No hay turnos disponibles.</p>
     <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                  
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Servicio</th>
-                    <th>Mascota</th>
-                    <th>Cliente</th>
-                    <th>Estado</th>
-                    <th>Historial Médico</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $result->fetch_assoc()): ?>
+        <div class="table-card">
+            <div class="table-toolbar">
+                <input id="searchInput" class="toolbar-input" type="text" placeholder="Buscar por cliente, mascota o servicio...">
+                <select id="filterServicio" class="toolbar-select">
+                    <option value="">Servicio: Todos</option>
+                    <option value="vacunacion">Vacunación</option>
+                    <option value="Control">Control</option>
+                    <option value="castracion">Castración</option>
+                    <option value="baño">Baño</option>
+                </select>
+                <select id="filterEstado" class="toolbar-select">
+                    <option value="">Estado: Todos</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="terminado">Terminado</option>
+                </select>
+                <button id="applyFilters" class="toolbar-button" type="button">Filtrar</button>
+                <button id="clearFilters" class="toolbar-button" type="button" style="background:linear-gradient(135deg,#6b7280,#374151)">Limpiar</button>
+            </div>
+            <div id="noResults" style="display:none;padding:14px 16px;color:#991b1b;background:#fee2e2;border:1px solid #fecaca;margin:8px 16px;border-radius:10px;font-weight:600;">No se ha encontrado ningún turno con esos filtros.</div>
+            <div class="table-scroll">
+            <table id="turnosTable">
+                <thead>
                     <tr>
-                      
-                        <td><?php echo htmlspecialchars($row['fecha']); ?></td>
-                        <td><?php echo htmlspecialchars($row['hora']); ?></td>
-                        <td><?php echo htmlspecialchars($row['tipo_servicio']); ?></td>
-                        <td><?php echo htmlspecialchars($row['mascota']); ?></td>
-                        <td><?php echo htmlspecialchars($row['cliente']); ?></td>
-                        <td class="<?php echo htmlspecialchars($row['estado']) === 'terminado' ? 'status-completed' : 'status-pending'; ?>">
-                            <?php echo htmlspecialchars($row['estado']); ?>
-                        </td>
-                        <td class="action-links">
-                            <a href="historial_mascota.php?mascota_id=<?php echo htmlspecialchars($row['mascota_id']); ?>">Ver Historial</a>
-                        </td>
-                        <td>
-                            <?php if (htmlspecialchars($row['estado']) !== 'terminado'): ?>
-                                <form method="post" style="display:inline;">
-                                    <input type="hidden" name="turno_id" value="<?php echo htmlspecialchars($row['turno_id']); ?>">
-                                    <button type="submit" name="mark_completed" class="mark-completed">Marcar como Terminado</button>
-                                </form>
-                            <?php endif; ?>
-                        </td>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Servicio</th>
+                        <th>Mascota</th>
+                        <th>Cliente</th>
+                        <th>Estado</th>
+                        <th>Historial Médico</th>
+                        <th>Acciones</th>
                     </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr data-servicio="<?php echo htmlspecialchars(strtolower($row['tipo_servicio'])); ?>" data-estado="<?php echo htmlspecialchars(strtolower($row['estado'])); ?>">
+                            <td><?php echo htmlspecialchars($row['fecha']); ?></td>
+                            <td><?php echo htmlspecialchars($row['hora']); ?></td>
+                            <td class="col-servicio"><?php echo htmlspecialchars($row['tipo_servicio']); ?></td>
+                            <td class="col-mascota"><?php echo htmlspecialchars($row['mascota']); ?></td>
+                            <td class="col-cliente"><?php echo htmlspecialchars($row['cliente']); ?></td>
+                            <td>
+                                <?php $st = strtolower($row['estado']); ?>
+                                <span class="badge <?php echo $st === 'terminado' ? 'badge-terminado' : 'badge-pendiente'; ?>"><?php echo htmlspecialchars($row['estado']); ?></span>
+                            </td>
+                            <td class="action-links">
+                                <a href="historial_mascota.php?mascota_id=<?php echo htmlspecialchars($row['mascota_id']); ?>">Ver Historial</a>
+                            </td>
+                            <td>
+                                <?php if (strtolower($row['estado']) !== 'terminado'): ?>
+                                    <form method="post" style="display:inline;">
+                                        <input type="hidden" name="turno_id" value="<?php echo htmlspecialchars($row['turno_id']); ?>">
+                                        <button type="submit" name="mark_completed" class="mark-completed">Marcar como Terminado</button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+            </div>
+        </div>
     <?php endif; ?>
     </div>
     </div> 
@@ -315,18 +368,19 @@ $mysqli->close();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="alertas_clientes.js"></script>
 <script>
-    const menuToggle = document.getElementById('menu-toggle');
+    const menuToggle = document.querySelector('.toggle-menu');
     const sidebar = document.querySelector('.sidebar');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const body = document.body;
 
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        menuToggle.classList.toggle('bx-chevron-left');
-        menuToggle.classList.toggle('bx-chevron-right');
+    menuToggle?.addEventListener('click', () => {
+        sidebar?.classList.toggle('collapsed');
+        const icon = menuToggle.querySelector('i');
+        icon?.classList.toggle('bx-chevron-left');
+        icon?.classList.toggle('bx-chevron-right');
     });
 
-    darkModeToggle.addEventListener('change', () => {
+    darkModeToggle?.addEventListener('change', () => {
         body.classList.toggle('dark-mode');
     });
 
@@ -346,6 +400,63 @@ $mysqli->close();
             }
         });
     });
+
+    // Filtro de tabla
+    const table = document.getElementById('turnosTable');
+    const searchInput = document.getElementById('searchInput');
+    const filterServicio = document.getElementById('filterServicio');
+    const filterEstado = document.getElementById('filterEstado');
+    const noResults = document.getElementById('noResults');
+    const applyBtn = document.getElementById('applyFilters');
+    const clearBtn = document.getElementById('clearFilters');
+
+    function normalize(text){
+        return (text||'')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g,'');
+    }
+
+    function applyFilters(){
+        const q = normalize(searchInput.value);
+        const serv = normalize(filterServicio.value);
+        const est = normalize(filterEstado.value);
+
+        let visibleCount = 0;
+        Array.from(table.tBodies[0].rows).forEach(tr => {
+            const tdCliente = normalize(tr.querySelector('.col-cliente')?.textContent);
+            const tdMascota = normalize(tr.querySelector('.col-mascota')?.textContent);
+            const tdServicio = normalize(tr.querySelector('.col-servicio')?.textContent);
+            const rowServ = normalize(tr.getAttribute('data-servicio'));
+            const rowEst = normalize(tr.getAttribute('data-estado'));
+
+            let matches = true;
+            if (q) {
+                matches = (tdCliente.includes(q) || tdMascota.includes(q) || tdServicio.includes(q));
+            }
+            if (matches && serv) {
+                matches = rowServ === serv;
+            }
+            if (matches && est) {
+                matches = rowEst === est;
+            }
+            tr.style.display = matches ? '' : 'none';
+            if (matches) visibleCount++;
+        });
+
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    function clearFilters(){
+        searchInput.value = '';
+        filterServicio.value = '';
+        filterEstado.value = '';
+        applyFilters();
+    }
+
+    applyBtn?.addEventListener('click', applyFilters);
+    clearBtn?.addEventListener('click', clearFilters);
 </script>
 </body>
 </html>

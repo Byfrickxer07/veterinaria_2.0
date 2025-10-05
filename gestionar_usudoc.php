@@ -72,16 +72,16 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Clientes</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
          body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
-            
-            background-color: #f4f4f9;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
+            background: linear-gradient(135deg, #f4f7fb 0%, #eef4f7 100%);
+            color: #0f172a;
+            transition: background 0.3s, color 0.3s;
         }
 
         .dark-mode {
@@ -144,8 +144,11 @@ $conn->close();
             height: 120px; 
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 10px;
-            transition: width 0.3s, height 0.3s;
+            margin-bottom: 12px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            background-color: #fff;
+            transition: width 0.3s, height 0.3s, box-shadow .2s ease;
         }
 
         .sidebar.collapsed .profile-image {
@@ -198,15 +201,25 @@ $conn->close();
         .content {
             flex-grow: 1;
             margin-left: 275px; 
-            padding: 50px 20px; 
-            text-align: center;
-            height: 100vh;
-            transition: padding 0.3s;
+            padding: 32px 24px; 
+            min-height: 100vh;
         }
 
         h1 {
-            margin-top: 0;
+            margin: 6px 0 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #027a8d 0%, #025162 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: .2px;
+            position: relative;
+            text-align: center;
         }
+        h1::after { content:''; position:absolute; left:50%; transform:translateX(-50%); bottom:-10px; width:70px; height:4px; border-radius:2px; background: linear-gradient(135deg, #027a8d 0%, #025162 100%); }
+
+        /* Subtítulos centrados */
+        h2 { text-align: center; margin: 20px 0 10px; position: relative; }
+        h2::after { content:''; position:absolute; left:50%; transform:translateX(-50%); bottom:-8px; width:60px; height:3px; border-radius:2px; background: linear-gradient(135deg, #027a8d 0%, #025162 100%); }
 
         .toggle-switch-container {
             background-color: transparent; 
@@ -301,88 +314,66 @@ $conn->close();
             color: #721c24;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
+        .table-card { width: 92%; max-width: 1100px; margin: 0 auto 24px; background: #fff; border-radius: 18px; box-shadow: 0 24px 60px rgba(2,122,141,0.14); overflow: hidden; border: 1px solid #e6f0f2; text-align:left; }
+        .table-card table { width:100%; border-collapse: separate; border-spacing:0; }
+        .table-card thead th { position:sticky; top:0; background: #0b5b66; /* teal sólido similar a la foto */ color:#fff; padding:14px 18px; font-weight:700; text-transform:uppercase; font-size:12px; letter-spacing:.4px; border-right:1px solid rgba(255,255,255,0.18); text-align:center; }
+        .table-card thead th:last-child { border-right:none; }
+        .table-card tbody td { padding:14px 18px; border-bottom:1px solid #e8eef2; border-right:1px solid #e8eef2; color:#0f172a; text-align:center; vertical-align: middle; background:#ffffff; }
+        .table-card tbody td:last-child { border-right:none; }
+        .table-card tbody tr:nth-child(even){ background:#fbfdff; }
+        .table-card tbody tr:hover{ background:#f7fbfd; }
+        .table-card table tr:first-child th:first-child { border-top-left-radius: 0; }
+        .table-card table tr:first-child th:last-child { border-top-right-radius: 0; }
 
-        table, th, td {
-            border: 1px solid #ddd;
-        }
+        .button { background:#0b5b66; color:#fff; border:none; padding:10px 18px; text-align:center; display:inline-inline; font-size:14px; margin:4px 4px; cursor:pointer; border-radius:9999px; box-shadow:0 6px 14px rgba(11,91,102,0.28); transition: filter .15s ease, transform .1s ease; }
+        .button:hover { filter:brightness(1.04); transform: translateY(-1px); }
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
+        /* Enlaces de acción estilo link (como Ver Historial de la foto) */
+        .link-action { color:#0b5b66; font-weight:700; text-decoration:none; }
+        .link-action:hover { text-decoration:underline; }
 
-        th {
-            background-color: #f2f2f2;
-        }
+        /* Toolbar de filtros/búsqueda (clientes) */
+        .table-toolbar { display:flex; gap:10px; align-items:center; padding:12px 16px; background:#ffffff; border:1px solid #e6f0f2; border-radius:14px; margin: 10px auto 16px; width:92%; max-width:1100px; }
+        .toolbar-input { flex:1; padding:10px 12px; border:1px solid #ccd9de; border-radius:10px; background:#fff; font-size:14px; transition: box-shadow .15s ease, border-color .15s ease; }
+        .toolbar-button { background: #027a8d; color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(2,122,141,0.18); }
+        .toolbar-button:hover { filter:brightness(1.03); }
+        .toolbar-input:focus { border-color:#027a8d; box-shadow:0 0 0 3px rgba(2,122,141,0.15); }
 
-        .button {
-            background-color: #03879C;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
+        /* Centrado específico para las tablas de clientes y mascotas */
+        #clientesTable th, #clientesTable td,
+        #mascotasTable th, #mascotasTable td { text-align: center !important; vertical-align: middle; }
+        #clientesTable td form { display: inline-block; }
 
-        .button:hover {
-            background-color: #026b7c;
-        }
+        .modal { display:none; position:fixed; z-index:1000; inset:0; background: rgba(0,0,0,0.35); backdrop-filter: blur(2px); padding:24px 12px; overflow:auto; }
 
-        .modal {
-            display: none; /* Ocultar el modal por defecto */
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4); /* Fondo oscuro semi-transparente */
-        }
+        .modal-content { background:#fff; margin: 40px auto; padding:0; width:92%; max-width:620px; max-height:95vh; border-radius:18px; overflow:hidden; box-shadow: 0 30px 70px rgba(2,122,141,0.22); position:relative; animation: modalIn .25s ease-out; display:flex; flex-direction:column; }
+        .modal-header { padding:16px 20px; background: linear-gradient(135deg,#027a8d,#035c6b); color:#fff; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:2; }
+        .modal-body { padding:20px; overflow:auto; flex: 1 1 auto; }
+        .modal-footer { position:sticky; bottom:0; background:#f7fafb; padding:12px 18px; border-top:1px solid #e6f0f2; display:flex; justify-content:flex-end; gap:8px; }
+        @keyframes modalIn { from { opacity:0; transform: translateY(20px);} to { opacity:1; transform: translateY(0);} }
 
-        .modal-content {
-            background-color: #fff;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 600px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
+        .modal-content h2 { color:#fff; margin:0; font-weight:800; }
 
-        .modal-content h2 {
-            color: #03879C; /* Color del título */
-            margin-top: 0;
-        }
+        .close { color:#fff; font-size:26px; font-weight:800; line-height:1; cursor:pointer; padding:4px 8px; border-radius:8px; transition: background .2s ease; }
+        .close:hover, .close:focus { background: rgba(255,255,255,0.15); }
 
-        .close {
-            color: #03879C;
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        /* Tabla de formulario dentro del modal */
+        .form-table { width:100%; border-collapse: separate; border-spacing:0; background:#fff; border:1px solid #e6f0f2; border-radius:12px; overflow:hidden; }
+        .form-table tr:nth-child(even){ background:#fafcff; }
+        .form-table th, .form-table td { padding:12px 14px; text-align:left; vertical-align:top; border-bottom:1px solid #eef2f7; }
+        .form-table th { width:38%; background:#f7fbfc; font-weight:700; color:#0f172a; }
+        .form-table tr:last-child th, .form-table tr:last-child td { border-bottom:none; }
+        .form-table input[type="text"],
+        .form-table input[type="date"],
+        .form-table textarea { width:100%; padding:10px 12px; border:1px solid #ccd4dd; border-radius:10px; outline:none; transition:border-color .15s ease, box-shadow .15s ease; box-sizing:border-box; }
+        .form-table textarea { min-height:80px; resize:vertical; }
+        .form-table input:focus, .form-table textarea:focus { border-color:#027a8d; box-shadow:0 0 0 3px rgba(2,122,141,.15); }
 
-        .close:hover,
-        .close:focus {
-            color: #005f6b;
-            text-decoration: none;
-            cursor: pointer;
+        @media (max-width: 600px){
+            .form-table th { width:45%; }
+            .form-table th, .form-table td { display:block; width:100%; }
+            .form-table th { border-bottom:none; }
         }
-
         form {
             display: flex;
             flex-direction: column;
@@ -435,7 +426,15 @@ $conn->close();
 
         <h1>Gestión de Clientes</h1>
 
-        <table>
+        <div class="table-toolbar">
+            <input id="searchCliente" class="toolbar-input" type="text" placeholder="Buscar por nombre o correo...">
+            <button id="applyFilterClientes" class="toolbar-button" type="button">Filtrar</button>
+            <button id="clearFilterClientes" class="toolbar-button" type="button" style="background:#6b7280">Limpiar</button>
+            <span id="clientesCounter" style="margin-left:auto; font-weight:700; color:#025162;"></span>
+        </div>
+
+        <div class="table-card">
+        <table id="clientesTable">
             <tr>
               
                 <th>Nombre de Usuario</th>
@@ -462,10 +461,20 @@ $conn->close();
                 </tr>
             <?php endif; ?>
         </table>
+        </div>
+
+        <div id="noClientes" style="display:none; width:92%; max-width:1100px; margin:8px auto 0; padding:12px 14px; background:#fee2e2; border:1px solid #fecaca; border-radius:10px; color:#7f1d1d; font-weight:600;">No se encontraron clientes con ese criterio.</div>
 
         <?php if ($selectedUserId && !empty($pets)): ?>
             <h2>Mascotas Registradas</h2>
-            <table>
+            <div class="table-card">
+            <div class="table-toolbar" style="margin-top:16px;">
+                <input id="searchMascota" class="toolbar-input" type="text" placeholder="Buscar mascota por nombre/raza...">
+                <button id="applyFilterMascotas" class="toolbar-button" type="button">Filtrar</button>
+                <button id="clearFilterMascotas" class="toolbar-button" type="button" style="background:#6b7280">Limpiar</button>
+                <span id="mascotasCounter" style="margin-left:auto; font-weight:700; color:#025162;"></span>
+            </div>
+            <table id="mascotasTable">
                 <tr>
                     <th>Nombre</th>
                     <th>Especie</th>
@@ -485,32 +494,57 @@ $conn->close();
                     </tr>
                 <?php endforeach; ?>
             </table>
+            </div>
+            <div id="noMascotas" style="display:none; width:92%; max-width:1100px; margin:8px auto 0; padding:12px 14px; background:#eef2ff; border:1px solid #c7d2fe; border-radius:10px; color:#1e3a8a; font-weight:600;">No se encontraron mascotas con ese criterio.</div>
         <?php endif; ?>
     </div>
 
         <!-- Modal -->
-        <div id="myModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal()">&times;</span>
-                <h2>Agregar Historial Clínico</h2>
-                <form method="post" action="guardar_historial.php">
-                    <input type="hidden" id="modal_pet_id" name="pet_id">
-                    <label for="date">Fecha de Consulta:</label>
-                    <input type="date" name="fecha_consulta" required><br><br>
-                    <label for="reason">Motivo de Consulta:</label>
-                    <textarea name="motivo_consulta" required></textarea><br><br>
-                    <label for="diagnosis">Diagnóstico:</label>
-                    <textarea name="diagnostico"></textarea><br><br>
-                    <label for="procedures">Procedimientos Realizados:</label>
-                    <textarea name="procedimientos_realizados"></textarea><br><br>
-                    <label for="vaccination_history">Historial de Vacunación:</label>0
-                    <textarea name="historial_vacunacion"></textarea><br><br>
-                    <label for="allergies">Alergias:</label>
-                    <textarea name="alergias"></textarea><br><br>
-                    <label for="current_medications">Medicamentos Actuales:</label>
-                    <textarea name="medicamentos_actuales"></textarea><br><br>
-                    <button type="submit" class="button" name="save_history">Guardar Historial</button>
-                </form>
+        <div id="myModal" class="modal" aria-hidden="true" role="dialog">
+            <div class="modal-content" role="document">
+                <div class="modal-header">
+                    <h2>Agregar Historial Clínico</h2>
+                    <span class="close" onclick="closeModal()" aria-label="Cerrar">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="guardar_historial.php">
+                        <input type="hidden" id="modal_pet_id" name="pet_id">
+                        <table class="form-table">
+                            <tr>
+                                <th><label for="fecha_consulta">Fecha de Consulta</label></th>
+                                <td><input type="date" id="fecha_consulta" name="fecha_consulta" required></td>
+                            </tr>
+                            <tr>
+                                <th><label for="motivo_consulta">Motivo de Consulta</label></th>
+                                <td><textarea id="motivo_consulta" name="motivo_consulta" required></textarea></td>
+                            </tr>
+                            <tr>
+                                <th><label for="diagnostico">Diagnóstico</label></th>
+                                <td><textarea id="diagnostico" name="diagnostico"></textarea></td>
+                            </tr>
+                            <tr>
+                                <th><label for="procedimientos_realizados">Procedimientos Realizados</label></th>
+                                <td><textarea id="procedimientos_realizados" name="procedimientos_realizados"></textarea></td>
+                            </tr>
+                            <tr>
+                                <th><label for="historial_vacunacion">Historial de Vacunación</label></th>
+                                <td><textarea id="historial_vacunacion" name="historial_vacunacion"></textarea></td>
+                            </tr>
+                            <tr>
+                                <th><label for="alergias">Alergias</label></th>
+                                <td><textarea id="alergias" name="alergias"></textarea></td>
+                            </tr>
+                            <tr>
+                                <th><label for="medicamentos_actuales">Medicamentos Actuales</label></th>
+                                <td><textarea id="medicamentos_actuales" name="medicamentos_actuales"></textarea></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="button" onclick="closeModal()" style="background:#6b7280">Cancelar</button>
+                    <button type="submit" form="" class="button" name="save_history" onclick="document.querySelector('#myModal form')?.submit();">Guardar Historial</button>
+                </div>
             </div>
         </div>
     <script>
@@ -518,13 +552,78 @@ $conn->close();
 
 
         function openModal(petId) {
+            const modal = document.getElementById("myModal");
             document.getElementById("modal_pet_id").value = petId;
-            document.getElementById("myModal").style.display = "block";
+            modal.style.display = "block";
+            modal.setAttribute('aria-hidden','false');
         }
 
         function closeModal() {
-            document.getElementById("myModal").style.display = "none";
+            const modal = document.getElementById("myModal");
+            modal.style.display = "none";
+            modal.setAttribute('aria-hidden','true');
         }
+
+        // Cerrar al hacer click fuera del contenido
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('myModal');
+            if (e.target === modal) closeModal();
+        });
+
+        // Cerrar con Escape
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // --- Filtros Clientes ---
+        const clientesTable = document.getElementById('clientesTable');
+        const clientesRows = clientesTable ? Array.from(clientesTable.querySelectorAll('tbody tr, tr')).slice(1) : [];
+        const clientesInput = document.getElementById('searchCliente');
+        const clientesCounter = document.getElementById('clientesCounter');
+        const noClientes = document.getElementById('noClientes');
+
+        function aplicarFiltroClientes(){
+            const q = (clientesInput?.value || '').toLowerCase().trim();
+            let visibles = 0;
+            clientesRows.forEach(r => {
+                const cols = r.querySelectorAll('td');
+                const nombre = (cols[0]?.innerText || '').toLowerCase();
+                const correo = (cols[1]?.innerText || '').toLowerCase();
+                const match = !q || nombre.includes(q) || correo.includes(q);
+                r.style.display = match ? '' : 'none';
+                if (match) visibles++;
+            });
+            if (clientesCounter) clientesCounter.textContent = `Mostrando ${visibles} de ${clientesRows.length}`;
+            if (noClientes) noClientes.style.display = visibles ? 'none' : 'block';
+        }
+        document.getElementById('applyFilterClientes')?.addEventListener('click', aplicarFiltroClientes);
+        document.getElementById('clearFilterClientes')?.addEventListener('click', ()=>{ if (clientesInput){ clientesInput.value=''; aplicarFiltroClientes(); }});
+        clientesInput?.addEventListener('keyup', (e)=>{ if (e.key==='Enter') aplicarFiltroClientes(); });
+
+        // --- Filtros Mascotas ---
+        const mascotasTable = document.getElementById('mascotasTable');
+        const mascotasRows = mascotasTable ? Array.from(mascotasTable.querySelectorAll('tbody tr, tr')).slice(1) : [];
+        const mascotasInput = document.getElementById('searchMascota');
+        const mascotasCounter = document.getElementById('mascotasCounter');
+        const noMascotas = document.getElementById('noMascotas');
+
+        function aplicarFiltroMascotas(){
+            const q = (mascotasInput?.value || '').toLowerCase().trim();
+            let visibles = 0;
+            mascotasRows.forEach(r => {
+                const cols = r.querySelectorAll('td');
+                const nombre = (cols[0]?.innerText || '').toLowerCase();
+                const raza = (cols[2]?.innerText || '').toLowerCase();
+                const match = !q || nombre.includes(q) || raza.includes(q);
+                r.style.display = match ? '' : 'none';
+                if (match) visibles++;
+            });
+            if (mascotasCounter) mascotasCounter.textContent = `Mostrando ${visibles} de ${mascotasRows.length}`;
+            if (noMascotas) noMascotas.style.display = visibles ? 'none' : 'block';
+        }
+        document.getElementById('applyFilterMascotas')?.addEventListener('click', aplicarFiltroMascotas);
+        document.getElementById('clearFilterMascotas')?.addEventListener('click', ()=>{ if (mascotasInput){ mascotasInput.value=''; aplicarFiltroMascotas(); }});
+        mascotasInput?.addEventListener('keyup', (e)=>{ if (e.key==='Enter') aplicarFiltroMascotas(); });
     </script>
 </body>
 </html>
