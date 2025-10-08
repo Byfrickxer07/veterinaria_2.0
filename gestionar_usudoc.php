@@ -15,34 +15,22 @@ $selectedUserId = null;
 $selectedPetId = null;
 $historyMessage = '';
 
+// Mensajes desde guardar_historial.php
+if (isset($_GET['status'])) {
+    if ($_GET['status'] === 'ok') {
+        $alertMessage = 'Historial clínico guardado exitosamente.';
+    } elseif ($_GET['status'] === 'error') {
+        $msg = isset($_GET['msg']) ? urldecode($_GET['msg']) : 'Error desconocido';
+        $alertMessage = 'Error al guardar el historial clínico: ' . htmlspecialchars($msg);
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["view_pets"])) {
         $selectedUserId = $_POST["user_id"];
     }
     if (isset($_POST["add_history"])) {
         $selectedPetId = $_POST["pet_id"];
-    }
-
-    if (isset($_POST["save_history"]) && $selectedPetId) {
-        // Guardar historial clínico
-        $selectedPetId = $_POST["pet_id"];
-        $fecha_consulta = $_POST["fecha_consulta"];
-        $motivo_consulta = $_POST["motivo_consulta"];
-        $diagnostico = $_POST["diagnostico"];
-        $procedimientos_realizados = $_POST["procedimientos_realizados"];
-        $historial_vacunacion = $_POST["historial_vacunacion"];
-        $alergias = $_POST["alergias"];
-        $medicamentos_actuales = $_POST["medicamentos_actuales"];
-        
-        $sql = "INSERT INTO historial_clinico (mascota_id, fecha_consulta, motivo_consulta, diagnostico, procedimientos_realizados, historial_vacunacion, alergias, medicamentos_actuales)
-        VALUES ('$selectedPetId', '$fecha_consulta', '$motivo_consulta', '$diagnostico', '$procedimientos_realizados', '$historial_vacunacion', '$alergias', '$medicamentos_actuales')";
-        
-        if ($conn->query($sql) === TRUE) {
-            echo "Historial clínico guardado exitosamente.";
-        } else {
-            echo "Error al guardar el historial clínico: " . $conn->error;
-            }    
-        
     }
 }
 
