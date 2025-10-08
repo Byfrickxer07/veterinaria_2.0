@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-09-2025 a las 04:30:21
+-- Tiempo de generación: 08-10-2025 a las 21:38:39
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -14,6 +14,41 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `veterinaria`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `adopcion`
+--
+
+CREATE TABLE `adopcion` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(120) NOT NULL,
+  `tipo` enum('Perro','Gato') NOT NULL DEFAULT 'Perro',
+  `raza` varchar(120) NOT NULL,
+  `edad` varchar(60) DEFAULT NULL,
+  `genero` enum('Macho','Hembra') DEFAULT 'Macho',
+  `tamano` enum('Pequeño','Mediano','Grande') DEFAULT 'Mediano',
+  `descripcion` text DEFAULT NULL,
+  `imagen` varchar(255) DEFAULT NULL,
+  `refugio` varchar(150) DEFAULT NULL,
+  `direccion` varchar(200) DEFAULT NULL,
+  `telefono` varchar(60) DEFAULT NULL,
+  `email` varchar(120) DEFAULT NULL,
+  `estado` enum('Disponible','Reservado','Adoptado') DEFAULT 'Disponible',
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `adopcion`
+--
+
+INSERT INTO `adopcion` (`id`, `nombre`, `tipo`, `raza`, `edad`, `genero`, `tamano`, `descripcion`, `imagen`, `refugio`, `direccion`, `telefono`, `email`, `estado`, `creado_en`) VALUES
+(1, 'Luna', 'Perro', 'Labrador', '2 años', 'Hembra', 'Grande', 'Luna es muy cariñosa y juguetona. Le encanta estar con niños.', 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800', 'Refugio Huellitas Felices', 'Av. San Martín 1234, Buenos Aires', '+54 11 1234-5678', 'contacto@huellitasfelices.com', 'Disponible', '2025-10-08 18:58:52'),
+(2, 'Michi', 'Gato', 'Siamés', '1 año', 'Macho', 'Mediano', 'Gato tranquilo y cariñoso. Ideal para departamento.', 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=800', 'Fundación Animalitos', 'Calle Florida 567, CABA', '+54 11 2345-6789', 'info@animalitos.org', 'Disponible', '2025-10-08 18:58:52'),
+(3, 'Rocky', 'Perro', 'Pastor Alemán', '3 años', 'Macho', 'Grande', 'Perro guardián, leal y protector. Necesita espacio para ejercitarse.', 'https://images.unsplash.com/photo-1568572933382-74d440642117?w=800', 'Refugio Huellitas Felices', 'Av. San Martín 1234, Buenos Aires', '+54 11 1234-5678', 'contacto@huellitasfelices.com', 'Reservado', '2025-10-08 18:58:52'),
+(4, 'Nina', 'Gato', 'Mestizo', '8 meses', 'Hembra', 'Pequeño', 'Curiosa y juguetona. Se adapta rápido a nuevos hogares.', NULL, 'Patitas al Rescate', 'Av. Rivadavia 8900, CABA', '+54 11 4455-6677', 'adopciones@patitas.org', 'Disponible', '2025-10-08 18:58:52'),
+(5, 'Toby', 'Perro', 'Beagle', '4 años', 'Macho', 'Mediano', '', 'uploads/istockphoto-513133900-612x612_1759951948.jpg', 'Refugio Colitas Felices', 'Calle Sarmiento 456, La Plata', '+54 221 555-1212', 'colitas@refugio.org', 'Adoptado', '2025-10-08 18:58:52');
 
 -- --------------------------------------------------------
 
@@ -52,6 +87,13 @@ CREATE TABLE `mascotas` (
   `foto` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `mascotas`
+--
+
+INSERT INTO `mascotas` (`id`, `user_id`, `nombre`, `especie`, `raza`, `edad`, `sexo`, `peso`, `esterilizado`, `foto`) VALUES
+(16, 17, 'dgfdgdf', 'Perro', 'Sin raza definida', 3, 'Macho', 45.00, 1, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -64,9 +106,16 @@ CREATE TABLE `turnos` (
   `mascota_id` int(11) NOT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
-  `tipo_servicio` enum('cirugia','castracion','peluqueria') NOT NULL,
+  `tipo_servicio` enum('cirugia','peluqueria','vacunacion','Control','castracion','baño') NOT NULL,
   `estado` enum('Pendiente','Terminado') DEFAULT 'Pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `turnos`
+--
+
+INSERT INTO `turnos` (`id`, `user_id`, `mascota_id`, `fecha`, `hora`, `tipo_servicio`, `estado`) VALUES
+(26, 17, 16, '2025-10-23', '09:40:00', 'vacunacion', 'Pendiente');
 
 -- --------------------------------------------------------
 
@@ -90,11 +139,22 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `nombre_usuario`, `correo_electronico`, `contrasena`, `rol`, `telefono`, `dni`, `apellido`) VALUES
-(17, 'thomas', 'thomas@gmail.com', '$2y$10$M7peRymumORu1XH9GmXcluSla1guALQsu71nrXKdOPtwLe.9bblhW', 'admin', '1121212121', '2222222', 'fricker');
+(17, 'thomas', 'thomas@gmail.com', '$2y$10$M7peRymumORu1XH9GmXcluSla1guALQsu71nrXKdOPtwLe.9bblhW', 'cliente', '1121212122', '2222222', 'fricker'),
+(18, 'hola', 'byfrickxer@gmail.com', '$2y$10$9ynRWwLf2pZnl1Ht2bP33OmhlxbAwk/Ec5EujypD/QKHkLBUWIY6m', 'admin', '3123123213', '111121123333', 'hola'),
+(22, 'doctor', 'doctor@gmail.com', '$2y$10$c6glyGEy3PY5gml6UmXFgOSvJL7rHNDXDc6EL9i1ozhchpeGMsIha', 'doctor', '111222333444', '2223334443233', 'doctor');
 
 --
 -- Índices para tablas volcadas
 --
+
+--
+-- Indices de la tabla `adopcion`
+--
+ALTER TABLE `adopcion`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_adopcion_nombre` (`nombre`),
+  ADD KEY `idx_adopcion_tipo` (`tipo`),
+  ADD KEY `idx_adopcion_estado` (`estado`);
 
 --
 -- Indices de la tabla `historial_clinico`
@@ -130,6 +190,12 @@ ALTER TABLE `user`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `adopcion`
+--
+ALTER TABLE `adopcion`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT de la tabla `historial_clinico`
 --
 ALTER TABLE `historial_clinico`
@@ -139,19 +205,19 @@ ALTER TABLE `historial_clinico`
 -- AUTO_INCREMENT de la tabla `mascotas`
 --
 ALTER TABLE `mascotas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `turnos`
 --
 ALTER TABLE `turnos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Restricciones para tablas volcadas
