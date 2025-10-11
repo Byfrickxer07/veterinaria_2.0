@@ -648,8 +648,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                                oninput="validarPeso(this)">
                     </div>
                     
+                    
                     <div class="form-group">
-                        <label for="esterilizado"><i class='bx bx-check-shield' style="margin-right: 5px;"></i>Esterilizado</label>
+                        <label for="esterilizado"><i class='bx bx-check-shield' style="margin-right: 5px;"></i>Estado de esterilización</label>
                         <select id="esterilizado" name="esterilizado" required>
                             <option value="" disabled selected>Seleccionar...</option>
                             <option value="1">Sí</option>
