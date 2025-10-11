@@ -1499,14 +1499,16 @@ try {
                             <div class="form-group">
                                 <label class="form-label" for="current_password">Contraseña Actual</label>
                                 <div class="input-group">
-                                    <input type="password" id="current_password" name="current_password" class="form-input" required>
+                                    <input type="password" id="current_password" name="current_password" class="form-input" required
+                                           value="<?php echo isset($_POST['current_password']) ? htmlspecialchars($_POST['current_password']) : ''; ?>">
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="new_password">Nueva Contraseña</label>
                                 <div class="input-group">
-                                    <input type="password" id="new_password" name="new_password" class="form-input" required>
+                                    <input type="password" id="new_password" name="new_password" class="form-input" required
+                                           value="<?php echo isset($_POST['new_password']) ? htmlspecialchars($_POST['new_password']) : ''; ?>">
                                 </div>
                                 <small class="form-hint">Mínimo 8 caracteres, incluyendo al menos una mayúscula y un número</small>
                             </div>
@@ -1514,9 +1516,56 @@ try {
                             <div class="form-group">
                                 <label class="form-label" for="confirm_password">Confirmar Nueva Contraseña</label>
                                 <div class="input-group">
-                                    <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+                                    <input type="password" id="confirm_password" name="confirm_password" class="form-input" required
+                                           value="<?php echo isset($_POST['confirm_password']) ? htmlspecialchars($_POST['confirm_password']) : ''; ?>">
                                 </div>
+                                <div id="passwordMatch" class="form-hint"></div>
                             </div>
+
+                            <script>
+                            // Validación en tiempo real de coincidencia de contraseñas
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const newPassword = document.getElementById('new_password');
+                                const confirmPassword = document.getElementById('confirm_password');
+                                const passwordMatch = document.getElementById('passwordMatch');
+
+                                function checkPasswordMatch() {
+                                    if (newPassword.value && confirmPassword.value) {
+                                        if (newPassword.value === confirmPassword.value) {
+                                            passwordMatch.textContent = 'Las contraseñas coinciden';
+                                            passwordMatch.style.color = 'green';
+                                        } else {
+                                            passwordMatch.textContent = 'Las contraseñas no coinciden';
+                                            passwordMatch.style.color = 'red';
+                                        }
+                                    } else {
+                                        passwordMatch.textContent = '';
+                                    }
+                                }
+
+                                newPassword.addEventListener('input', checkPasswordMatch);
+                                confirmPassword.addEventListener('input', checkPasswordMatch);
+
+                                // Validar antes de enviar el formulario
+                                const form = document.getElementById('passwordForm');
+                                if (form) {
+                                    form.addEventListener('submit', function(e) {
+                                        if (newPassword.value !== confirmPassword.value) {
+                                            e.preventDefault();
+                                            Swal.fire({
+                                                title: 'Error',
+                                                text: 'Las contraseñas no coinciden',
+                                                icon: 'error',
+                                                timer: 3000,
+                                                showConfirmButton: true
+                                            });
+                                            return false;
+                                        }
+                                        return true;
+                                    });
+                                }
+                            });
+                            </script>
                             
                             <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 1rem;">
                                 <button type="submit" class="btn btn-primary" style="flex: 1;">
