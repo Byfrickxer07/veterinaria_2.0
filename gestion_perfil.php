@@ -124,10 +124,15 @@ try {
                         $stmt->bindParam(':nombre_usuario', $nombre_usuario);
                         $stmt->bindParam(':correo_electronico', $correo_electronico);
                         $stmt->bindParam(':telefono', $telefono);
+                        if (!isset($_SESSION['user_id'])) {
+                            header("Location: login.php");
+                            exit();
+                        }
+                        $user_id = $_SESSION['user_id'];
                         $stmt->bindParam(':user_id', $user_id);
                         
                         if ($stmt->execute()) {
-                            $mensaje = "¡Tu perfil ha sido actualizado con éxito! Tus nuevos datos son: nombre de usuario: $nombre_usuario, correo electrónico: $correo_electronico y teléfono: $telefono.";
+                            $mensaje = "¡Tu perfil ha sido actualizado con éxito!.";
                             echo "<script>
                                 Swal.fire({
                                     title: '¡Éxito!',
@@ -180,9 +185,9 @@ try {
                 </script>";
             }
         } elseif (isset($_POST['update_password'])) {
-            $current_password = $_POST['current_password'];
-            $new_password = $_POST['new_password'];
-            $confirm_password = $_POST['confirm_password'];
+            $current_password = $_POST['current_password'] ?? '';
+            $new_password = $_POST['new_password'] ?? '';
+            $confirm_password = $_POST['confirm_password'] ?? '';
             $errores = [];
 
             // Validar que los campos no estén vacíos
@@ -196,30 +201,23 @@ try {
             }
 
             // Validar fortaleza de la nueva contraseña
-            if (strlen($new_password) < 8) {
-                $errores[] = "La contraseña debe tener al menos 8 caracteres.";
-            }
-            if (!preg_match('/[A-Z]/', $new_password)) {
-                $errores[] = "La contraseña debe contener al menos una letra mayúscula.";
-            }
-            if (!preg_match('/[a-z]/', $new_password)) {
-                $errores[] = "La contraseña debe contener al menos una letra minúscula.";
-            }
-            if (!preg_match('/[0-9]/', $new_password)) {
-                $errores[] = "La contraseña debe contener al menos un número.";
-            }
-            if (!preg_match('/[^A-Za-z0-9]/', $new_password)) {
-                $errores[] = "La contraseña debe contener al menos un carácter especial.";
+            $passwordPattern = '/^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/';
+            if (!preg_match($passwordPattern, $new_password)) {
+                $errores[] = "La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.";
             }
 
             if (empty($errores)) {
                 try {
                     // Obtener la contraseña actual del usuario
-                    $query = "SELECT contrasena FROM user WHERE id = :user_id";
+                    $query = "SELECT id, contrasena FROM user WHERE id = :user_id";
                     $stmt = $conn->prepare($query);
-                    $stmt->bindParam(':user_id', $user_id);
+                    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
                     $stmt->execute();
                     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$usuario) {
+                        throw new Exception("Usuario no encontrado");
+                    }
 
                     // Verificar que la contraseña actual sea correcta
                     if (!password_verify($current_password, $usuario['contrasena'])) {
@@ -234,78 +232,29 @@ try {
                         $query = "UPDATE user SET contrasena = :contrasena WHERE id = :user_id";
                         $stmt = $conn->prepare($query);
                         $stmt->bindParam(':contrasena', $hashed_password);
-                        $stmt->bindParam(':user_id', $user_id);
+                        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
                         
                         if ($stmt->execute()) {
-                            $mensaje = "Contraseña actualizada correctamente";
-                            echo "<script>
-                                Swal.fire({
-                                    title: '¡Éxito!',
-                                    text: '" . addslashes($mensaje) . "',
-                                    icon: 'success',
-                                    timer: 3000,
-                                    showConfirmButton: false,
-                                    willClose: () => {
-                                        // Limpiar el formulario de contraseña
-                                        document.getElementById('current_password').value = '';
-                                        document.getElementById('new_password').value = '';
-                                        document.getElementById('confirm_password').value = '';
-                                        // Ocultar el formulario de contraseña
-                                        document.getElementById('password-form').style.display = 'none';
-                                    }
-                                });
-                            </script>";
-                            // Salir para evitar mostrar mensajes de error
+                            // Guardar mensaje de éxito en sesión
+                            $_SESSION['success_message'] = 'Tu contraseña ha sido actualizada correctamente';
+                            // Redirigir para evitar reenvío del formulario
+                            header('Location: ' . $_SERVER['PHP_SELF']);
                             exit();
                         } else {
-                            $errores[] = "Error al actualizar la contraseña.";
-                            $stmt->bindParam(':user_id', $user_id);
-                            
-                            if ($stmt->execute()) {
-                                echo "<script>
-                                    Swal.fire({
-                                        title: '¡Éxito!',
-                                        text: 'Contraseña actualizada correctamente',
-                                        icon: 'success',
-                                        timer: 3000,
-                                        showConfirmButton: false,
-                                        willClose: () => {
-                                            // Limpiar el formulario de contraseña
-                                            document.getElementById('current_password').value = '';
-                                            document.getElementById('new_password').value = '';
-                                            document.getElementById('confirm_password').value = '';
-                                            // Ocultar el formulario de contraseña
-                                            document.getElementById('password-form').style.display = 'none';
-                                        }
-                                    });
-                                </script>";
-                                // Salir para evitar mostrar mensajes de error
-                                exit();
-                            } else {
-                                $errores[] = "Error al actualizar la contraseña.";
-                            }
+                            throw new Exception("Error al actualizar la contraseña en la base de datos");
                         }
                     }
-                } catch (PDOException $e) {
-                    $errores[] = "Error en la base de datos: " . $e->getMessage();
+                } catch (Exception $e) {
+                    $errores[] = $e->getMessage();
                 }
             }
 
-            // Mostrar errores si los hay
             if (!empty($errores)) {
-                $mensaje_error = '<ul>' . implode('', array_map(function($error) {
-                    return '<li>' . htmlspecialchars($error) . '</li>';
-                }, $errores)) . '</ul>';
-                
-                echo "<script>
-                    Swal.fire({
-                        title: 'Error',
-                        html: '" . addslashes($mensaje_error) . "',
-                        icon: 'error',
-                        timer: 5000,
-                        showConfirmButton: true
-                    });
-                </script>";
+                // Guardar errores en sesión
+                $_SESSION['error_messages'] = $errores;
+                // Redirigir para evitar reenvío del formulario
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit();
             }
         }
     }
@@ -321,11 +270,19 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestionar Perfil</title>
     <!-- SweetAlert2 CSS y JS -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Verificar si SweetAlert2 está cargado
+        if (typeof Swal === 'undefined') {
+            console.error('SweetAlert2 no se cargó correctamente');
+            // Cargar SweetAlert2 de nuevo si falla la primera vez
+            document.write('<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>');
+        }
+    </script>
     
     <script>
         // Mostrar mensajes de PHP con SweetAlert2
@@ -1147,50 +1104,196 @@ try {
         }
 
         // Funcionalidad para mostrar/ocultar contraseñas
+        // Función para validar el formulario de contraseña
+        function validatePasswordForm() {
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const errorDiv = document.getElementById('passwordErrors');
+            
+            // Limpiar mensajes de error previos
+            errorDiv.style.display = 'none';
+            errorDiv.innerHTML = '';
+            
+            // Validar que todos los campos estén completos
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                errorDiv.innerHTML = 'Todos los campos son obligatorios';
+                errorDiv.style.display = 'block';
+                return false;
+            }
+            
+            // Validar que las contraseñas coincidan
+            if (newPassword !== confirmPassword) {
+                errorDiv.innerHTML = 'Las contraseñas no coinciden';
+                errorDiv.style.display = 'block';
+                return false;
+            }
+
+            // Validar fortaleza de la contraseña (mismos requisitos que en el registro)
+            const passwordPattern = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            if (!passwordPattern.test(newPassword)) {
+                errorDiv.innerHTML = 'La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número';
+                errorDiv.style.display = 'block';
+                return false;
+            }
+
+            // Si todo está bien, permitir el envío del formulario
+            return true;
+        }
+
+        // Función para mostrar alerta de éxito
+        function showSuccessAlert(message) {
+            return Swal.fire({
+                title: '¡Éxito!',
+                text: message,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
+        // Función para mostrar alerta de error
+        function showErrorAlert(message) {
+            return Swal.fire({
+                title: 'Error',
+                html: message,
+                icon: 'error',
+                confirmButtonText: 'Entendido'
+            });
+        }
+
+        // Manejar el envío del formulario de contraseña
+        const passwordForm = document.getElementById('passwordForm');
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const formData = new FormData(this);
+                
+                // Mostrar indicador de carga
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Actualizando...';
+                }
+                
+                try {
+                    const response = await fetch('gestion_perfil.php', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Mostrar mensaje de éxito
+                        await Swal.fire({
+                            title: '¡Éxito!',
+                            text: result.message,
+                            icon: 'success',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        
+                        // Limpiar y ocultar el formulario
+                        this.reset();
+                        const passwordSection = document.getElementById('passwordSection');
+                        const showBtn = document.getElementById('showPasswordForm');
+                        
+                        if (passwordSection) passwordSection.style.display = 'none';
+                        if (showBtn) showBtn.style.display = 'block';
+                        
+                    } else if (result.errors && result.errors.length > 0) {
+                        // Mostrar errores
+                        await Swal.fire({
+                            title: 'Error',
+                            html: result.errors.join('<br>'),
+                            icon: 'error',
+                            showConfirmButton: true
+                        });
+                    } else {
+                        throw new Error('Respuesta inesperada del servidor');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.message || 'Error al procesar la solicitud',
+                        icon: 'error',
+                        showConfirmButton: true
+                    });
+                } finally {
+                    // Restaurar el botón
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Actualizar Contraseña';
+                    }
+                }
+            });
+        }
+
+        // Mostrar/ocultar contraseña
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                const type = input.type === 'password' ? 'text' : 'password';
+                input.type = type;
+                const button = input.nextElementSibling;
+                if (button && button.classList.contains('toggle-password')) {
+                    button.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Mostrar/ocultar formulario de contraseña
             const showPasswordForm = document.getElementById('showPasswordForm');
             const hidePasswordForm = document.getElementById('hidePasswordForm');
             const passwordSection = document.getElementById('passwordSection');
-            
-            if (showPasswordForm && passwordSection) {
-                showPasswordForm.addEventListener('click', function() {
-                    passwordSection.style.display = 'block';
-                    // Desplazarse suavemente al formulario de contraseña
-                    passwordSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            }
-            
-            if (hidePasswordForm && passwordSection) {
-                hidePasswordForm.addEventListener('click', function() {
-                    // Limpiar los campos de contraseña
-                    document.getElementById('current_password').value = '';
-                    document.getElementById('new_password').value = '';
-                    document.getElementById('confirm_password').value = '';
-                    document.getElementById('passwordMatch').textContent = '';
-                    // Ocultar la sección
-                    passwordSection.style.display = 'none';
+
+            // Mostrar formulario de contraseña
+            if (showPasswordForm) {
+                showPasswordForm.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (passwordSection) {
+                        passwordSection.style.display = 'block';
+                        showPasswordForm.style.display = 'none';
+                    }
                 });
             }
 
-            // Toggle password visibility
+            // Ocultar formulario de contraseña
+            if (hidePasswordForm && passwordSection && showPasswordForm) {
+                hidePasswordForm.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Limpiar los campos de contraseña
+                    const currentPassword = document.getElementById('current_password');
+                    const newPassword = document.getElementById('new_password');
+                    const confirmPassword = document.getElementById('confirm_password');
+                    const passwordMatch = document.getElementById('passwordMatch');
+                    
+                    if (currentPassword) currentPassword.value = '';
+                    if (newPassword) newPassword.value = '';
+                    if (confirmPassword) confirmPassword.value = '';
+                    if (passwordMatch) passwordMatch.textContent = '';
+                    
+                    // Ocultar la sección
+                    passwordSection.style.display = 'none';
+                    // Mostrar el botón de cambiar contraseña
+                    showPasswordForm.style.display = 'block';
+                });
+            }
+
+            // Configurar botones para mostrar/ocultar contraseña
             document.querySelectorAll('.toggle-password').forEach(button => {
                 button.addEventListener('click', function() {
                     const targetId = this.getAttribute('data-target');
-                    const input = document.getElementById(targetId);
-                    
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        this.textContent = '👁️';
-                        this.setAttribute('title', 'Ocultar contraseña');
-                    } else {
-                        input.type = 'password';
-                        this.textContent = '👁️‍🗨️';
-                        this.setAttribute('title', 'Mostrar contraseña');
-                    }
-                    // Invertir la lógica del ícono
-                    this.textContent = input.type === 'password' ? '👁️' : '👁️‍🗨️';
-                    this.setAttribute('title', input.type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                    togglePasswordVisibility(targetId);
                     // Mantener el foco en el input
                     input.focus();
                 });
@@ -1202,29 +1305,17 @@ try {
             const passwordMatch = document.getElementById('passwordMatch');
 
             function validatePassword() {
-                if (!newPassword.value) {
+                if (!newPassword.value || !confirmPassword.value) {
                     passwordMatch.textContent = '';
                     return false;
                 }
                 
-                // Validar fortaleza de la contraseña
-                const hasUpperCase = /[A-Z]/.test(newPassword.value);
-                const hasLowerCase = /[a-z]/.test(newPassword.value);
-                const hasNumbers = /\d/.test(newPassword.value);
-                const isLongEnough = newPassword.value.length >= 8;
-                
-                if (!isLongEnough || !hasUpperCase || !hasLowerCase || !hasNumbers) {
-                    passwordMatch.textContent = 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas y números';
-                    passwordMatch.style.color = 'var(--danger-color)';
-                    return false;
-                }
-                
                 if (newPassword.value !== confirmPassword.value) {
-                    passwordMatch.textContent = 'Las contraseñas no coinciden';
-                    passwordMatch.style.color = 'var(--danger-color)';
+                    passwordMatch.textContent = '✗ Las contraseñas no coinciden';
+                    passwordMatch.style.color = '#ef4444';
                     return false;
                 } else {
-                    passwordMatch.textContent = 'Las contraseñas coinciden';
+                    passwordMatch.textContent = '✓ Las contraseñas coinciden';
                     passwordMatch.style.color = '#10B981';
                     return true;
                 }
@@ -1275,6 +1366,42 @@ try {
     </script>
 </head>
 <body>
+    <?php 
+    // Mostrar mensajes de éxito
+    if (isset($_SESSION['success_message'])) {
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: '" . addslashes($_SESSION['success_message']) . "',
+                    icon: 'success',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            });
+        </script>";
+        // Eliminar el mensaje después de mostrarlo
+        unset($_SESSION['success_message']);
+    }
+    
+    // Mostrar mensajes de error
+    if (isset($_SESSION['error_messages']) && is_array($_SESSION['error_messages'])) {
+        $errorMessage = implode("\\n", $_SESSION['error_messages']);
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Error',
+                    text: '" . addslashes($errorMessage) . "',
+                    icon: 'error',
+                    timer: 5000,
+                    showConfirmButton: true
+                });
+            });
+        </script>";
+        // Eliminar los mensajes de error después de mostrarlos
+        unset($_SESSION['error_messages']);
+    }
+    ?>
     <div class="container">
         <div class="header">
             <a href="client_dashboard.php" class="return-link">
@@ -1285,13 +1412,6 @@ try {
                 <p>Administra tu información personal y la de tus mascotas</p>
             </div>
         </div>
-
-        <?php if (isset($mensaje)): ?>
-            <div class="alert <?php echo strpos($mensaje, 'Error') === false ? 'alert-success' : 'alert-error'; ?>">
-                <span><?php echo strpos($mensaje, 'Error') === false ? '✅' : '❌'; ?></span>
-                <?php echo $mensaje; ?>
-            </div>
-        <?php endif; ?>
 
         <div class="main-grid">
             <!-- Sección de Perfil -->
@@ -1336,51 +1456,70 @@ try {
                         <button type="button" id="showPasswordForm" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
                             Cambiar Contraseña
                         </button>
+                        
+                        <script>
+                        // Script directo para manejar el botón de cambio de contraseña
+                        document.getElementById('showPasswordForm').addEventListener('click', function() {
+                            const passwordSection = document.getElementById('passwordSection');
+                            const showPasswordBtn = document.getElementById('showPasswordForm');
+                            
+                            if (passwordSection) {
+                                passwordSection.style.display = 'block';
+                                showPasswordBtn.style.display = 'none';
+                            }
+                        });
+                        
+                        // Manejar el botón de cancelar
+                        const hidePasswordForm = document.getElementById('hidePasswordForm');
+                        if (hidePasswordForm) {
+                            hidePasswordForm.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const passwordSection = document.getElementById('passwordSection');
+                                const showPasswordBtn = document.getElementById('showPasswordForm');
+                                
+                                if (passwordSection && showPasswordBtn) {
+                                    passwordSection.style.display = 'none';
+                                    showPasswordBtn.style.display = 'block';
+                                    
+                                    // Limpiar campos
+                                    document.getElementById('current_password').value = '';
+                                    document.getElementById('new_password').value = '';
+                                    document.getElementById('confirm_password').value = '';
+                                }
+                            });
+                        }
+                        </script>
                     </form>
                     
                     <!-- Formulario de Cambio de Contraseña (inicialmente oculto) -->
                     <div id="passwordSection" class="password-section" style="display: none; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
                         <h3>Cambiar Contraseña</h3>
-                        <form method="POST" id="passwordForm">
+                        <form id="passwordForm" method="POST" action="gestion_perfil.php">
+                            <input type="hidden" name="update_password" value="1">
                             <div class="form-group">
                                 <label class="form-label" for="current_password">Contraseña Actual</label>
                                 <div class="input-group">
-                                    <span class="input-icon">🔒</span>
                                     <input type="password" id="current_password" name="current_password" class="form-input" required>
-                                    <button type="button" class="toggle-password" data-target="current_password" title="Mostrar/ocultar contraseña">
-                                        👁️
-                                    </button>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="new_password">Nueva Contraseña</label>
                                 <div class="input-group">
-                                    <span class="input-icon">🔑</span>
-                                    <input type="password" id="new_password" name="new_password" class="form-input" 
-                                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                                           title="La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas y números" required>
-                                    <button type="button" class="toggle-password" data-target="new_password" title="Mostrar/ocultar contraseña">
-                                        👁️
-                                    </button>
+                                    <input type="password" id="new_password" name="new_password" class="form-input" required>
                                 </div>
-                                <small class="form-hint">Mínimo 8 caracteres, incluyendo mayúsculas, minúsculas y números</small>
+                                <small class="form-hint">Mínimo 8 caracteres, incluyendo al menos una mayúscula y un número</small>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="confirm_password">Confirmar Nueva Contraseña</label>
                                 <div class="input-group">
-                                    <span class="input-icon">🔑</span>
                                     <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
-                                    <button type="button" class="toggle-password" data-target="confirm_password" title="Mostrar/ocultar contraseña">
-                                        👁️
-                                    </button>
                                 </div>
-                                <div id="passwordMatch" class="form-hint"></div>
                             </div>
                             
                             <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 1rem;">
-                                <button type="submit" name="update_password" class="btn btn-primary" style="flex: 1;">
+                                <button type="submit" class="btn btn-primary" style="flex: 1;">
                                     Actualizar Contraseña
                                 </button>
                                 <button type="button" id="hidePasswordForm" class="btn btn-outline" style="flex: 1;">
@@ -1574,5 +1713,7 @@ try {
             }
         });
     </script>
+    <!-- Iframe oculto para el envío del formulario de contraseña -->
+    <iframe name="hiddenIframe" id="hiddenIframe" style="display: none;"></iframe>
 </body>
 </html>
