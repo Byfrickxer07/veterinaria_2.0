@@ -66,6 +66,7 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $mascotas = $result->fetch_all(MYSQLI_ASSOC);
+$tiene_mascotas = !empty($mascotas);
 $stmt->close();
 $conn->close();
 ?>
@@ -495,6 +496,93 @@ $conn->close();
             padding-right: 50px;
         }
 
+        /* Estilos para el mensaje de sin mascotas */
+        .no-mascotas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh;
+            padding: 2rem;
+        }
+
+        .no-mascotas-content {
+            background: #fff;
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .no-mascotas-icon {
+            font-size: 4rem;
+            color: #0284c7;
+            margin-bottom: 1.5rem;
+        }
+
+        .no-mascotas-content h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-mascotas-text {
+            color: #64748b;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .no-mascotas-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #0284c7;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para el formulario cuando hay mascotas */
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
         /* Desactivar colapso del sidebar en esta página */
         .sidebar .toggle-menu { display: none !important; }
         .sidebar.collapsed { width: 280px !important; }
@@ -502,6 +590,20 @@ $conn->close();
         @media (max-width: 768px) {
             .sidebar.collapsed { width: 70px !important; }
             .sidebar.collapsed ~ .content { margin-left: 70px !important; }
+            
+            .no-mascotas-content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .no-mascotas-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -525,7 +627,28 @@ $conn->close();
 
     <div class="content">
         <h1>Reservar Turno</h1>
-        <form method="POST" class="form-reserva-turno">
+        
+        <?php if (!$tiene_mascotas): ?>
+            <div class="no-mascotas-container">
+                <div class="no-mascotas-content">
+                    <div class="no-mascotas-icon">
+                        <i class='bx bx-package'></i>
+                    </div>
+                    <h2>¡Aún no tienes mascotas registradas!</h2>
+                    <p class="no-mascotas-text">Para poder sacar un turno, primero necesitas registrar al menos una mascota en tu perfil.</p>
+                    <div class="no-mascotas-buttons">
+                        <a href="registrar_mascota.php" class="btn btn-primary">
+                            <i class='bx bx-plus'></i> Registrar Mascota
+                        </a>
+                        <a href="client_dashboard.php" class="btn btn-secondary">
+                            <i class='bx bx-home'></i> Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="form-container">
+                <form method="POST" class="form-reserva-turno">
             <div class="form-group">
                 <label for="fecha">Fecha:</label>
                 <input type="date" id="fecha" name="fecha" required>
@@ -560,8 +683,9 @@ $conn->close();
                 <i class='bx bx-calendar-plus' style="margin-right: 8px;"></i>
                 Reservar Turno
             </button>
-        </form>
-      
+                </form>
+            </div>
+        <?php endif; ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

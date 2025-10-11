@@ -85,78 +85,108 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Turnos</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-           body {
-            font-family: Arial, sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             overflow: hidden;
-            background-color: #f4f4f9;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
+            background: linear-gradient(135deg, #f4f4f9 0%, #e8eef2 100%);
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .dark-mode {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #e0e0e0;
         }
 
         .sidebar {
-            width: 275px;
-            background-color: #025162;
+            width: 280px;
+            background: linear-gradient(180deg, #025162 0%, #034854 100%);
+            backdrop-filter: blur(10px);
             color: #ecf0f1;
-            padding-top: 40px; 
+            padding-top: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            transition: width 0.3s, background-color 0.3s;
-            position: relative;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar.collapsed {
-            width: 75px;
+            width: 80px;
         }
 
         .sidebar.collapsed .user-name,
         .sidebar.collapsed span {
-            display: none;
-        }
-
-        .sidebar.collapsed .profile-section {
-            text-align: center;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.2s ease;
         }
 
         .sidebar .toggle-menu {
             position: absolute;
-            top: 30px; 
-            right: -15px; 
+            top: 25px;
+            right: -18px;
             cursor: pointer;
-            background-color: #027a8d; 
-            padding: 10px;
-            border-radius: 50%; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); 
-            transition: right 0.3s ease, background-color 0.3s;
+            background: linear-gradient(135deg, #027a8d 0%, #025162 100%);
+            padding: 12px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(2, 122, 141, 0.3);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            z-index: 1001;
+        }
+
+        .sidebar .toggle-menu:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(2, 122, 141, 0.4);
         }
 
         .sidebar.collapsed .toggle-menu {
-            right: -15px; 
+            right: -18px;
+            transform: rotate(180deg);
         }
 
         .profile-section {
             text-align: center;
-            margin-bottom: 20px; 
-            transition: margin-bottom 0.3s;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            width: 100%;
+            padding: 0 20px;
         }
 
         .profile-image {
-            width: 120px; 
-            height: 120px; 
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 10px;
-            transition: width 0.3s, height 0.3s;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .sidebar.collapsed .profile-image {
-            width: 60px; 
-            height: 60px; 
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
         }
 
         .sidebar a {
@@ -165,31 +195,61 @@ try {
             justify-content: flex-start;
             color: #ecf0f1;
             text-decoration: none;
-            padding: 15px 20px;
-            width: calc(100% - 40px);
-            margin-bottom: 15px; 
-            background-color: #027a8d;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: background-color 0.3s, padding 0.3s;
-            box-sizing: border-box;
+            padding: 16px 24px;
+            width: calc(100% - 30px);
+            margin: 0 15px 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .sidebar a:hover::before {
+            left: 100%;
         }
 
         .sidebar.collapsed a {
             justify-content: center;
-            padding: 15px;
+            padding: 16px;
+            width: 50px;
+            margin: 0 15px 12px 15px;
         }
 
         .sidebar a:hover {
-            background-color: #03485f;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar.collapsed a:hover {
+            transform: translateX(0) scale(1.05);
         }
 
         .sidebar i {
-            margin-right: 10px;
+            margin-right: 12px;
+            font-size: 18px;
+            transition: all 0.3s ease;
         }
 
         .sidebar.collapsed i {
             margin-right: 0;
+            font-size: 20px;
         }
 
         .sidebar .bottom-menu {
@@ -203,10 +263,18 @@ try {
 
         .content {
             flex-grow: 1;
-            padding: 40px 20px 40px; 
+            padding: 40px 30px;
+            margin-left: 280px; /* Mismo ancho que el sidebar */
+            width: calc(100% - 280px);
             text-align: center;
-            height: 100vh;
-            transition: padding 0.3s;
+            min-height: 100vh;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed ~ .content {
+            margin-left: 80px;
+            width: calc(100% - 80px);
         }
 
         h1 {
