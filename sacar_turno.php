@@ -30,33 +30,114 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!in_array($tipo_servicio, $servicios_permitidos, true)) {
             $mensaje = "error:Tipo de servicio no válido.";
         } else {
-        $query = "SELECT * FROM turnos WHERE fecha = ? AND hora = ? AND tipo_servicio = ?";
+        // Definir duración de cada tipo de servicio en minutos
+        $duraciones = [
+            'vacunacion' => 20,  // 20 minutos
+            'Control' => 20,     // 20 minutos
+            'castracion' => 60,  // 1 hora
+            'baño' => 60         // 1 hora
+        ];
+
+        // Obtener la duración del servicio seleccionado
+        $duracion = $duraciones[$tipo_servicio] ?? 30; // 30 minutos por defecto
+        
+        // Calcular hora de inicio y fin del turno solicitado
+        $horaInicio = new DateTime($fecha . ' ' . $hora);
+        $horaFin = clone $horaInicio;
+        $horaFin->modify("+{$duracion} minutes");
+        
+        // Verificar si la mascota ya tiene un turno que se solape
+        $query = "SELECT t.* FROM (
+                    SELECT 
+                        turnos.*,
+                        CASE 
+                            WHEN tipo_servicio = 'vacunacion' THEN 20
+                            WHEN tipo_servicio = 'Control' THEN 20
+                            WHEN tipo_servicio = 'castracion' THEN 60
+                            WHEN tipo_servicio = 'baño' THEN 60
+                            ELSE 30
+                        END as duracion_minutos
+                    FROM turnos
+                    WHERE mascota_id = ? AND fecha = ?
+                ) as t
+                WHERE (
+                    -- Turno existente empieza antes y termina después del inicio del nuevo turno
+                    (t.hora <= ? AND ADDTIME(t.hora, SEC_TO_TIME(t.duracion_minutos * 60)) > ?) OR
+                    -- Turno existente empieza durante el nuevo turno
+                    (t.hora < ? AND t.hora >= ?)
+                )";
+                
+        $horaInicioStr = $horaInicio->format('H:i:s');
+        $horaFinStr = $horaFin->format('H:i:s');
+        
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("sss", $fecha, $hora, $tipo_servicio);
+        $stmt->bind_param("isssss", 
+            $mascota_id, 
+            $fecha,
+            $horaInicioStr, $horaInicioStr,
+            $horaFinStr, $horaInicioStr
+        );
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            $mensaje = "error:Ya existe un turno para este servicio en el horario seleccionado. Por favor, elija otra fecha u hora.";
+            $turno = $result->fetch_assoc();
+            $mensaje = "error:La mascota ya tiene un turno programado de " . $turno['tipo_servicio'] . 
+                      " que se solapa con este horario. Por favor, elija otra fecha u hora.";
         } else {
-            $query = "INSERT INTO turnos (user_id, mascota_id, fecha, hora, tipo_servicio) VALUES (?, ?, ?, ?, ?)";
+            // Verificar disponibilidad del horario para el mismo servicio
+            $query = "SELECT * FROM (
+                        SELECT 
+                            t.*,
+                            CASE 
+                                WHEN t.tipo_servicio = 'vacunacion' THEN 20
+                                WHEN t.tipo_servicio = 'Control' THEN 20
+                                WHEN t.tipo_servicio = 'castracion' THEN 60
+                                WHEN t.tipo_servicio = 'baño' THEN 60
+                                ELSE 30
+                            END as duracion_minutos
+                        FROM turnos t
+                        WHERE t.fecha = ? 
+                        AND t.tipo_servicio = ?
+                    ) as turnos_con_duracion
+                    WHERE (
+                        -- Turno existente empieza antes y termina después del inicio del nuevo turno
+                        (hora <= ? AND ADDTIME(hora, SEC_TO_TIME(duracion_minutos * 60)) > ?) OR
+                        -- Turno existente empieza durante el nuevo turno
+                        (hora < ? AND hora >= ?)
+                    )";
+            
             $stmt = $conn->prepare($query);
+            $stmt->bind_param("ssssss", 
+                $fecha, $tipo_servicio,
+                $horaInicioStr, $horaInicioStr,
+                $horaFinStr, $horaInicioStr
+            );
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-            if ($stmt) {
-                $stmt->bind_param("iisss", $user_id, $mascota_id, $fecha, $hora, $tipo_servicio);
-                $stmt->execute();
-                if ($stmt->affected_rows > 0) {
-                    $mensaje = "success:¡Turno reservado con éxito!";
-                } else {
-                    $mensaje = "error:No se pudo reservar el turno. Por favor, intente de nuevo.";
-                }
-                $stmt->close();
+            if ($result->num_rows > 0) {
+                $mensaje = "error:Ya existe un turno para este servicio en un horario que se solapa. Por favor, elija otra fecha u hora.";
             } else {
-                $mensaje = "error:Error en la base de datos: " . $conn->error;
+                $query = "INSERT INTO turnos (user_id, mascota_id, fecha, hora, tipo_servicio) VALUES (?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($query);
+
+                if ($stmt) {
+                    $stmt->bind_param("iisss", $user_id, $mascota_id, $fecha, $hora, $tipo_servicio);
+                    $stmt->execute();
+                    if ($stmt->affected_rows > 0) {
+                        $mensaje = "success:¡Turno reservado con éxito!";
+                    } else {
+                        $mensaje = "error:No se pudo reservar el turno. Por favor, intente de nuevo.";
+                    }
+                    $stmt->close();
+                } else {
+                    $mensaje = "error:Error en la base de datos: " . $conn->error;
+                }
             }
         }
-        }
     }
+}
 }
 
 $user_id = $_SESSION['user_id'];
