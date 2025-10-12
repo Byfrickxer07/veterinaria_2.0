@@ -36,15 +36,21 @@ try {
     $stmt->execute();
     $mascotas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        if (isset($_POST['edit_pet'])) {
-            $pet_id = $_POST['id'];
-            $nombre = $_POST['nombre'];
-            $especie = $_POST['especie'];
-            $raza = $_POST['raza'];
-            $edad = $_POST['edad'];
+    // Verificar si es una petición de edición de mascota
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_pet'])) {
+        try {
+            $pet_id = $_POST['id'] ?? null;
+            $nombre = $_POST['nombre'] ?? '';
+            $especie = $_POST['especie'] ?? '';
+            $raza = $_POST['raza'] ?? '';
+            $edad = $_POST['edad'] ?? '';
             
-            $query = "UPDATE mascotas SET nombre = :nombre, especie = :especie, raza = :raza, edad = :edad WHERE id = :id AND user_id = :user_id";
+            if (!$pet_id) {
+                throw new Exception('ID de mascota no proporcionado');
+            }
+            
+            $query = "UPDATE mascotas SET nombre = :nombre, especie = :especie, raza = :raza, edad = :edad 
+                      WHERE id = :id AND user_id = :user_id";
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':nombre', $nombre);
             $stmt->bindParam(':especie', $especie);
@@ -54,34 +60,16 @@ try {
             $stmt->bindParam(':user_id', $user_id);
             $stmt->execute();
 
-            echo "<script>
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'Mascota actualizada correctamente',
-                    icon: 'success',
-                    timer: 3000,
-                    showConfirmButton: false
-                });
-            </script>";
-        } elseif (isset($_POST['delete_pet'])) {
-            $pet_id = $_POST['id'];
-
-            $query = "DELETE FROM mascotas WHERE id = :id AND user_id = :user_id";
-            $stmt = $conn->prepare($query);
-            $stmt->bindParam(':id', $pet_id);
-            $stmt->bindParam(':user_id', $user_id);
-            $stmt->execute();
-
-            echo "<script>
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'Mascota eliminada correctamente',
-                    icon: 'success',
-                    timer: 3000,
-                    showConfirmButton: false
-                });
-            </script>";
-        } elseif (isset($_POST['update_profile'])) {
+            // Set success message in session
+            $_SESSION['success_message'] = 'La mascota ha sido actualizada correctamente';
+            
+            // Redirect to prevent form resubmission
+            header('Location: ' . $_SERVER['PHP_SELF'] . '#mascotas');
+            exit();
+        } catch (Exception $e) {
+            $error_message = $e->getMessage();
+        }
+    } elseif (isset($_POST['update_profile'])) {
             $nombre_usuario = trim($_POST['username']);
             $correo_electronico = trim($_POST['email']);
             $telefono = preg_replace('/[^0-9]/', '', $_POST['phone']);
@@ -194,7 +182,35 @@ try {
                     });
                 </script>";
             }
-        } elseif (isset($_POST['update_password'])) {
+        } elseif (isset($_POST['delete_pet'])) {
+        try {
+            $pet_id = $_POST['id'] ?? null;
+            
+            if (!$pet_id) {
+                throw new Exception('ID de mascota no proporcionado');
+            }
+            
+            // Verificar que la mascota pertenece al usuario actual
+            $query = "DELETE FROM mascotas WHERE id = :id AND user_id = :user_id";
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':id', $pet_id);
+            $stmt->bindParam(':user_id', $user_id);
+            
+            if ($stmt->execute()) {
+                $_SESSION['success_message'] = 'Mascota eliminada correctamente';
+            } else {
+                throw new Exception('No se pudo eliminar la mascota');
+            }
+            
+            // Redirigir para evitar reenvío del formulario
+            header('Location: ' . $_SERVER['PHP_SELF'] . '#mascotas');
+            exit();
+            
+        } catch (Exception $e) {
+            $mensaje = $e->getMessage();
+        }
+        
+    } elseif (isset($_POST['update_password'])) {
             $current_password = $_POST['current_password'] ?? '';
             $new_password = $_POST['new_password'] ?? '';
             $confirm_password = $_POST['confirm_password'] ?? '';
@@ -268,11 +284,10 @@ try {
             }
         }
     }
-} catch (PDOException $e) {
+ catch (PDOException $e) {
     $mensaje = "Error: " . $e->getMessage();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1060,29 +1075,35 @@ try {
         }
 
         function openModal(id, nombre, especie, raza, edad) {
+            // Set the pet ID
             document.getElementById('edit-pet-id').value = id;
+            
+            // Set the pet name
             document.getElementById('edit-nombre').value = nombre;
             
-            // Establecer la especie
+            // Set the species and update the breeds
             const especieSelect = document.getElementById('edit-especie');
             especieSelect.value = especie;
-            
-            // Actualizar las razas basadas en la especie
             actualizarRazas(especie);
             
-            // Establecer la raza después de que se hayan cargado las opciones
+            // Set the breed after the options are loaded
             setTimeout(() => {
                 const razaSelect = document.getElementById('edit-raza');
                 razaSelect.value = raza;
-            }, 10);
+            }, 100); // Increased timeout to ensure options are loaded
             
+            // Set the age
             document.getElementById('edit-edad').value = edad;
-            // Mostrar el modal con animación
+            
+            // Show the modal with animation
             const modal = document.getElementById('editModal');
             modal.style.display = 'flex';
-            // Forzar reflow para que funcione la animación
+            // Force reflow for animation
             void modal.offsetWidth;
             modal.classList.add('active');
+            
+            // Focus on the first input field for better UX
+            document.getElementById('edit-nombre').focus();
         }
 
         function closeModal() {
@@ -1096,18 +1117,44 @@ try {
     </script>
     <script>
         // Funciones para el modal
-        function openModal() {
+        function openModal(id, nombre, especie, raza, edad) {
+            // Set the pet ID
+            document.getElementById('edit-pet-id').value = id;
+            
+            // Set the pet name
+            document.getElementById('edit-nombre').value = nombre;
+            
+            // Set the species and update the breeds
+            const especieSelect = document.getElementById('edit-especie');
+            especieSelect.value = especie;
+            actualizarRazas(especie);
+            
+            // Set the breed after the options are loaded
+            setTimeout(() => {
+                const razaSelect = document.getElementById('edit-raza');
+                if (razaSelect) {
+                    razaSelect.value = raza;
+                }
+            }, 100);
+            
+            // Set the age
+            document.getElementById('edit-edad').value = edad;
+            
+            // Show the modal with animation
             const modal = document.getElementById('editModal');
             modal.style.display = 'flex';
-            // Forzar reflow para reiniciar la animación
+            // Force reflow for animation
             void modal.offsetWidth;
             modal.classList.add('active');
+            
+            // Focus on the first input field for better UX
+            document.getElementById('edit-nombre').focus();
         }
 
         function closeModal() {
             const modal = document.getElementById('editModal');
             modal.classList.remove('active');
-            // Esperar a que termine la animación antes de ocultar
+            // Wait for the animation to complete before hiding
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
@@ -1697,8 +1744,9 @@ try {
                 <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body">
-                <form action="gestion_perfil.php" method="post">
+                <form action="gestion_perfil.php" method="post" id="editPetForm">
                     <input type="hidden" id="edit-pet-id" name="id">
+                    <input type="hidden" name="edit_pet" value="1">
                     
                     <div class="form-group">
                         <label class="form-label" for="edit-nombre">Nombre de la Mascota</label>
@@ -1735,16 +1783,30 @@ try {
                     
                     <div class="form-group">
                         <label class="form-label" for="edit-edad">Edad (años)</label>
-<!-- ... -->
+                        <div class="input-group">
                             <span class="input-icon">+</span>
                             <input type="number" id="edit-edad" name="edad" class="form-input" min="0" max="30" required>
                         </div>
                     </div>
                     
-                    <button type="submit" name="edit_pet" class="btn btn-primary" style="width: 100%;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
                         Guardar Cambios
                     </button>
                 </form>
+
+                <script>
+                // Mostrar mensaje de éxito si existe en la sesión
+                <?php if (isset($_SESSION['success_message'])): ?>
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: '<?php echo addslashes($_SESSION['success_message']); ?>',
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    <?php unset($_SESSION['success_message']); ?>
+                <?php endif; ?>
+                </script>
             </div>
         </div>
     </div>
