@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         if (isset($_POST['nombre_mascota'], $_POST['especie'], $_POST['raza'], $_POST['edad'], $_POST['sexo'], $_POST['peso'], $_POST['esterilizado']) &&
             !empty($_POST['nombre_mascota']) && !empty($_POST['especie']) && !empty($_POST['raza']) && 
             !empty($_POST['edad']) && !empty($_POST['sexo']) && !empty($_POST['peso']) && 
-            !empty($_POST['esterilizado'])) {
+            ($_POST['esterilizado'] === '0' || !empty($_POST['esterilizado']))) {
             // La foto es opcional, no se valida aquí
             if (!isset($_SESSION['user_id'])) {
                 header('Location: login.php');
