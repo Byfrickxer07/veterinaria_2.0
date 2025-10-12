@@ -6,7 +6,11 @@ $mensaje = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] == 'registrar_mascota') {
-        if (isset($_POST['nombre_mascota'], $_POST['especie'], $_POST['raza'], $_POST['edad'], $_POST['sexo'], $_POST['peso'], $_POST['esterilizado'])) {
+        if (isset($_POST['nombre_mascota'], $_POST['especie'], $_POST['raza'], $_POST['edad'], $_POST['sexo'], $_POST['peso'], $_POST['esterilizado']) &&
+            !empty($_POST['nombre_mascota']) && !empty($_POST['especie']) && !empty($_POST['raza']) && 
+            !empty($_POST['edad']) && !empty($_POST['sexo']) && !empty($_POST['peso']) && 
+            !empty($_POST['esterilizado'])) {
+            // La foto es opcional, no se valida aquí
             if (!isset($_SESSION['user_id'])) {
                 header('Location: login.php');
                 exit();
@@ -18,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             // Validar que la especie sea una de las permitidas
             $especies_permitidas = ['Perro', 'Gato', 'Conejo', 'Ave', 'Roedor'];
             if (!in_array($especie, $especies_permitidas)) {
-                $mensaje = "<p>Error: Especie no válida</p>";
+                $mensaje = "error:La especie seleccionada no es válida. Por favor, elige una especie de la lista.";
                 include 'registrar_mascota.php';
                 exit();
             }
@@ -27,16 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             $peso = (float)$_POST['peso'];
             // Validar que el peso no sea mayor a 70kg
             if ($peso > 70) {
-                $mensaje = "<p>Error: El peso no puede ser mayor a 70kg</p>";
+                $mensaje = "error:El peso de la mascota no puede ser mayor a 70kg. Por favor, ingresa un peso válido.";
                 $_POST = array();
                 include 'registrar_mascota.php';
                 exit();
             }
             $esterilizado = (int)$_POST['esterilizado'];
             $user_id = (int)$_SESSION['user_id'];
+            
+            // La foto es completamente opcional
             $stored_foto = null;
-
-            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK && !empty($_FILES['foto']['name'])) {
                 $upload_dir = 'uploads/';
                 if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
@@ -44,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                 $stored_foto = basename($_FILES['foto']['name']);
                 $dest_path = $upload_dir . $stored_foto;
                 if (!move_uploaded_file($_FILES['foto']['tmp_name'], $dest_path)) {
-                    $mensaje = "<p>Error al subir la foto.</p>";
+                    $mensaje = "error:No se pudo subir la foto de la mascota. Por favor, intenta con otra imagen.";
                 }
             }
 
@@ -53,16 +58,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             if ($stmt) {
                 $stmt->bind_param("isssisdis", $user_id, $nombre_mascota, $especie, $raza, $edad, $sexo, $peso, $esterilizado, $stored_foto);
                 if ($stmt->execute()) {
-                    $mensaje = "<p>Mascota registrada con éxito.</p>";
+                    // Para AJAX, solo devolver éxito
+                    echo "success";
+                    exit();
                 } else {
-                    $mensaje = "<p>Error al registrar: " . htmlspecialchars($stmt->error) . "</p>";
+                    echo "error:Error al registrar la mascota: " . htmlspecialchars($stmt->error);
+                    exit();
                 }
                 $stmt->close();
             } else {
-                $mensaje = "<p>Error en la consulta: " . htmlspecialchars($conn->error) . "</p>";
+                echo "error:Error en la base de datos: " . htmlspecialchars($conn->error);
+                exit();
             }
         } else {
-            $mensaje = "<p>Por favor, completa todos los campos.</p>";
+            echo "error:Por favor, completa todos los campos requeridos.";
+            exit();
         }
     }
 }
@@ -508,6 +518,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             background: rgba(255, 255, 255, 0.5);
         }
 
+        /* Estilos para mensajes de error personalizados */
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-group.error input,
+        .form-group.error select {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+        }
+
         /* Dark mode styles */
         .dark-mode .container {
             background: rgba(30, 41, 59, 0.95);
@@ -601,66 +630,74 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                 <p>Completa la información de tu nueva mascota</p>
             </div>
             
-            <form action="" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="registrar_mascota">
+             <form id="registro-form" enctype="multipart/form-data" novalidate>
+                 <input type="hidden" name="action" value="registrar_mascota">
                 
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="nombre_mascota"><i class='bx bx-user' style="margin-right: 5px;"></i>Nombre</label>
-                        <input type="text" id="nombre_mascota" name="nombre_mascota" 
-                               pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" 
-                               title="Solo se permiten letras y espacios" 
-                               placeholder="Ej: Max" required>
-                    </div>
+                     <div class="form-group">
+                         <label for="nombre_mascota"><i class='bx bx-user' style="margin-right: 5px;"></i>Nombre</label>
+                         <input type="text" id="nombre_mascota" name="nombre_mascota" 
+                                placeholder="Ej: Max"
+                                value="<?php echo isset($_POST['nombre_mascota']) ? htmlspecialchars($_POST['nombre_mascota']) : ''; ?>">
+                         <div class="error-message" id="error-nombre_mascota">Por favor, ingresa el nombre de la mascota</div>
+                     </div>
                     
-                    <div class="form-group">
-                        <label for="especie"><i class='bx bx-category' style="margin-right: 5px;"></i>Especie</label>
-                        <select id="especie" name="especie" required onchange="actualizarRazas()">
-                            <option value="" disabled selected>Seleccionar </option>
-                            <option value="Perro">Perro</option>
-                            <option value="Gato">Gato</option>
-                            <option value="Conejo">Conejo</option>
-                            <option value="Ave">Ave</option>
-                            <option value="Roedor">Roedor</option>
-                        </select>
-                    </div>
+                     <div class="form-group">
+                         <label for="especie"><i class='bx bx-category' style="margin-right: 5px;"></i>Especie</label>
+                         <select id="especie" name="especie" onchange="actualizarRazas()">
+                             <option value="" disabled <?php echo !isset($_POST['especie']) ? 'selected' : ''; ?>>Seleccionar </option>
+                             <option value="Perro" <?php echo (isset($_POST['especie']) && $_POST['especie'] == 'Perro') ? 'selected' : ''; ?>>Perro</option>
+                             <option value="Gato" <?php echo (isset($_POST['especie']) && $_POST['especie'] == 'Gato') ? 'selected' : ''; ?>>Gato</option>
+                             <option value="Conejo" <?php echo (isset($_POST['especie']) && $_POST['especie'] == 'Conejo') ? 'selected' : ''; ?>>Conejo</option>
+                             <option value="Ave" <?php echo (isset($_POST['especie']) && $_POST['especie'] == 'Ave') ? 'selected' : ''; ?>>Ave</option>
+                             <option value="Roedor" <?php echo (isset($_POST['especie']) && $_POST['especie'] == 'Roedor') ? 'selected' : ''; ?>>Roedor</option>
+                         </select>
+                         <div class="error-message" id="error-especie">Por favor, selecciona una especie</div>
+                     </div>
                     
-                    <div class="form-group">
-                        <label for="raza"><i class='bx bx-dna' style="margin-right: 5px;"></i>Raza</label>
-                        <select id="raza" name="raza" required>
-                            <option value="" disabled selected>Primero seleccione una especie</option>
-                        </select>
-                    </div>
+                     <div class="form-group">
+                         <label for="raza"><i class='bx bx-dna' style="margin-right: 5px;"></i>Raza</label>
+                         <select id="raza" name="raza">
+                             <option value="" disabled selected>Primero seleccione una especie</option>
+                         </select>
+                         <div class="error-message" id="error-raza">Por favor, selecciona una raza</div>
+                     </div>
                     
-                    <div class="form-group">
-                        <label for="edad"><i class='bx bx-time' style="margin-right: 5px;"></i>Edad (años)</label>
-                        <input type="number" id="edad" name="edad" min="0" max="30" step="1" placeholder="Ej: 3" required>
-                    </div>
+                     <div class="form-group">
+                         <label for="edad"><i class='bx bx-time' style="margin-right: 5px;"></i>Edad (años)</label>
+                         <input type="number" id="edad" name="edad" placeholder="Ej: 3"
+                                value="<?php echo isset($_POST['edad']) ? htmlspecialchars($_POST['edad']) : ''; ?>">
+                         <div class="error-message" id="error-edad">Por favor, ingresa la edad de la mascota</div>
+                     </div>
                     
-                    <div class="form-group">
-                        <label for="sexo"><i class='bx bx-male-sign' style="margin-right: 5px;"></i>Sexo</label>
-                        <select id="sexo" name="sexo" required>
-                            <option value="" disabled selected>Seleccionar...</option>
-                            <option value="Macho">Macho</option>
-                            <option value="Hembra">Hembra</option>
-                        </select>
-                    </div>
+                     <div class="form-group">
+                         <label for="sexo"><i class='bx bx-male-sign' style="margin-right: 5px;"></i>Sexo</label>
+                         <select id="sexo" name="sexo">
+                             <option value="" disabled <?php echo !isset($_POST['sexo']) ? 'selected' : ''; ?>>Seleccionar...</option>
+                             <option value="Macho" <?php echo (isset($_POST['sexo']) && $_POST['sexo'] == 'Macho') ? 'selected' : ''; ?>>Macho</option>
+                             <option value="Hembra" <?php echo (isset($_POST['sexo']) && $_POST['sexo'] == 'Hembra') ? 'selected' : ''; ?>>Hembra</option>
+                         </select>
+                         <div class="error-message" id="error-sexo">Por favor, selecciona el sexo de la mascota</div>
+                     </div>
                     
-                    <div class="form-group">
-                        <label for="peso"><i class='bx bx-chart' style="margin-right: 5px;"></i>Peso (kg) <span id="peso-error" style="color: red; font-size: 0.8em; display: none;">(Máximo 70kg)</span></label>
-                        <input type="number" id="peso" name="peso" min="0.1" max="70" step="0.1" placeholder="Ej: 25.5" required
-                               oninput="validarPeso(this)">
-                    </div>
+                     <div class="form-group">
+                         <label for="peso"><i class='bx bx-chart' style="margin-right: 5px;"></i>Peso (kg)</label>
+                         <input type="number" id="peso" name="peso" placeholder="Ej: 25.5"
+                                value="<?php echo isset($_POST['peso']) ? htmlspecialchars($_POST['peso']) : ''; ?>"
+                                oninput="validarPeso(this)">
+                         <div class="error-message" id="error-peso">Por favor, ingresa el peso de la mascota</div>
+                     </div>
                     
                     
-                    <div class="form-group">
-                        <label for="esterilizado"><i class='bx bx-check-shield' style="margin-right: 5px;"></i>Estado de esterilización</label>
-                        <select id="esterilizado" name="esterilizado" required>
-                            <option value="" disabled selected>Seleccionar...</option>
-                            <option value="1">Sí</option>
-                            <option value="0">No</option>
-                        </select>
-                    </div>
+                     <div class="form-group">
+                         <label for="esterilizado"><i class='bx bx-check-shield' style="margin-right: 5px;"></i>Estado de esterilización</label>
+                         <select id="esterilizado" name="esterilizado">
+                             <option value="" disabled <?php echo !isset($_POST['esterilizado']) ? 'selected' : ''; ?>>Seleccionar...</option>
+                             <option value="1" <?php echo (isset($_POST['esterilizado']) && $_POST['esterilizado'] == '1') ? 'selected' : ''; ?>>Sí</option>
+                             <option value="0" <?php echo (isset($_POST['esterilizado']) && $_POST['esterilizado'] == '0') ? 'selected' : ''; ?>>No</option>
+                         </select>
+                         <div class="error-message" id="error-esterilizado">Por favor, selecciona el estado de esterilización</div>
+                     </div>
                     
                     <div class="form-group full-width">
                         <label for="foto"><i class='bx bx-image' style="margin-right: 5px;"></i>Foto de la Mascota</label>
@@ -679,28 +716,188 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
                 </button>
             </form>
             
-            <script>
-            function validarPeso(input) {
-                const errorSpan = document.getElementById('peso-error');
-                if (parseFloat(input.value) > 70) {
-                    input.setCustomValidity('El peso no puede ser mayor a 70kg');
-                    errorSpan.style.display = 'inline';
-                } else {
-                    input.setCustomValidity('');
-                    errorSpan.style.display = 'none';
-                }
-            }
-            
-            // Validar el formulario antes de enviar
-            document.querySelector('form').addEventListener('submit', function(e) {
-                const pesoInput = document.getElementById('peso');
-                if (parseFloat(pesoInput.value) > 70) {
-                    e.preventDefault();
-                    alert('El peso no puede ser mayor a 70kg');
-                    pesoInput.focus();
-                }
-            });
-            </script>
+             <script>
+             // Función para mostrar/ocultar errores
+             function showError(fieldId, message) {
+                 const field = document.getElementById(fieldId);
+                 if (!field) return;
+                 
+                 const errorDiv = document.getElementById('error-' + fieldId);
+                 const formGroup = field.closest('.form-group');
+                 
+                 if (errorDiv) {
+                     errorDiv.textContent = message;
+                     errorDiv.classList.add('show');
+                 }
+                 if (formGroup) {
+                     formGroup.classList.add('error');
+                 }
+             }
+             
+             function hideError(fieldId) {
+                 const field = document.getElementById(fieldId);
+                 if (!field) return;
+                 
+                 const errorDiv = document.getElementById('error-' + fieldId);
+                 const formGroup = field.closest('.form-group');
+                 
+                 if (errorDiv) {
+                     errorDiv.classList.remove('show');
+                 }
+                 if (formGroup) {
+                     formGroup.classList.remove('error');
+                 }
+             }
+             
+             function validarPeso(input) {
+                 const peso = parseFloat(input.value);
+                 if (peso > 70) {
+                     showError('peso', 'El peso no puede ser mayor a 70kg');
+                     return false;
+                 } else {
+                     hideError('peso');
+                     return true;
+                 }
+             }
+             
+             // Validación en tiempo real
+             document.addEventListener('DOMContentLoaded', function() {
+                 const form = document.querySelector('form');
+                 const requiredFields = [
+                     { id: 'nombre_mascota', message: 'Por favor, ingresa el nombre de la mascota' },
+                     { id: 'especie', message: 'Por favor, selecciona una especie' },
+                     { id: 'raza', message: 'Por favor, selecciona una raza' },
+                     { id: 'edad', message: 'Por favor, ingresa la edad de la mascota' },
+                     { id: 'sexo', message: 'Por favor, selecciona el sexo de la mascota' },
+                     { id: 'peso', message: 'Por favor, ingresa el peso de la mascota' },
+                     { id: 'esterilizado', message: 'Por favor, selecciona el estado de esterilización' }
+                     // La foto NO es obligatoria, por eso no está en la lista
+                 ];
+                 
+                 // Agregar validación en tiempo real
+                 requiredFields.forEach(field => {
+                     const element = document.getElementById(field.id);
+                     if (element) {
+                         element.addEventListener('blur', function() {
+                             if (!this.value || this.value.trim() === '') {
+                                 showError(field.id, field.message);
+                             } else {
+                                 hideError(field.id);
+                             }
+                         });
+                         
+                         element.addEventListener('input', function() {
+                             if (this.value && this.value.trim() !== '') {
+                                 hideError(field.id);
+                             }
+                         });
+                     }
+                 });
+                 
+                 // Validación especial para peso
+                 const pesoInput = document.getElementById('peso');
+                 if (pesoInput) {
+                     pesoInput.addEventListener('input', function() {
+                         if (this.value) {
+                             validarPeso(this);
+                         } else {
+                             hideError('peso');
+                         }
+                     });
+                 }
+                 
+                 // Envío del formulario con AJAX
+                 form.addEventListener('submit', function(e) {
+                     e.preventDefault(); // Prevenir envío normal
+                     
+                     let hasErrors = false;
+                     
+                     // Limpiar errores anteriores
+                     requiredFields.forEach(field => {
+                         hideError(field.id);
+                     });
+                     
+                     // Validar todos los campos requeridos
+                     requiredFields.forEach(field => {
+                         const element = document.getElementById(field.id);
+                         console.log('Validando campo:', field.id, 'Valor:', element ? element.value : 'No encontrado'); // Debug
+                         if (element && (!element.value || element.value.trim() === '')) {
+                             console.log('Mostrando error para:', field.id); // Debug
+                             showError(field.id, field.message);
+                             hasErrors = true;
+                         }
+                     });
+                     
+                     // Validación especial para peso
+                     const pesoInput = document.getElementById('peso');
+                     if (pesoInput && pesoInput.value) {
+                         if (!validarPeso(pesoInput)) {
+                             hasErrors = true;
+                         }
+                     }
+                     
+                     if (hasErrors) {
+                         return false;
+                     }
+                     
+                     // Enviar con AJAX
+                     const formData = new FormData(form);
+                     
+                     fetch('', {
+                         method: 'POST',
+                         body: formData
+                     })
+                     .then(response => response.text())
+                     .then(data => {
+                         console.log('Respuesta del servidor:', data); // Debug
+                         if (data.trim() === 'success') {
+                             // Limpiar todos los campos
+                             document.getElementById('nombre_mascota').value = '';
+                             document.getElementById('especie').selectedIndex = 0;
+                             document.getElementById('raza').innerHTML = '<option value="" disabled selected>Primero seleccione una especie</option>';
+                             document.getElementById('edad').value = '';
+                             document.getElementById('sexo').selectedIndex = 0;
+                             document.getElementById('peso').value = '';
+                             document.getElementById('esterilizado').selectedIndex = 0;
+                             document.getElementById('foto').value = '';
+                             
+                             // Mostrar mensaje de éxito
+                             Swal.fire({
+                                 title: '¡Éxito!',
+                                 text: '¡Mascota registrada con éxito!',
+                                 icon: 'success',
+                                 confirmButtonColor: '#027a8d',
+                                 confirmButtonText: 'Aceptar',
+                                 background: '#fff',
+                                 customClass: {
+                                     popup: 'animated fadeIn'
+                                 }
+                             });
+                         } else {
+                             // Mostrar error
+                             Swal.fire({
+                                 title: 'Error',
+                                 text: data.replace('error:', ''),
+                                 icon: 'error',
+                                 confirmButtonColor: '#dc3545',
+                                 confirmButtonText: 'Aceptar',
+                                 background: '#fff'
+                             });
+                         }
+                     })
+                     .catch(error => {
+                         Swal.fire({
+                             title: 'Error',
+                             text: 'Error al registrar la mascota. Por favor, intenta nuevamente.',
+                             icon: 'error',
+                             confirmButtonColor: '#dc3545',
+                             confirmButtonText: 'Aceptar',
+                             background: '#fff'
+                         });
+                     });
+                 });
+             });
+             </script>
             
             <script>
             // Datos de razas por especie
@@ -748,24 +945,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             }
 
             // Validar que solo se ingresen letras en el nombre
+            // Validación del nombre para solo letras
             document.getElementById('nombre_mascota').addEventListener('input', function(e) {
                 this.value = this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '');
             });
+            
+            // Validación de edad para solo números positivos
+            document.getElementById('edad').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                if (value > 30) value = 30;
+                e.target.value = value;
+            });
             </script>
             
-            <?php if ($mensaje) : ?>
-                <div class="message <?= strpos($mensaje, 'Error') !== false ? 'error' : 'success' ?>">
-                    <div class="icon-wrapper">
-                        <i class='bx <?= strpos($mensaje, 'Error') !== false ? 'bx-error' : 'bx-check' ?>'></i>
-                    </div>
-                    <?= $mensaje ?>
-                </div>
-            <?php endif; ?>
         </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="alertas_clientes.js"></script>
+    <script>
+        // Ya no necesitamos manejar mensajes PHP porque usamos AJAX
+    </script>
     <script>
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.querySelector('.sidebar');
