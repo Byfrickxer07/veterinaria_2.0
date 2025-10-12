@@ -86,6 +86,7 @@ try {
     <title>Mis Turnos</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             margin: 0;
@@ -663,6 +664,8 @@ try {
         }
     });
 </script>
+
+<script src="alertas_clientes.js"></script>
 
 </body>
 </html>
