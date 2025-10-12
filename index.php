@@ -168,7 +168,8 @@
             border: none;
             padding: 10px 15px;
             cursor: pointer;
-            margin-top: 10px;
+            margin: 10px auto 0 auto;
+            display: block;
             box-shadow: 0 2px 5px rgba(0, 0, 0, .1);
         }
 
@@ -183,7 +184,8 @@
             border: none;
             padding: 10px 15px;
             cursor: pointer;
-            margin-top: 10px;
+            margin: 10px auto 0 auto;
+            display: block;
             box-shadow: 0 2px 5px rgba(0, 0, 0, .1);
         }
 
@@ -233,13 +235,15 @@
         .alerta-error {
             background-color: #F66060;
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 5px;
-            margin-top: 10px;
-            font-size: 14px;
+            margin: 10px auto 0 auto;
+            font-size: 13px;
             font-weight: 500;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: block;
+            max-width: 300px;
         }
 
        
@@ -456,9 +460,9 @@
                         </div>
                         
                         <input type="submit" value="Registrarse">
-                        <div class="alerta-error" id="alerta-registro" style="display: none;">Todos los campos son obligatorios</div>
-                        <div class="alerta-exito">Te registraste correctamente</div>
                     </form>
+                    <div class="alerta-error" id="alerta-registro" style="display: none;">Todos los campos son obligatorios</div>
+                    <div class="alerta-exito" style="display: none;">Te registraste correctamente</div>
                 </div>
             </div>
         </div>
@@ -489,9 +493,9 @@
                             </label>
                         </div>
                         <input type="submit" value="Iniciar Sesión">
-                        <div class="alerta-error" id="alerta-login" style="display: none;">Todos los campos son obligatorios</div>
-                        <div class="alerta-exito">Te registraste correctamente</div>
                     </form>
+                    <div class="alerta-error" id="alerta-login" style="display: none;">Todos los campos son obligatorios</div>
+                    <div class="alerta-exito" style="display: none;">Te registraste correctamente</div>
                 </div>
             </div>
         </div>
