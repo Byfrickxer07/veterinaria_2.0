@@ -23,9 +23,9 @@ elseif ($userRole === 'admin') { $homeUrl = 'admin_dashboard.php'; }
     *{box-sizing:border-box}
     body{margin:0;font-family:'Inter',system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,#fff7ed,#fff1f2);color:#0f172a}
     .container{max-width:1120px;margin:0 auto;padding:16px}
-    .header{background:#fff;border-bottom:1px solid #e5e7eb}
+    .header{background:#fff}
     .header-inner{display:flex;align-items:center;justify-content:space-between;padding:16px}
-    .brand{font-weight:800;font-size:22px;color:#111827}
+    .brand{font-weight:800;font-size:22px;color:#111827;text-decoration:none}
     .btn{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
     .btn.primary{background:var(--primary);color:#fff}
     .btn.dark{background:var(--dark);color:#fff}
@@ -47,16 +47,297 @@ elseif ($userRole === 'admin') { $homeUrl = 'admin_dashboard.php'; }
     .muted{color:var(--muted);font-size:14px}
     .title{font-size:20px;font-weight:800;margin:0 0 4px}
     .actions{display:flex;gap:8px;margin-top:10px}
-    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);padding:18px;z-index:50}
-    .modal-content{max-width:760px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;max-height:92vh}
-    .modal-header{padding:12px 16px;background:#111827;color:#fff;display:flex;justify-content:space-between;align-items:center}
-    .modal-body{padding:16px;overflow:auto}
-    .modal-footer{padding:12px 16px;background:#f3f4f6;display:flex;justify-content:flex-end;gap:8px}
-    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .form-group{display:flex;flex-direction:column;gap:6px}
-    .form-group label{font-size:13px;font-weight:700}
-    .form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:1px solid #d1d5db;border-radius:10px}
-    .details-img{width:100%;height:240px;object-fit:cover}
+    /* Estilos mejorados para los modales */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.15s ease-in-out;
+      overflow-y: auto;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    
+    .modal[aria-hidden="false"] {
+      opacity: 1;
+      display: flex;
+      pointer-events: auto;
+    }
+    
+    .modal-content {
+      width: 90%;
+      max-width: 900px;
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+      transform: translateY(20px);
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      opacity: 0;
+      margin: auto;
+      position: relative;
+    }
+    
+    .modal[aria-hidden="false"] .modal-content {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    /* Asegurar que el contenido del modal sea interactivo inmediatamente */
+    .modal[aria-hidden="false"] .modal-content * {
+      pointer-events: auto;
+    }
+
+    @media (max-height: 700px) {
+      .modal {
+        align-items: flex-start;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .modal-content {
+        margin: 0 auto;
+      }
+    }
+    
+    .modal-header {
+      padding: 20px 30px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    }
+    
+    .modal-body {
+      padding: 30px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+    }
+    
+    .modal-footer {
+      padding: 20px 30px;
+      background: #f8fafc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+      border-top: 1px solid #e2e8f0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+    }
+    
+    /* Estilo mejorado para la información de la mascota */
+    .pet-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .pet-info {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .pet-info h3 {
+      color: #1e293b;
+      margin-top: 0;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f1f5f9;
+      font-size: 1.25rem;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .info-item {
+      margin-bottom: 10px;
+    }
+    
+    .info-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+    }
+    
+    .info-value {
+      font-size: 1rem;
+      color: #1e293b;
+      font-weight: 500;
+      background: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .description-box {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin-top: 20px;
+      line-height: 1.6;
+      color: #334155;
+    }
+    
+    .description-box h4 {
+      margin-top: 0;
+      color: #1e293b;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background-color: #f8fafc;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #f97316;
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+      background-color: #fff;
+    }
+    
+    .details-img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 12px;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: block;
+      background-color: #f8fafc;
+      padding: 8px;
+    }
+    
+    /* Asegurar que el contenedor del modal tenga espacio para la imagen */
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Animación de entrada del modal */
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-content {
+      animation: modalFadeIn 0.3s ease-out forwards;
+    }
+    
+    /* Estilo mejorado para el botón de cerrar */
+    .modal-header .btn.muted {
+      background: none;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .modal-header .btn.muted::before,
+    .modal-header .btn.muted::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 2px;
+      background-color: white;
+      transition: all 0.2s ease;
+    }
+    
+    .modal-header .btn.muted::before {
+      transform: rotate(45deg);
+    }
+    
+    .modal-header .btn.muted::after {
+      transform: rotate(-45deg);
+    }
+    
+    .modal-header .btn.muted:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .modal-header .btn.muted:hover::before,
+    .modal-header .btn.muted:hover::after {
+      background-color: #fff;
+    }
+    
+    .modal-header .btn.muted span {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -105,7 +386,12 @@ elseif ($userRole === 'admin') { $homeUrl = 'admin_dashboard.php'; }
 
   <div id="detailsModal" class="modal" aria-hidden="true">
     <div class="modal-content">
-      <div class="modal-header"><strong id="detailsTitle">Detalles</strong><button class="btn muted" onclick="closeDetails()">Cerrar</button></div>
+      <div class="modal-header">
+        <strong id="detailsTitle">Detalles</strong>
+        <button class="btn muted" onclick="closeDetails()" title="Cerrar">
+          <span>Cerrar</span>
+        </button>
+      </div>
       <div class="modal-body">
         <img id="detailsImage" class="details-img" alt="Pet" />
         <div id="detailsInfo" style="margin-top:12px"></div>
@@ -117,7 +403,12 @@ elseif ($userRole === 'admin') { $homeUrl = 'admin_dashboard.php'; }
   <?php if ($isAdmin): ?>
   <div id="formModal" class="modal" aria-hidden="true">
     <div class="modal-content">
-      <div class="modal-header"><strong id="formTitle">Nueva Mascota</strong><button class="btn muted" onclick="closeForm()">Cerrar</button></div>
+      <div class="modal-header">
+        <strong id="formTitle">Nueva Mascota</strong>
+        <button class="btn muted" onclick="closeForm()" title="Cerrar">
+          <span>Cerrar</span>
+        </button>
+      </div>
       <form id="petForm" class="modal-body" enctype="multipart/form-data">
         <input type="hidden" name="id" id="f_id" />
         <div class="form-grid">
@@ -187,18 +478,25 @@ function renderClient(){
   const grid = el('petsGrid');
   grid.innerHTML = list.map(p=>{
     const img = p.image && p.image.startsWith('http') ? p.image : (p.image ? p.image : '');
-    return `<div class="card">
-      ${img?`<img src="${img}" alt="${p.name}">`:''}
+    const statusColor = getStatusColor(p.status);
+    const isAdopted = p.status === 'Adoptado';
+    const isReserved = p.status === 'Reservado';
+    const textColor = (isAdopted || isReserved) ? '#000' : '#fff';
+    
+    return `<div class="card" style="${isAdopted ? 'opacity: 0.8;' : ''} ${isReserved ? 'border: 2px solid #f59e0b;' : ''}">
+      ${img?`<img src="${img}" alt="${p.name}" style="${isAdopted ? 'filter: grayscale(50%);' : ''}">`:''}
       <div class="card-body">
         <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
           <div>
-            <div class="title">${p.name||''}</div>
+            <div class="title" style="${isAdopted ? 'text-decoration: line-through;' : ''}">${p.name||''}</div>
             <div class="muted">${p.breed||''} • ${p.age||''}</div>
           </div>
-          <span class="badge">${p.status||''}</span>
+          <span class="badge" style="background: ${statusColor}; color: ${textColor};">${p.status||''}</span>
         </div>
-        <p class="muted" style="margin:8px 0 10px">${(p.description||'').slice(0,100)}...</p>
-        <button class="btn primary" style="width:100%" onclick='openDetails(${JSON.stringify(p.id)})'>Ver Detalles</button>
+        <p class="muted" style="margin:8px 0 10px">${(p.description||'').slice(0,100)}${(p.description||'').length > 100 ? '...' : ''}</p>
+        <button class="btn primary" style="width:100%" onclick='openDetails(${JSON.stringify(p.id)})' ${isAdopted ? 'disabled style="opacity:0.7;cursor:not-allowed;"' : ''}>
+          ${isAdopted ? 'Adoptado' : isReserved ? 'Reservado' : 'Ver Detalles'}
+        </button>
       </div>
     </div>`;
   }).join('');
@@ -207,27 +505,97 @@ function renderClient(){
 function openDetails(id){
   const p = PETS.find(x=>x.id===id);
   if(!p) return;
+  
   el('detailsTitle').textContent = p.name || '';
   const img = p.image && p.image.startsWith('http') ? p.image : (p.image ? p.image : '');
   el('detailsImage').src = img || '';
+  
   el('detailsInfo').innerHTML = `
-    <div class="form-grid">
-      <div><div class="muted">Tipo</div><div><strong>${p.type||''}</strong></div></div>
-      <div><div class="muted">Raza</div><div><strong>${p.breed||''}</strong></div></div>
-      <div><div class="muted">Edad</div><div><strong>${p.age||''}</strong></div></div>
-      <div><div class="muted">Género</div><div><strong>${p.gender||''}</strong></div></div>
-      <div><div class="muted">Tamaño</div><div><strong>${p.size||''}</strong></div></div>
-      <div><div class="muted">Estado</div><div><strong>${p.status||''}</strong></div></div>
+    <div class="pet-details">
+      <div class="pet-info">
+        <h3>Información de la Mascota</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Tipo</span>
+            <div class="info-value">${p.type||'No especificado'}</div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Raza</span>
+            <div class="info-value">${p.breed||'No especificada'}</div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Edad</span>
+            <div class="info-value">${p.age||'No especificada'}</div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Género</span>
+            <div class="info-value">${p.gender||'No especificado'}</div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Tamaño</span>
+            <div class="info-value">${p.size||'No especificado'}</div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Estado</span>
+            <div class="info-value" style="background: ${getStatusColor(p.status)}; color: white; border: none;">
+              ${p.status||'No especificado'}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="pet-info">
+        <h3>Información de Contacto</h3>
+        <div class="info-grid">
+          <div class="info-item" style="grid-column: span 2;">
+            <span class="info-label">Refugio</span>
+            <div class="info-value">${p.location||'No especificado'}</div>
+          </div>
+          <div class="info-item" style="grid-column: span 2;">
+            <span class="info-label">Dirección</span>
+            <div class="info-value">${p.address||'No especificada'}</div>
+          </div>
+          <div class="info-item" style="grid-column: span 2;">
+            <span class="info-label">Email</span>
+            <div class="info-value">${p.email||'No especificado'}</div>
+          </div>
+          <div class="info-item" style="grid-column: span 2;">
+            <span class="info-label">Teléfono</span>
+            <div class="info-value">${p.phone||'No especificado'}</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div style="margin-top:12px"><strong>Descripción</strong><div class="muted">${p.description||''}</div></div>
-    <div style="margin-top:12px"><strong>Contacto</strong>
-      <div class="muted">${p.location||''}</div>
-      <div class="muted">${p.address||''}</div>
-      <div class="muted">${p.phone||''}</div>
-      <div class="muted">${p.email||''}</div>
+    
+    <div class="description-box">
+      <h4>Acerca de ${p.name||'esta mascota'}</h4>
+      <p>${p.description||'No hay descripción disponible.'}</p>
     </div>`;
-  document.getElementById('btnContact').onclick = ()=>{ if(p.email){ window.location.href = `mailto:${p.email}?subject=Consulta sobre ${encodeURIComponent(p.name||'Mascota')}`; } };
-  const m = el('detailsModal'); m.style.display='block'; m.setAttribute('aria-hidden','false');
+    
+  // Configurar el botón de contacto
+  const btnContact = document.getElementById('btnContact');
+  if (p.email) {
+    btnContact.onclick = () => window.location.href = `mailto:${p.email}?subject=Consulta sobre ${encodeURIComponent(p.name||'Mascota')}`;
+    btnContact.style.display = 'block';
+  } else {
+    btnContact.style.display = 'none';
+  }
+  
+  // Mostrar el modal
+  const m = el('detailsModal'); 
+  m.style.display = 'flex';
+  m.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+}
+
+// Función auxiliar para colores de estado
+function getStatusColor(status) {
+  const statusColors = {
+    'Disponible': '#10b981',
+    'Reservado': '#f59e0b',
+    'Adoptado': '#ef4444'
+  };
+  return statusColors[status] || '#6b7280';
 }
 
 function closeDetails(){ const m = el('detailsModal'); m.style.display='none'; m.setAttribute('aria-hidden','true'); }
