@@ -161,6 +161,23 @@
             color: #a7a7a7;
         }
 
+        .form label {
+            position: relative;
+        }
+
+        .form label i:last-child {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: color 0.3s ease;
+            z-index: 1;
+        }
+
+        .form label i:last-child:hover {
+            color: #42909E;
+        }
+
         .form-register input[type="submit"] {
             background-color: #42909E;
             color: #fff;
@@ -455,7 +472,8 @@
                         <div>
                             <label>
                                 <i class='bx bx-lock-alt'></i>
-                                <input type="password" placeholder="Contraseña" name="userPassword" required>
+                                <input type="password" placeholder="Contraseña" name="userPassword" required id="password-register">
+                                <i class='bx bx-show' id="toggle-password-register" style="cursor: pointer; color: #a7a7a7;"></i>
                             </label>
                         </div>
                         
@@ -489,7 +507,8 @@
                         <div>
                             <label>
                                 <i class='bx bx-lock-alt'></i>
-                                <input type="password" placeholder="Contraseña" name="userPassword" required>
+                                <input type="password" placeholder="Contraseña" name="userPassword" required id="password-login">
+                                <i class='bx bx-show' id="toggle-password-login" style="cursor: pointer; color: #a7a7a7;"></i>
                             </label>
                         </div>
                         <input type="submit" value="Iniciar Sesión">
@@ -503,5 +522,37 @@
     <script src="index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="alertas.js"></script>
+    <script>
+        // Funcionalidad para mostrar/ocultar contraseña
+        document.getElementById('toggle-password-register').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password-register');
+            const toggleIcon = this;
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bx-show');
+                toggleIcon.classList.add('bx-hide');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bx-hide');
+                toggleIcon.classList.add('bx-show');
+            }
+        });
+
+        document.getElementById('toggle-password-login').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password-login');
+            const toggleIcon = this;
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bx-show');
+                toggleIcon.classList.add('bx-hide');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bx-hide');
+                toggleIcon.classList.add('bx-show');
+            }
+        });
+    </script>
 </body>
 </html>
