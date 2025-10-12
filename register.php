@@ -62,18 +62,35 @@ if ($userPhone !== '' && !preg_match('/^\d+$/', $userPhone)) {
     echo "El teléfono solo puede contener números.";
     exit;
 }
-// Longitud máxima para DNI y Teléfono
-if (strlen($userDNI) > 15 || strlen($userPhone) > 15) {
-    echo "El DNI y el teléfono no pueden superar 15 dígitos.";
+// Longitud exacta para DNI y Teléfono
+if (strlen($userDNI) !== 8) {
+    echo "El DNI debe tener exactamente 8 dígitos.";
+    exit;
+}
+if (strlen($userPhone) !== 10) {
+    echo "El teléfono debe tener exactamente 10 dígitos.";
     exit;
 }
 
-// Verificar si el correo electrónico o nombre de usuario ya están en uso
-$sql = "SELECT * FROM user WHERE correo_electronico='$userEmail' OR nombre_usuario='$userName'";
+// Verificar si el correo electrónico o DNI ya están en uso
+$sql = "SELECT * FROM user WHERE correo_electronico='$userEmail' OR dni='$userDNI'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
-    echo "El nombre de usuario o el correo electrónico ya están en uso.";
+    // Verificar cuál campo está duplicado
+    $sql_email = "SELECT * FROM user WHERE correo_electronico='$userEmail'";
+    $sql_dni = "SELECT * FROM user WHERE dni='$userDNI'";
+    
+    $result_email = $conn->query($sql_email);
+    $result_dni = $conn->query($sql_dni);
+    
+    if ($result_email->num_rows > 0 && $result_dni->num_rows > 0) {
+        echo "El correo electrónico y el DNI ya están en uso.";
+    } else if ($result_email->num_rows > 0) {
+        echo "El correo electrónico ya está en uso.";
+    } else {
+        echo "El DNI ya está en uso.";
+    }
     exit;
 }
 
