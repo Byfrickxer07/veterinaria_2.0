@@ -18,6 +18,16 @@ try {
     $stmt->bindParam(':user_id', $user_id);
     $stmt->execute();
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Debug temporal - remover después
+    if (!$usuario) {
+        echo "Error: No se encontró el usuario con ID: " . $user_id;
+        exit;
+    }
+    
+    // Debug temporal - mostrar datos del usuario
+    echo "<!-- Debug: Usuario encontrado -->";
+    echo "<!-- Debug: Telefono = '" . ($usuario['telefono'] ?? 'NULL') . "' -->";
 
     // Obtener las mascotas del usuario
     $query = "SELECT * FROM mascotas WHERE user_id = :user_id";
@@ -1442,9 +1452,10 @@ try {
                             <div class="input-group">
                                 <span class="input-icon"><i class='bx bx-phone'></i></span>
                                 <input type="tel" id="phone" name="phone" class="form-input" 
-                                       pattern="[0-9]{10,15}" 
-                                       title="Por favor ingresa solo números (10-15 dígitos)"
-                                       value="<?php echo htmlspecialchars($usuario['telefono']); ?>" required>
+                                       pattern="[0-9]{10}" 
+                                       title="Por favor ingresa exactamente 10 números"
+                                       maxlength="10"
+                                       value="<?php echo isset($usuario['telefono']) && !empty($usuario['telefono']) ? htmlspecialchars($usuario['telefono']) : ''; ?>" required>
                             </div>
                             <small class="form-text text-muted">Ejemplo: 1122334455</small>
                         </div>
@@ -1498,26 +1509,29 @@ try {
                             <input type="hidden" name="update_password" value="1">
                             <div class="form-group">
                                 <label class="form-label" for="current_password">Contraseña Actual</label>
-                                <div class="input-group">
+                                <div class="input-group" style="position: relative;">
                                     <input type="password" id="current_password" name="current_password" class="form-input" required
                                            value="<?php echo isset($_POST['current_password']) ? htmlspecialchars($_POST['current_password']) : ''; ?>">
+                                    <i class='bx bx-show' id="toggle-current-password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #a7a7a7; z-index: 10;"></i>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="new_password">Nueva Contraseña</label>
-                                <div class="input-group">
+                                <div class="input-group" style="position: relative;">
                                     <input type="password" id="new_password" name="new_password" class="form-input" required
                                            value="<?php echo isset($_POST['new_password']) ? htmlspecialchars($_POST['new_password']) : ''; ?>">
+                                    <i class='bx bx-show' id="toggle-new-password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #a7a7a7; z-index: 10;"></i>
                                 </div>
                                 <small class="form-hint">Mínimo 8 caracteres, incluyendo al menos una mayúscula y un número</small>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="confirm_password">Confirmar Nueva Contraseña</label>
-                                <div class="input-group">
+                                <div class="input-group" style="position: relative;">
                                     <input type="password" id="confirm_password" name="confirm_password" class="form-input" required
                                            value="<?php echo isset($_POST['confirm_password']) ? htmlspecialchars($_POST['confirm_password']) : ''; ?>">
+                                    <i class='bx bx-show' id="toggle-confirm-password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #a7a7a7; z-index: 10;"></i>
                                 </div>
                                 <div id="passwordMatch" class="form-hint"></div>
                             </div>
@@ -1545,6 +1559,31 @@ try {
 
                                 newPassword.addEventListener('input', checkPasswordMatch);
                                 confirmPassword.addEventListener('input', checkPasswordMatch);
+
+                                // Funcionalidad para mostrar/ocultar contraseñas
+                                function setupPasswordToggle(toggleId, inputId) {
+                                    const toggle = document.getElementById(toggleId);
+                                    const input = document.getElementById(inputId);
+                                    
+                                    if (toggle && input) {
+                                        toggle.addEventListener('click', function() {
+                                            if (input.type === 'password') {
+                                                input.type = 'text';
+                                                toggle.classList.remove('bx-show');
+                                                toggle.classList.add('bx-hide');
+                                            } else {
+                                                input.type = 'password';
+                                                toggle.classList.remove('bx-hide');
+                                                toggle.classList.add('bx-show');
+                                            }
+                                        });
+                                    }
+                                }
+
+                                // Configurar toggles para cada campo de contraseña
+                                setupPasswordToggle('toggle-current-password', 'current_password');
+                                setupPasswordToggle('toggle-new-password', 'new_password');
+                                setupPasswordToggle('toggle-confirm-password', 'confirm_password');
 
                                 // Validar antes de enviar el formulario
                                 const form = document.getElementById('passwordForm');
@@ -1758,6 +1797,31 @@ try {
                     }
                     
                     return true;
+                });
+            }
+
+            // Configurar validación del teléfono
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                // Solo permitir números y máximo 10 dígitos
+                phoneInput.addEventListener('input', function(e) {
+                    // Remover cualquier carácter que no sea número
+                    let value = e.target.value.replace(/[^0-9]/g, '');
+                    
+                    // Limitar a máximo 10 dígitos
+                    if (value.length > 10) {
+                        value = value.substring(0, 10);
+                    }
+                    
+                    e.target.value = value;
+                });
+                
+                // Prevenir pegar texto que no sean números
+                phoneInput.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const paste = (e.clipboardData || window.clipboardData).getData('text');
+                    const numbers = paste.replace(/[^0-9]/g, '').substring(0, 10);
+                    e.target.value = numbers;
                 });
             }
         });
