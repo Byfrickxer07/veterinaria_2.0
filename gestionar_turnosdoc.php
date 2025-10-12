@@ -79,7 +79,36 @@ $mysqli->close();
         align-items: center;
         height: 100vh;
         transition: width 0.3s, background-color 0.3s;
-        position: relative;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    .content {
+        margin-left: 275px;
+        width: calc(100% - 275px);
+        padding: 20px;
+        padding-bottom: 60px; /* Añadido más espacio en la parte inferior */
+        transition: margin-left 0.3s;
+        min-height: calc(100vh - 40px); /* Asegura que el contenido ocupe al menos el alto de la pantalla */
+    }
+
+    .table-container {
+        margin-bottom: 30px; /* Espacio adicional debajo de la tabla */
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+        }
+        .content {
+            margin-left: 0;
+            width: 100%;
+        }
     }
 
     .sidebar.collapsed {
@@ -167,10 +196,14 @@ $mysqli->close();
     .sidebar .bottom-menu {
         margin-top: auto;
         width: 100%;
-        padding-bottom: 20px;
+        padding: 20px 0 40px; /* Aumentado el padding inferior */
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+
+    .logout-button {
+        margin-bottom: 30px; /* Añadido margen inferior adicional */
     }
 
     .content {
@@ -292,7 +325,7 @@ $mysqli->close();
     </div>
 
 <div class="content">
-    <h1>Lista de Turnos</h1>
+    <h1 style="text-align:center; margin-bottom: 20px;">Lista de Turnos</h1>
     <div class="turnos">
     <?php if ($no_turnos): ?>
         <p>No hay turnos disponibles.</p>

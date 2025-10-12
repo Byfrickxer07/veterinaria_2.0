@@ -180,10 +180,15 @@ $conn->close();
         .sidebar .bottom-menu {
             margin-top: auto;
             width: 100%;
-            padding-bottom: 20px;
+            padding-bottom: 40px; /* Aumentado el padding inferior */
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        /* Estilo específico para el botón de cierre de sesión */
+        .logout-button {
+            margin-bottom: 30px; /* Añadido margen inferior adicional */
         }
 
         .content {
@@ -394,9 +399,7 @@ $conn->close();
         <div class="profile-section">
             <img src="logo_perro.jpg" alt="Profile Image" class="profile-image">
         </div>
-        <div class="toggle-menu">
-            <i class='bx bx-chevron-left'></i>
-        </div>
+      
         <a href="doctor_dashboard.php"><i class='bx bxs-dashboard'></i><span>Inicio</span></a>
         <a href="gestionar_turnosdoc.php"><i class='bx bx-calendar'></i><span>Gestión de Turnos</span></a>
       
@@ -454,7 +457,7 @@ $conn->close();
         <div id="noClientes" style="display:none; width:92%; max-width:1100px; margin:8px auto 0; padding:12px 14px; background:#fee2e2; border:1px solid #fecaca; border-radius:10px; color:#7f1d1d; font-weight:600;">No se encontraron clientes con ese criterio.</div>
 
         <?php if ($selectedUserId && !empty($pets)): ?>
-            <h2>Mascotas Registradas</h2>
+            <h2 style=" margin-bottom: 20px;">Mascotas Registradas</h2>
             <div class="table-card">
             <div class="table-toolbar" style="margin-top:16px;">
                 <input id="searchMascota" class="toolbar-input" type="text" placeholder="Buscar mascota por nombre/raza...">

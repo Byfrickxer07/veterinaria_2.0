@@ -296,10 +296,11 @@ $conn->close();
 
     <a href="gestionar_usudoc.php"><i class='bx bx-user'></i><span>Gestionar Usuarios</span></a>
     <a href="gestionar_turnosdoc.php"><i class='bx bx-calendar'></i><span>Gestionar Turnos</span></a>
-   
+    
+    <a href="index.php" id="logout-button" class="logout-button" style="margin-top: 470px;"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
 
     <div class="bottom-menu">
-        <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
+        <!-- Espacio para elementos adicionales del menú inferior -->
     </div>
 </div>
 
