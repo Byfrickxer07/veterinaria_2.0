@@ -262,13 +262,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
         .content {
             flex-grow: 1;
-            padding: 40px;
+            padding: 40px 40px 20px 40px; /* Reducido padding inferior */
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+            align-items: center; /* Cambiado de flex-start a center para centrar verticalmente */
+            height: 100vh; /* Altura fija para limitar el scroll */
             margin-left: 280px;
-            overflow-y: auto;
+            overflow: hidden; /* Quitado el scroll completamente */
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
@@ -281,7 +281,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 24px;
-            padding: 40px;
+            padding: 25px; /* Reducido aún más */
             max-width: 500px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
@@ -289,6 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: visible; /* sin scroll interno, lo maneja .content */
+            margin-bottom: 10px; /* Reducido margen inferior */
         }
 
         .container::before {
@@ -315,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
         .form-header {
             text-align: center;
-            margin-bottom: 35px;
+            margin-bottom: 25px; /* Reducido de 35px a 25px */
             position: relative;
             z-index: 2;
         }
@@ -338,8 +339,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px; /* Reducido de 20px a 15px */
+            margin-bottom: 15px; /* Reducido de 20px a 15px */
         }
 
         .form-group {
@@ -364,7 +365,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         input[type="number"],
         select {
             width: 100%;
-            padding: 16px 18px;
+            padding: 12px 14px; /* Reducido de 16px 18px a 12px 14px */
             border: 2px solid #e5e7eb;
             border-radius: 12px;
             font-size: 15px;
@@ -404,12 +405,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px; /* Reducido de 20px a 15px */
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
             background: #f8fafc;
             transition: all 0.3s ease;
-            min-height: 80px;
+            min-height: 60px; /* Reducido de 80px a 60px */
             text-align: center;
         }
 
@@ -555,13 +556,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             }
             
             .container {
-                margin: 20px 10px;
-                padding: 30px 20px;
+                margin: 20px 10px 10px 10px; /* Reducido margen inferior */
+                padding: 25px 20px; /* Reducido padding */
             }
 
             .content {
                 margin-left: 70px; /* coincide con el ancho móvil del menú */
-                padding: 20px 15px;
+                padding: 15px 10px 5px 10px; /* Reducido aún más */
+                height: 100vh; /* Altura fija también en móvil */
+                overflow: hidden; /* Quitado el scroll también en móvil */
+                align-items: center; /* Centrar verticalmente en móvil */
             }
         }
 
