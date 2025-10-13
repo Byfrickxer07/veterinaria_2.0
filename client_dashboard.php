@@ -68,54 +68,31 @@ $conn->close();
         }
 
         .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #025162 0%, #034854 100%);
-            backdrop-filter: blur(10px);
+            width: 275px;
+            background-color: #025162;
             color: #ecf0f1;
             padding-top: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
         .sidebar.collapsed {
-            width: 80px;
+            width: 275px;
         }
 
         .sidebar.collapsed .user-name,
         .sidebar.collapsed span {
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.2s ease;
-        }
-        .sidebar.collapsed .profile-section {
-            text-align: center;
+            display: inline;
         }
 
         .sidebar .toggle-menu {
-            position: absolute;
-            top: 25px;
-            right: -18px;
-            cursor: pointer;
-            background: linear-gradient(135deg, #027a8d 0%, #025162 100%);
-            padding: 12px;
-            border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(2, 122, 141, 0.3);
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            z-index: 1001;
-        }
-
-        .sidebar.collapsed .toggle-menu {
-            right: -18px;
-            transform: rotate(180deg);
+            display: none;
         }
 
         .profile-section {
@@ -125,22 +102,14 @@ $conn->close();
             width: 100%;
             padding: 0 20px;
         }
-        .profile-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar.collapsed .profile-image {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 10px;
-        }
+         .profile-image {
+             width: 120px; 
+             height: 120px; 
+             border-radius: 50%;
+             object-fit: cover;
+             margin-bottom: 10px;
+             transition: width 0.3s, height 0.3s;
+         }
 
         .sidebar a {
             display: flex;
@@ -148,18 +117,15 @@ $conn->close();
             justify-content: flex-start;
             color: #ecf0f1;
             text-decoration: none;
-            padding: 16px 24px;
-            width: calc(100% - 30px);
-            margin: 0 15px 12px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            width: calc(100% - 40px);
+            margin-bottom: 15px;
+            background-color: #027a8d;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
+            box-sizing: border-box;
             position: relative;
-            overflow: hidden;
         }
 
         .sidebar a::before {
@@ -185,23 +151,27 @@ $conn->close();
         }
 
         .sidebar a:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background-color: #03485f;
+            transform: translateY(-1px);
         }
 
-        .sidebar.collapsed a:hover {
-            transform: translateX(0) scale(1.05);
+        .sidebar a.active {
+            background-color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar a.active:hover {
+            background-color: #e55a2b;
         }
 
         .sidebar i {
-            margin-right: 12px;
+            margin-right: 10px;
             font-size: 18px;
-            transition: all 0.3s ease;
         }
 
-        .sidebar.collapsed i {
-            margin-right: 0;
+        .sidebar span {
+            transition: opacity 0.3s ease;
         }
 
         .sidebar .toggle-menu:hover {
@@ -233,7 +203,7 @@ $conn->close();
         .sidebar .bottom-menu {
             margin-top: auto;
             width: 100%;
-            padding-bottom: 20px;
+            padding-bottom: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -241,6 +211,7 @@ $conn->close();
 
         .content {
             flex-grow: 1;
+            margin-left: 275px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -357,23 +328,16 @@ $conn->close();
         .sidebar.collapsed .toggle-switch i {
             display: none; 
         }
-        /* Desactivar colapso del sidebar en esta página */
-        .sidebar .toggle-menu { display: none !important; }
-        .sidebar.collapsed { width: 275px !important; }
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span { display: inline !important; }
+        /* Sidebar fijo sin colapso */
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div class="toggle-menu">
-        <i class='bx bx-chevron-left' id="menu-toggle"></i> 
-    </div>
     <div class="profile-section">
         <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
-        <h2 class="user-name">Bienvenido, <?php echo htmlspecialchars($nombre_usuario); ?></h2>
     </div>
+    <a href="client_dashboard.php" class="active"><i class='bx bx-home'></i><span>Inicio</span></a>
     <a href="sacar_turno.php"><i class='bx bx-calendar'></i><span>Sacar Turno</span></a>
     <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Ver Turnos</span></a>
     <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Gestionar Perfil</span></a>
