@@ -63,7 +63,7 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
          body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -86,18 +86,23 @@ $conn->close();
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            transition: width 0.3s, background-color 0.3s;
-            position: fixed; 
+            transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
+            position: fixed;
             top: 0;
             left: 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         .sidebar.collapsed {
-            width: 75px;
+            width: 275px;
         }
 
         .sidebar.collapsed .user-name,
         .sidebar.collapsed span {
+            display: inline;
+        }
+
+        .sidebar .toggle-menu {
             display: none;
         }
 
@@ -152,12 +157,13 @@ $conn->close();
             text-decoration: none;
             padding: 15px 20px;
             width: calc(100% - 40px);
-            margin-bottom: 15px; 
+            margin-bottom: 15px;
             background-color: #027a8d;
             border-radius: 12px;
             font-size: 16px;
-            transition: background-color 0.3s, padding 0.3s;
+            transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
             box-sizing: border-box;
+            position: relative;
         }
 
         .sidebar.collapsed a {
@@ -167,20 +173,41 @@ $conn->close();
 
         .sidebar a:hover {
             background-color: #03485f;
+            transform: translateY(-1px);
+        }
+
+        .sidebar a.active {
+            background-color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar a.active:hover {
+            background-color: #e55a2b;
         }
 
         .sidebar i {
             margin-right: 10px;
+            font-size: 18px;
         }
 
-        .sidebar.collapsed i {
-            margin-right: 0;
+        .sidebar span {
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-image {
+            width: 120px; 
+            height: 120px; 
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            transition: width 0.3s, height 0.3s;
         }
 
         .sidebar .bottom-menu {
             margin-top: auto;
             width: 100%;
-            padding-bottom: 40px; /* Aumentado el padding inferior */
+            padding-bottom: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -396,17 +423,17 @@ $conn->close();
 </head>
 <body>
 <div class="sidebar">
-        <div class="profile-section">
-            <img src="logo_perro.jpg" alt="Profile Image" class="profile-image">
-        </div>
-      
-        <a href="doctor_dashboard.php"><i class='bx bxs-dashboard'></i><span>Inicio</span></a>
-        <a href="gestionar_turnosdoc.php"><i class='bx bx-calendar'></i><span>Gestión de Turnos</span></a>
-      
-        <div class="bottom-menu">
-          <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
-        </div>
+    <div class="profile-section">
+        <img src="logo_perro.jpg" alt="Profile Image" class="profile-image">
     </div>
+    <a href="doctor_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
+    <a href="gestionar_usudoc.php" class="active"><i class='bx bx-user'></i><span>Gestionar Usuarios</span></a>
+    <a href="gestionar_turnosdoc.php"><i class='bx bx-calendar'></i><span>Gestionar Turnos</span></a>
+
+    <div class="bottom-menu">
+        <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
+    </div>
+</div>
 
     <div class="content">
         <?php if ($alertMessage): ?>

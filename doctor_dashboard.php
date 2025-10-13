@@ -67,21 +67,28 @@ $conn->close();
         width: 275px;
         background-color: #025162;
         color: #ecf0f1;
-        padding-top: 40px; 
+        padding-top: 40px;
         display: flex;
         flex-direction: column;
         align-items: center;
         height: 100vh;
-        transition: width 0.3s, background-color 0.3s;
-        position: relative;
+        transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
+        position: fixed;
+        top: 0;
+        left: 0;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
     }
 
     .sidebar.collapsed {
-        width: 75px;
+        width: 275px;
     }
 
     .sidebar.collapsed .user-name,
     .sidebar.collapsed span {
+        display: inline;
+    }
+
+    .sidebar .toggle-menu {
         display: none;
     }
 
@@ -133,12 +140,13 @@ $conn->close();
         text-decoration: none;
         padding: 15px 20px;
         width: calc(100% - 40px);
-        margin-bottom: 15px; 
+        margin-bottom: 15px;
         background-color: #027a8d;
         border-radius: 12px;
         font-size: 16px;
-        transition: background-color 0.3s, padding 0.3s;
+        transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
         box-sizing: border-box;
+        position: relative;
     }
 
     .sidebar.collapsed a {
@@ -148,20 +156,32 @@ $conn->close();
 
     .sidebar a:hover {
         background-color: #03485f;
+        transform: translateY(-1px);
+    }
+
+    .sidebar a.active {
+        background-color: #ff6b35;
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar a.active:hover {
+        background-color: #e55a2b;
     }
 
     .sidebar i {
         margin-right: 10px;
+        font-size: 18px;
     }
 
-    .sidebar.collapsed i {
-        margin-right: 0;
+    .sidebar span {
+        transition: opacity 0.3s ease;
     }
 
     .sidebar .bottom-menu {
         margin-top: auto;
         width: 100%;
-        padding-bottom: 20px;
+        padding-bottom: 60px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -169,10 +189,71 @@ $conn->close();
 
     .content {
         flex-grow: 1;
-        padding: 50px 20px; 
-        text-align: center;
+        margin-left: 275px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: 50px 20px;
         height: 100vh;
-        transition: padding 0.3s;
+        overflow: hidden;
+        text-align: center;
+        position: relative;
+    }
+
+    .content h1,
+    .content p {
+        margin: 0;
+        font-size: 2em;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+
+    .content h1 {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #025162;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+
+    .content p {
+        font-size: 1.2em;
+        color: #555;
+        margin-top: 10px;
+        line-height: 1.6;
+        max-width: 100%;
+        overflow: hidden;
+        border-right: 3px solid #333;
+        white-space: nowrap;
+        box-sizing: border-box;
+        padding-right: 5px;
+    }
+
+    .typing-text {
+        font-size: 1.2em;
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 3px solid #333;
+        animation: typing 4s steps(40, end), blink-caret .75s step-end infinite;
+        margin: 0 auto;
+        font-family: 'Courier New', Courier, monospace;
+        color: #333;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes typing {
+        from { width: 0; }
+        to { width: 65%; }
+    }
+
+    @keyframes blink-caret {
+        from, to { border-color: transparent; }
+        50% { border-color: #333; }
     }
 
     h1 {
@@ -278,35 +359,25 @@ $conn->close();
         justify-content: center;
     }
 
-    /* Desactivar colapso del sidebar en esta página */
-    .sidebar .toggle-menu { display: none !important; }
-    .sidebar.collapsed { width: 275px !important; }
-    .sidebar.collapsed .user-name,
-    .sidebar.collapsed span { display: inline !important; }
+    /* Sidebar fijo sin colapso */
 </style>
 
 <div class="sidebar">
-    <div class="toggle-menu">
-        <i class='bx bx-chevron-left' id="menu-toggle"></i> 
-    </div>
     <div class="profile-section">
         <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
-        <h2 class="user-name">Bienvenido, <?php echo htmlspecialchars($nombre_usuario); ?></h2>
     </div>
-
+    <a href="doctor_dashboard.php" class="active"><i class='bx bx-home'></i><span>Inicio</span></a>
     <a href="gestionar_usudoc.php"><i class='bx bx-user'></i><span>Gestionar Usuarios</span></a>
     <a href="gestionar_turnosdoc.php"><i class='bx bx-calendar'></i><span>Gestionar Turnos</span></a>
-    
-    <a href="index.php" id="logout-button" class="logout-button" style="margin-top: 470px;"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
 
     <div class="bottom-menu">
-        <!-- Espacio para elementos adicionales del menú inferior -->
+        <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
     </div>
 </div>
 
 <div class="content">
     <h1>Panel de Doctor</h1>
-    <p>Gestiona los usuarios, turnos, historial clínico, y más desde este panel.</p>
+    <p class="typing-text">Gestiona los usuarios, turnos, historial clínico, y más desde este panel.</p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="alertas_clientes.js"></script>
