@@ -471,14 +471,6 @@ $result = $conn->query($sql);
             transform: translateY(-1px);
         }
 
-        .button.danger {
-            background-color: #dc3545;
-        }
-
-        .button.danger:hover {
-            background-color: #c82333;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -611,7 +603,7 @@ $result = $conn->query($sql);
                         <td><?= $row["rol"] ?></td>
                         <td>
                             <button class="button" onclick="openEditModal(<?= $row['id'] ?>, '<?= htmlspecialchars($row['nombre_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['apellido'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['correo_electronico'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['telefono'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['dni'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['rol'], ENT_QUOTES) ?>')">Editar</button>
-                            <button class="button danger" onclick="openDeleteModal(<?= $row['id'] ?>)">Eliminar</button>
+                            <button class="button" onclick="openDeleteModal(<?= $row['id'] ?>)">Eliminar</button>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -666,7 +658,7 @@ $result = $conn->query($sql);
                 <p>¿Estás seguro de que deseas eliminar este usuario?</p>
                 <form id="deleteForm" method="post">
                     <input type="hidden" name="confirm_delete" id="deleteId">
-                    <input type="submit" value="Eliminar" class="button danger">
+                    <input type="submit" value="Eliminar" class="button">
                 </form>
                 <button class="button" onclick="closeDeleteModal()">Cancelar</button>
             </div>

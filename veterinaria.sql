@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 13-10-2025 a las 02:51:07
+-- Tiempo de generación: 08-10-2025 a las 21:38:39
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -47,8 +47,8 @@ INSERT INTO `adopcion` (`id`, `nombre`, `tipo`, `raza`, `edad`, `genero`, `taman
 (1, 'Luna', 'Perro', 'Labrador', '2 años', 'Hembra', 'Grande', 'Luna es muy cariñosa y juguetona. Le encanta estar con niños.', 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800', 'Refugio Huellitas Felices', 'Av. San Martín 1234, Buenos Aires', '+54 11 1234-5678', 'contacto@huellitasfelices.com', 'Disponible', '2025-10-08 18:58:52'),
 (2, 'Michi', 'Gato', 'Siamés', '1 año', 'Macho', 'Mediano', 'Gato tranquilo y cariñoso. Ideal para departamento.', 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=800', 'Fundación Animalitos', 'Calle Florida 567, CABA', '+54 11 2345-6789', 'info@animalitos.org', 'Disponible', '2025-10-08 18:58:52'),
 (3, 'Rocky', 'Perro', 'Pastor Alemán', '3 años', 'Macho', 'Grande', 'Perro guardián, leal y protector. Necesita espacio para ejercitarse.', 'https://images.unsplash.com/photo-1568572933382-74d440642117?w=800', 'Refugio Huellitas Felices', 'Av. San Martín 1234, Buenos Aires', '+54 11 1234-5678', 'contacto@huellitasfelices.com', 'Reservado', '2025-10-08 18:58:52'),
-(4, 'Nina', 'Gato', 'Mestizo', '8 meses', 'Hembra', 'Pequeño', 'Curiosa y juguetona. Se adapta rápido a nuevos hogares.', 'https://imgs.search.brave.com/togRKvyfxb3JguX5JmWiDjNn3lAYp4YL-bQObofJoHI/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9nYXRv/cy5wbHVzL3dwLWNv/bnRlbnQvdXBsb2Fk/cy8yMDIxLzExL2dh/dG8tbWVzdGl6by1i/ZWJlLmpwZw', 'Patitas al Rescate', 'Av. Rivadavia 8900, CABA', '+54 11 4455-6677', 'adopciones@patitas.org', 'Disponible', '2025-10-08 18:58:52'),
-(5, 'Toby', 'Perro', 'Beagle', '4 años', 'Macho', 'Mediano', '', 'https://imgs.search.brave.com/vaJT8RxrLYxIRvwZE0IzbZ2yQMpyKP4MQyAJdYODLJs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/YnJpdGFubmljYS5j/b20vOTkvMTUyNDk5/LTA1MC0yOUVGQjdF/RS9CZWFnbGUuanBn/P3c9MzAw', 'Refugio Colitas Felices', 'Calle Sarmiento 456, La Plata', '+54 221 555-1212', 'colitas@refugio.org', 'Adoptado', '2025-10-08 18:58:52');
+(4, 'Nina', 'Gato', 'Mestizo', '8 meses', 'Hembra', 'Pequeño', 'Curiosa y juguetona. Se adapta rápido a nuevos hogares.', NULL, 'Patitas al Rescate', 'Av. Rivadavia 8900, CABA', '+54 11 4455-6677', 'adopciones@patitas.org', 'Disponible', '2025-10-08 18:58:52'),
+(5, 'Toby', 'Perro', 'Beagle', '4 años', 'Macho', 'Mediano', '', 'uploads/istockphoto-513133900-612x612_1759951948.jpg', 'Refugio Colitas Felices', 'Calle Sarmiento 456, La Plata', '+54 221 555-1212', 'colitas@refugio.org', 'Adoptado', '2025-10-08 18:58:52');
 
 -- --------------------------------------------------------
 
@@ -92,10 +92,7 @@ CREATE TABLE `mascotas` (
 --
 
 INSERT INTO `mascotas` (`id`, `user_id`, `nombre`, `especie`, `raza`, `edad`, `sexo`, `peso`, `esterilizado`, `foto`) VALUES
-(16, 17, 'dgfdgdf', 'Perro', 'Sin raza definida', 3, 'Macho', 45.00, 1, NULL),
-(18, 17, 'rrg', 'Gato', 'Maine Coon', 3, 'Hembra', 4.00, 1, NULL),
-(19, 17, 'rrr', 'Gato', 'Maine Coon', 1, 'Macho', 3.00, 1, NULL),
-(20, 17, 'eere', 'Ave', 'Ninfa', 3, 'Hembra', 3.00, 1, NULL);
+(16, 17, 'dgfdgdf', 'Perro', 'Sin raza definida', 3, 'Macho', 45.00, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -142,7 +139,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `nombre_usuario`, `correo_electronico`, `contrasena`, `rol`, `telefono`, `dni`, `apellido`) VALUES
-(17, 'thomas', 'thomas@gmail.com', '$2y$10$5VLy5vXInz6It7z0AI41y.ovOH8DXos.7lIDZAkBfQTL52GbZnKEW', 'cliente', '1121212122', '2222222', 'fricker'),
+(17, 'thomas', 'thomas@gmail.com', '$2y$10$M7peRymumORu1XH9GmXcluSla1guALQsu71nrXKdOPtwLe.9bblhW', 'cliente', '1121212122', '2222222', 'fricker'),
 (18, 'hola', 'byfrickxer@gmail.com', '$2y$10$9ynRWwLf2pZnl1Ht2bP33OmhlxbAwk/Ec5EujypD/QKHkLBUWIY6m', 'admin', '3123123213', '111121123333', 'hola'),
 (22, 'doctor', 'doctor@gmail.com', '$2y$10$c6glyGEy3PY5gml6UmXFgOSvJL7rHNDXDc6EL9i1ozhchpeGMsIha', 'doctor', '111222333444', '2223334443233', 'doctor');
 
@@ -202,13 +199,13 @@ ALTER TABLE `adopcion`
 -- AUTO_INCREMENT de la tabla `historial_clinico`
 --
 ALTER TABLE `historial_clinico`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `mascotas`
 --
 ALTER TABLE `mascotas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `turnos`

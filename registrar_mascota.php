@@ -109,32 +109,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         }
 
         .sidebar {
-            width: 275px;
-            background-color: #025162;
+            width: 280px;
+            background: linear-gradient(180deg, #025162 0%, #034854 100%);
+            backdrop-filter: blur(10px);
             color: #ecf0f1;
             padding-top: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: fixed;
             top: 0;
             left: 0;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-        }
-
-        .sidebar.collapsed {
-            width: 275px;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
         }
 
         .sidebar.collapsed .user-name,
         .sidebar.collapsed span {
-            display: inline;
-        }
-
-        .sidebar .toggle-menu {
-            display: none;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.2s ease;
+            display: inline-block;
+            width: 0;
+            overflow: hidden;
         }
 
         .sidebar .toggle-menu {
@@ -202,15 +203,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             justify-content: flex-start;
             color: #ecf0f1;
             text-decoration: none;
-            padding: 15px 20px;
-            width: calc(100% - 40px);
-            margin-bottom: 15px;
-            background-color: #027a8d;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
-            box-sizing: border-box;
+            padding: 16px 24px;
+            width: calc(100% - 30px);
+            margin: 0 15px 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
+            overflow: hidden;
         }
 
         .sidebar a::before {
@@ -236,46 +240,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         }
 
         .sidebar a:hover {
-            background-color: #03485f;
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .sidebar a.active {
-            background-color: #ff6b35;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .sidebar a.active:hover {
-            background-color: #e55a2b;
+        .sidebar.collapsed a:hover {
+            transform: translateX(0) scale(1.05);
         }
 
         .sidebar i {
-            margin-right: 10px;
+            margin-right: 12px;
             font-size: 18px;
+            transition: all 0.3s ease;
         }
 
-        .sidebar span {
-            transition: opacity 0.3s ease;
+        .sidebar.collapsed i {
+            margin-right: 0;
+            font-size: 20px;
         }
 
-        .profile-image {
-            width: 120px; 
-            height: 120px; 
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-            transition: width 0.3s, height 0.3s;
+        .sidebar .bottom-menu {
+            margin-top: auto;
+            width: 100%;
+            padding-bottom: 40px; /* Aumentado de 20px a 40px */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px; /* Añadido espacio entre botones */
         }
-
-         .sidebar .bottom-menu {
-             margin-top: auto;
-             width: 100%;
-             padding-bottom: 60px;
-             display: flex;
-             flex-direction: column;
-             align-items: center;
-         }
 
         .content {
             flex-grow: 1;
@@ -284,14 +277,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             justify-content: center;
             align-items: center; /* Cambiado de flex-start a center para centrar verticalmente */
             height: 100vh; /* Altura fija para limitar el scroll */
-            margin-left: 275px;
+            margin-left: 280px;
             overflow: hidden; /* Quitado el scroll completamente */
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .sidebar.collapsed ~ .content {
-            margin-left: 275px;
-            width: calc(100% - 275px);
+            margin-left: 80px;
+            width: calc(100% - 80px);
         }
 
         .container {
@@ -605,21 +598,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             }
         }
 
-        /* Sidebar fijo sin colapso */
+        /* Desactivar colapso del sidebar en esta página */
+        .sidebar .toggle-menu { display: none !important; }
+        .sidebar.collapsed { width: 280px !important; }
+        .sidebar.collapsed .user-name,
+        .sidebar.collapsed span { display: inline !important; opacity: 1 !important; transform: none !important; }
+        .sidebar.collapsed ~ .content { margin-left: 280px !important; }
     </style>
 </head>
 <body>
     <div class="sidebar">
+        <div class="toggle-menu">
+            <i class='bx bx-chevron-left' id="menu-toggle"></i>
+        </div>
         <div class="profile-section">
             <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
         </div>
         <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
         <a href="sacar_turno.php"><i class='bx bx-calendar'></i><span>Sacar turno</span></a>
-        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Ver Turnos</span></a>
         <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Gestionar Perfil</span></a>
-        <a href="registrar_mascota.php" class="active"><i class='bx bx-plus'></i><span>Añadir tus mascotas</span></a>
-        <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
-
+        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Ver Turnos</span></a>
         <div class="bottom-menu">
             <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
         </div>
