@@ -605,19 +605,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         .sidebar.collapsed span { display: inline !important; opacity: 1 !important; transform: none !important; }
         .sidebar.collapsed ~ .content { margin-left: 280px !important; }
     </style>
+    <style>
+        /* Override para unificar estilos del sidebar con el dashboard de doctor */
+        .sidebar { width: 275px; background-color: #025162; padding-top: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .sidebar a { background-color: #027a8d; padding: 15px 20px; width: calc(100% - 40px); margin-bottom: 15px; border-radius: 12px; font-size: 16px; }
+        .sidebar a:hover { background-color: #03485f; transform: translateY(-1px); }
+        .sidebar a.active { background-color: #ff6b35; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); border: 2px solid rgba(255, 255, 255, 0.2); }
+        .sidebar i { margin-right: 10px; font-size: 18px; }
+        .content { margin-left: 275px; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
-        <div class="toggle-menu">
-            <i class='bx bx-chevron-left' id="menu-toggle"></i>
-        </div>
         <div class="profile-section">
             <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
         </div>
         <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
-        <a href="sacar_turno.php"><i class='bx bx-calendar'></i><span>Sacar turno</span></a>
-        <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Gestionar Perfil</span></a>
-        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Ver Turnos</span></a>
+        <a href="sacar_turno.php"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
+        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
+        <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
+        <a href="registrar_mascota.php" class="active"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
+        <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
         <div class="bottom-menu">
             <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
         </div>

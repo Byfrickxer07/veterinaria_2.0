@@ -184,20 +184,144 @@ $conn->close();
             color: #e0e0e0;
         }
 
+        /* Estilos del Sidebar */
         .sidebar {
             width: 280px;
             background: linear-gradient(180deg, #025162 0%, #034854 100%);
-            backdrop-filter: blur(10px);
             color: #ecf0f1;
-            padding-top: 40px;
+            padding: 30px 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
             height: 100vh;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: fixed;
             top: 0;
             left: 0;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 15px;
+        }
+        
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .profile-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .user-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 10px 0;
+            color: #fff;
+        }
+        
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #ecf0f1;
+            padding: 14px 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            margin: 5px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar a i {
+            margin-right: 15px;
+            font-size: 1.4rem;
+            min-width: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #4CAF50;
+            transform: translateX(5px);
+        }
+        
+        .sidebar a:hover i {
+            transform: scale(1.1);
+        }
+        
+        .sidebar a.active {
+            background-color: rgba(76, 175, 80, 0.15);
+            border-left: 4px solid #4CAF50;
+            font-weight: 500;
+        }
+        
+        .bottom-menu {
+            margin-top: auto;
+            width: 100%;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-button {
+            color: #ff6b6b !important;
+            margin: 0 15px;
+            border-radius: 8px;
+        }
+        
+        .logout-button:hover {
+            background-color: rgba(255, 107, 107, 0.1) !important;
+            border-left: 4px solid #ff6b6b !important;
+        }
+        
+        /* Asegurar que el contenido principal no se oculte detrás del sidebar */
+        .content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 30px;
+        }
+        
+        /* Estilos responsivos */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .mobile-menu-toggle {
+                display: block !important;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1100;
+                background: #025162;
+                border: none;
+                color: white;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 1.5rem;
+                cursor: pointer;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            }
+        }
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
         }
@@ -687,6 +811,15 @@ $conn->close();
             }
         }
     </style>
+    <style>
+        /* Override para unificar estilos del sidebar con el dashboard de doctor */
+        .sidebar { width: 275px; background-color: #025162; padding-top: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .sidebar a { background-color: #027a8d; padding: 15px 20px; width: calc(100% - 40px); margin-bottom: 15px; border-radius: 12px; font-size: 16px; }
+        .sidebar a:hover { background-color: #03485f; transform: translateY(-1px); }
+        .sidebar a.active { background-color: #ff6b35; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); border: 2px solid rgba(255, 255, 255, 0.2); }
+        .sidebar i { margin-right: 10px; font-size: 18px; }
+        .content { margin-left: 275px; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
@@ -696,10 +829,12 @@ $conn->close();
         <div class="profile-section">
             <img src="logo_perro.jpg" alt="Perfil" class="profile-image">
         </div>
-        <a href="client_dashboard.php"><i class='bx bx-home'></i><span> Inicio</span></a>
-        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Ver Turnos</span></a>
-        <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Gestionar Perfil</span></a>
-        <a href="registrar_mascota.php"><i class='bx bx-plus'></i><span>Añadir tus mascotas</span></a>
+        <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
+        <a href="sacar_turno.php" class="active"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
+        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
+        <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
+        <a href="registrar_mascota.php"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
+        <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
 
         <div class="bottom-menu">
             <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
