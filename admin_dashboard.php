@@ -80,34 +80,8 @@ $conn->close();
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
-        .sidebar.collapsed {
-            width: 75px;
-        }
 
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span {
-            display: none;
-        }
 
-        .sidebar.collapsed .profile-section {
-            text-align: center;
-        }
-
-        .sidebar .toggle-menu {
-            position: absolute;
-            top: 30px; 
-            right: -15px; 
-            cursor: pointer;
-            background-color: #027a8d; 
-            padding: 10px;
-            border-radius: 50%; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); 
-            transition: right 0.3s ease, background-color 0.3s;
-        }
-
-        .sidebar.collapsed .toggle-menu {
-            right: -15px; 
-        }
 
         .profile-section {
             text-align: center;
@@ -143,24 +117,32 @@ $conn->close();
             font-size: 16px;
             transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
             box-sizing: border-box;
+            position: relative;
         }
 
-        .sidebar.collapsed a {
-            justify-content: center;
-            padding: 15px;
-        }
 
         .sidebar a:hover {
             background-color: #03485f;
             transform: translateY(-1px);
         }
 
-        .sidebar i {
-            margin-right: 10px;
+        .sidebar a.active {
+            background-color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .sidebar.collapsed i {
-            margin-right: 0;
+        .sidebar a.active:hover {
+            background-color: #e55a2b;
+        }
+
+        .sidebar i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .sidebar span {
+            transition: opacity 0.3s ease;
         }
 
         .sidebar .bottom-menu {
@@ -174,13 +156,79 @@ $conn->close();
 
         .content {
             flex-grow: 1;
-            padding: 40px 30px; 
-            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 50px 20px;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+            transform: translateY(-30px);
         }
 
-        h1 {
-            margin-top: 0;
-            font-weight: 600;
+        .content h1,
+        .content p {
+            margin: 0;
+            font-size: 2em;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .content h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #025162;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .content p {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 10px;
+            line-height: 1.6;
+            max-width: 100%;
+            overflow: hidden;
+            border-right: 3px solid #333;
+            white-space: nowrap;
+            box-sizing: border-box;
+            padding-right: 5px;
+        }
+
+        .typing-text {
+            font-size: 1.2em;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid #333;
+            animation: typing 4s steps(40, end), blink-caret .75s step-end infinite;
+            margin: 0 auto;
+            font-family: 'Courier New', Courier, monospace;
+            color: #333;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+            to {
+                width: 65%;
+            }
+        }
+
+        @keyframes blink-caret {
+            from, to {
+                border-color: transparent;
+            }
+            50% {
+                border-color: #333;
+            }
         }
 
         .toggle-switch-container {
@@ -282,25 +330,15 @@ $conn->close();
             justify-content: center;
         }
 
-        .sidebar.collapsed .toggle-switch i {
-            display: none; 
-        }
-        /* Desactivar colapso del sidebar en esta página */
-        .sidebar .toggle-menu { display: none !important; }
-        .sidebar.collapsed { width: 275px !important; }
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span { display: inline !important; }
+        /* Sidebar fijo sin colapso */
 </style>
 
 <div class="sidebar">
-<div class="toggle-menu">
-        <i class='bx bx-chevron-left' id="menu-toggle"></i> 
-    </div>
     <div class="profile-section">
         <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
-        <h2 class="user-name">Bienvenido, <?php echo htmlspecialchars($nombre_usuario); ?></h2>
     </div>
   
+    <a href="admin_dashboard.php" class="active"><i class='bx bx-home'></i><span>Inicio</span></a>
     <a href="gestionar_usuarios.php"><i class='bx bx-user'></i><span>Gestionar Usuarios</span></a>
     <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span>Gestionar Turnos</span></a>
     <a href="gestionar_mascotas.php"><i class='bx bx-bone'></i><span>Gestionar Mascotas</span></a>
@@ -315,25 +353,19 @@ $conn->close();
 
 <div class="content">
     <h1>Panel de Administración</h1>
-    <p>Gestiona los usuarios, turnos y reportes de la veterinaria.</p>
+    <p class="typing-text">Gestiona los usuarios, turnos y reportes de la veterinaria de manera eficiente.</p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="alertas_clientes.js"></script>
 <script>
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const body = document.body;
 
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        menuToggle.classList.toggle('bx-chevron-left');
-        menuToggle.classList.toggle('bx-chevron-right');
-    });
-
-    darkModeToggle.addEventListener('change', () => {
-        body.classList.toggle('dark-mode');
-    });
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark-mode');
+        });
+    }
 
 
     const logoutButton = document.getElementById('logout-button');

@@ -230,30 +230,6 @@ $result = $conn->query($sql);
             width: 75px;
         }
 
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span {
-            display: none;
-        }
-
-        .sidebar.collapsed .profile-section {
-            text-align: center;
-        }
-
-        .sidebar .toggle-menu {
-            position: absolute;
-            top: 30px; 
-            right: -15px; 
-            cursor: pointer;
-            background-color: #027a8d; 
-            padding: 10px;
-            border-radius: 50%; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); 
-            transition: right 0.3s ease, background-color 0.3s;
-        }
-
-        .sidebar.collapsed .toggle-menu {
-            right: -15px; 
-        }
 
         .profile-section {
             text-align: center;
@@ -289,11 +265,7 @@ $result = $conn->query($sql);
             font-size: 16px;
             transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
             box-sizing: border-box;
-        }
-
-        .sidebar.collapsed a {
-            justify-content: center;
-            padding: 15px;
+            position: relative;
         }
 
         .sidebar a:hover {
@@ -301,12 +273,23 @@ $result = $conn->query($sql);
             transform: translateY(-1px);
         }
 
-        .sidebar i {
-            margin-right: 10px;
+        .sidebar a.active {
+            background-color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .sidebar.collapsed i {
-            margin-right: 0;
+        .sidebar a.active:hover {
+            background-color: #e55a2b;
+        }
+
+        .sidebar i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .sidebar span {
+            transition: opacity 0.3s ease;
         }
 
         .sidebar .bottom-menu {
@@ -576,12 +559,13 @@ $result = $conn->query($sql);
             
         </div>
     
-        <a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i><span>Inicio</span></a>
-        
-        <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span> Gestión de Turnos</span></a>
-        <a href="gestionar_mascotas.php"><i class='bx bx-bone'></i><span> Gestionar Mascotas</span></a>
+        <a href="admin_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
+        <a href="gestionar_usuarios.php" class="active"><i class='bx bx-user'></i><span>Gestionar Usuarios</span></a>
+        <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span>Gestionar Turnos</span></a>
+        <a href="gestionar_mascotas.php"><i class='bx bx-bone'></i><span>Gestionar Mascotas</span></a>
+        <a href="adopcion_page.php?view=admin"><i class='bx bx-heart'></i><span>Adopción (Admin)</span></a>
         <div class="bottom-menu">
-            <a href="logout.php"><i class='bx bx-log-out'></i> <span>Cerrar Sesión</span></a>
+            <a href="index.php" id="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
         </div>
     </div>
 
@@ -714,7 +698,8 @@ $result = $conn->query($sql);
         </div>
     </div>
 
-    <script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
         // Sidebar siempre visible: no registrar eventos de colapso
 
         function openEditModal(id, nombre_usuario, apellido, correo_electronico, telefono, dni, rol) {
@@ -748,6 +733,24 @@ $result = $conn->query($sql);
         function closeCreateModal() {
             document.getElementById('createModal').style.display = 'none';
         }
+
+        // Confirmación para cerrar sesión
+        document.getElementById('logout-button').addEventListener('click', (e) => {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¿Estás seguro de que deseas cerrar sesión?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, cerrar sesión'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.php';
+                }
+            });
+        });
     </script>
 </body>
 </html>

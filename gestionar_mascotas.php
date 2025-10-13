@@ -166,7 +166,7 @@ if ($filter_owner_id > 0) {
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         body {
-            font-family: 'Montserrat', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -186,10 +186,11 @@ if ($filter_owner_id > 0) {
             align-items: center;
             height: 100vh;
             transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
-        .sidebar .toggle-menu { display:none !important; }
         .sidebar a {
             display: flex;
             align-items: center;
@@ -204,17 +205,45 @@ if ($filter_owner_id > 0) {
             font-size: 16px;
             transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
             box-sizing: border-box;
+            position: relative;
         }
         .sidebar a:hover { background-color:#03485f; transform: translateY(-1px); }
-        .sidebar i { margin-right:10px; }
+        .sidebar a.active {
+            background-color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .sidebar a.active:hover {
+            background-color: #e55a2b;
+        }
+        .sidebar i { margin-right:10px; font-size: 18px; }
+        .sidebar span {
+            transition: opacity 0.3s ease;
+        }
+        .profile-section {
+            text-align: center;
+            margin-bottom: 20px;
+            transition: margin-bottom 0.3s;
+        }
+
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            transition: width 0.3s, height 0.3s;
+        }
+
         .sidebar .bottom-menu { margin-top:auto; width:100%; padding-bottom:60px; display:flex; flex-direction:column; align-items:center; }
         .content {
             flex-grow: 1;
+            margin-left: 275px;
             padding: 40px 30px;
             min-height: 100vh;
             height: 100vh;
-            overflow-y: auto; /* permite hacer scroll vertical */
-            padding-bottom: 140px; /* más espacio inferior para que no se corte el contenido */
+            overflow-y: auto;
+            padding-bottom: 140px;
         }
         .card {
             background:#fff;
@@ -273,15 +302,16 @@ if ($filter_owner_id > 0) {
 <body>
     <div class="sidebar">
         <div class="profile-section">
-            <img src="logo_perro.jpg" alt="Foto" class="profile-image" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin-bottom:10px;">
+            <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
         </div>
-        <a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i><span style="margin-left:10px;">Inicio</span></a>
-        <a href="gestionar_usuarios.php"><i class='bx bx-user'></i><span style="margin-left:10px;">Gestion Usuarios</span></a>
-        <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span style="margin-left:10px;">Gestion Turnos</span></a>
-        <a href="gestionar_mascotas.php"><i class='bx bx-bone'></i><span style="margin-left:10px;">Gestionar Mascotas</span></a>
-        <div class="bottom-menu" style="margin-top:auto; width:100%; padding-bottom:40px; display:flex; flex-direction:column; align-items:center;">
-            <a href="index.php"><i class='bx bx-log-out'></i><span style="margin-left:10px;">Cerrar Sesión</span></a>
-        </div>
+        <a href="admin_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
+        <a href="gestionar_usuarios.php"><i class='bx bx-user'></i><span>Gestionar Usuarios</span></a>
+        <a href="gestionar_turnos.php"><i class='bx bx-calendar'></i><span>Gestionar Turnos</span></a>
+        <a href="gestionar_mascotas.php" class="active"><i class='bx bx-bone'></i><span>Gestionar Mascotas</span></a>
+        <a href="adopcion_page.php?view=admin"><i class='bx bx-heart'></i><span>Adopción (Admin)</span></a>
+         <div class="bottom-menu">
+             <a href="index.php" id="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
+         </div>
     </div>
     <div class="content">
         <div class="card">
@@ -415,7 +445,9 @@ if ($filter_owner_id > 0) {
             <?php endif; ?>
         </div>
     </div>
-    <script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
         // Razas por especie (igual que en registrar_mascota.php)
         const razasPorEspecie = {
             'Perro': ['Labrador Retriever', 'Pastor Alemán', 'Bulldog', 'Golden Retriever', 'Poodle', 'Beagle', 'Chihuahua', 'Boxer', 'Dálmata', 'Husky Siberiano', 'Sin raza definida'],
@@ -503,9 +535,10 @@ if ($filter_owner_id > 0) {
                 const def = document.createElement('option'); def.value=''; def.textContent='Primero seleccione una especie'; def.disabled=true; def.selected=true; eRaza.appendChild(def); return;
             }
             const def = document.createElement('option'); def.value=''; def.textContent='Seleccione una raza...'; def.disabled=true; def.selected=true; eRaza.appendChild(def);
-            razasPorEspecie[especie].forEach(r => { const opt = document.createElement('option'); opt.value=r; opt.textContent=r; eRaza.appendChild(opt); });
-        });
-    </script>
+             razasPorEspecie[especie].forEach(r => { const opt = document.createElement('option'); opt.value=r; opt.textContent=r; eRaza.appendChild(opt); });
+         });
+
+     </script>
     <!-- Modal editar mascota -->
     <div id="editPetModal" class="modal">
         <div class="modal-content">
@@ -553,8 +586,33 @@ if ($filter_owner_id > 0) {
                     <button type="submit" name="edit_pet" class="button"><i class='bx bx-save'></i> Guardar</button>
                 </div>
             </form>
-        </div>
-    </div>
-</body>
-</html>
-<?php $mysqli->close(); ?>
+         </div>
+     </div>
+
+     <script>
+         // Confirmación para cerrar sesión
+         document.addEventListener('DOMContentLoaded', function() {
+             const logoutButton = document.getElementById('logout-button');
+             if (logoutButton) {
+                 logoutButton.addEventListener('click', (e) => {
+                     e.preventDefault();
+                     Swal.fire({
+                         title: '¿Estás seguro?',
+                         text: '¿Estás seguro de que deseas cerrar sesión?',
+                         icon: 'warning',
+                         showCancelButton: true,
+                         confirmButtonColor: '#3085d6',
+                         cancelButtonColor: '#d33',
+                         confirmButtonText: 'Sí, cerrar sesión'
+                     }).then((result) => {
+                         if (result.isConfirmed) {
+                             window.location.href = 'index.php';
+                         }
+                     });
+                 });
+             }
+         });
+     </script>
+ </body>
+ </html>
+ <?php $mysqli->close(); ?>
