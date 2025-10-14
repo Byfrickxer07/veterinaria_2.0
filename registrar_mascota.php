@@ -94,14 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
-            overflow: hidden; /* Igual que sacar_turno: evitamos scroll horizontal bajo el menú */
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #2c3e50;
-            min-height: 100vh;
+            overflow: hidden;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: #f4f4f9;
         }
         .dark-mode {
             background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
@@ -109,92 +109,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         }
 
         .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #025162 0%, #034854 100%);
-            backdrop-filter: blur(10px);
+            width: 275px;
+            background-color: #025162;
             color: #ecf0f1;
-            padding-top: 40px;
+            padding-top: 40px; 
             display: flex;
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-        }
-
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span {
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.2s ease;
-            display: inline-block;
-            width: 0;
-            overflow: hidden;
-        }
-
-        .sidebar .toggle-menu {
-            position: absolute;
-            top: 25px;
-            right: -18px;
-            cursor: pointer;
-            background: linear-gradient(135deg, #027a8d 0%, #025162 100%);
-            padding: 12px;
-            border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(2, 122, 141, 0.3);
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sidebar .toggle-menu:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(2, 122, 141, 0.4);
-        }
-
-        .sidebar.collapsed .toggle-menu {
-            right: -18px;
-            transform: rotate(180deg);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         .profile-section {
             text-align: center;
-            margin-bottom: 40px;
-            transition: all 0.3s ease;
-            width: 100%;
-            padding: 0 20px;
+            margin-bottom: 20px; 
+            transition: margin-bottom 0.3s;
         }
 
         .profile-image {
-            width: 100px;
-            height: 100px;
+            width: 120px; 
+            height: 120px; 
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar.collapsed .profile-image {
-            width: 50px;
-            height: 50px;
             margin-bottom: 10px;
-        }
-
-        .user-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
-            opacity: 0.95;
+            transition: width 0.3s, height 0.3s;
         }
 
         .sidebar a {
@@ -203,88 +146,67 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             justify-content: flex-start;
             color: #ecf0f1;
             text-decoration: none;
-            padding: 16px 24px;
-            width: calc(100% - 30px);
-            margin: 0 15px 12px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            width: calc(100% - 40px);
+            margin-bottom: 15px; 
+            background-color: #027a8d;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
+            box-sizing: border-box;
             position: relative;
-            overflow: hidden;
-        }
-
-        .sidebar a::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .sidebar a:hover::before {
-            left: 100%;
-        }
-
-        .sidebar.collapsed a {
-            justify-content: center;
-            padding: 16px;
-            width: 50px;
-            margin: 0 15px 12px 15px;
         }
 
         .sidebar a:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background-color: #03485f;
+            transform: translateY(-1px);
         }
 
-        .sidebar.collapsed a:hover {
-            transform: translateX(0) scale(1.05);
+        .sidebar a.active {
+            background-color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar a.active:hover {
+            background-color: #e55a2b;
         }
 
         .sidebar i {
-            margin-right: 12px;
+            margin-right: 10px;
             font-size: 18px;
-            transition: all 0.3s ease;
         }
 
-        .sidebar.collapsed i {
-            margin-right: 0;
-            font-size: 20px;
+        .sidebar span {
+            transition: opacity 0.3s ease;
         }
 
         .sidebar .bottom-menu {
             margin-top: auto;
             width: 100%;
-            padding-bottom: 40px; /* Aumentado de 20px a 40px */
+            padding-bottom: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px; /* Añadido espacio entre botones */
+        }
+
+        .logout-button {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .content {
-            flex-grow: 1;
-            padding: 40px 40px 20px 40px; /* Reducido padding inferior */
+            margin-left: 275px;
+            width: calc(100% - 275px);
+            padding: 40px 40px 20px 40px;
             display: flex;
             justify-content: center;
-            align-items: center; /* Cambiado de flex-start a center para centrar verticalmente */
-            height: 100vh; /* Altura fija para limitar el scroll */
-            margin-left: 280px;
-            overflow: hidden; /* Quitado el scroll completamente */
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        .sidebar.collapsed ~ .content {
-            margin-left: 80px;
-            width: calc(100% - 80px);
         }
 
         .container {
@@ -598,39 +520,65 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             }
         }
 
-        /* Desactivar colapso del sidebar en esta página */
-        .sidebar .toggle-menu { display: none !important; }
-        .sidebar.collapsed { width: 280px !important; }
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span { display: inline !important; opacity: 1 !important; transform: none !important; }
-        .sidebar.collapsed ~ .content { margin-left: 280px !important; }
-    </style>
-    <style>
-        /* Override para unificar estilos del sidebar con el dashboard de doctor */
-        .sidebar { width: 275px; background-color: #025162; padding-top: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
-        .sidebar a { background-color: #027a8d; padding: 15px 20px; width: calc(100% - 40px); margin-bottom: 15px; border-radius: 12px; font-size: 16px; }
-        .sidebar a:hover { background-color: #03485f; transform: translateY(-1px); }
-        .sidebar a.active { background-color: #ff6b35; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); border: 2px solid rgba(255, 255, 255, 0.2); }
-        .sidebar i { margin-right: 10px; font-size: 18px; }
-        .content { margin-left: 275px; }
+        /* Estilos responsivos */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .mobile-menu-toggle {
+                display: block !important;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1100;
+                background: #025162;
+                border: none;
+                color: white;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 1.5rem;
+                cursor: pointer;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="profile-section">
-            <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
-        </div>
-        <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
-        <a href="sacar_turno.php"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
-        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
-        <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
-        <a href="registrar_mascota.php" class="active"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
-        <a href="historial_cliente.php"><i class='bx bx-notepad'></i><span>Historial Clínico</span></a>
-        <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
-        <div class="bottom-menu">
-            <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
-        </div>
+<!-- Botón de menú móvil -->
+<button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+    <i class='bx bx-menu'></i>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="profile-section">
+        <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
     </div>
+  
+    <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
+    <a href="sacar_turno.php"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
+    <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
+    <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
+    <a href="registrar_mascota.php" class="active"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
+    <a href="historial_cliente.php"><i class='bx bx-notepad'></i><span>Historial Clínico</span></a>
+    <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
+
+    <div class="bottom-menu">
+        <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
+    </div>
+</div>
     
     <div class="content">
         <div class="container">
@@ -976,14 +924,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         // Ya no necesitamos manejar mensajes PHP porque usamos AJAX
     </script>
     <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const body = document.body;
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            menuToggle.classList.toggle('bx-chevron-left');
-            menuToggle.classList.toggle('bx-chevron-right');
+        if (window.innerWidth <= 992) {
+            mobileMenuToggle.style.display = 'block';
+            
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+            
+            // Cerrar menú al hacer clic en un enlace
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+        // Actualizar en caso de cambio de tamaño de ventana
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 992) {
+                mobileMenuToggle.style.display = 'none';
+                sidebar.classList.remove('active');
+            } else {
+                mobileMenuToggle.style.display = 'block';
+            }
         });
 
         const logoutButton = document.getElementById('logout-button');

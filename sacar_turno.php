@@ -168,15 +168,14 @@ $conn->close();
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             overflow: hidden;
-            background: linear-gradient(135deg, #f4f4f9 0%, #e8eef2 100%);
-            color: #2c3e50;
-            transition: all 0.3s ease;
-            min-height: 100vh;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: #f4f4f9;
         }
 
         .dark-mode {
@@ -186,106 +185,98 @@ $conn->close();
 
         /* Estilos del Sidebar */
         .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #025162 0%, #034854 100%);
+            width: 275px;
+            background-color: #025162;
             color: #ecf0f1;
-            padding: 30px 0;
+            padding-top: 40px; 
             display: flex;
             flex-direction: column;
+            align-items: center;
             height: 100vh;
+            transition: width 0.3s, background-color 0.3s, box-shadow 0.3s;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         .profile-section {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 0 15px;
+            margin-bottom: 20px; 
+            transition: margin-bottom 0.3s;
         }
         
         .profile-image {
-            width: 100px;
-            height: 100px;
+            width: 120px; 
+            height: 120px; 
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 15px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
+            margin-bottom: 10px;
+            transition: width 0.3s, height 0.3s;
         }
-        
-        .profile-image:hover {
-            transform: scale(1.05);
-        }
-        
-        .user-name {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin: 10px 0;
-            color: #fff;
-        }
-        
+
         .sidebar a {
             display: flex;
             align-items: center;
+            justify-content: flex-start;
             color: #ecf0f1;
-            padding: 14px 25px;
             text-decoration: none;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-            margin: 5px 15px;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 15px 20px;
+            width: calc(100% - 40px);
+            margin-bottom: 15px; 
+            background-color: #027a8d;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out;
+            box-sizing: border-box;
+            position: relative;
         }
-        
-        .sidebar a i {
-            margin-right: 15px;
-            font-size: 1.4rem;
-            min-width: 30px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        
+
         .sidebar a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid #4CAF50;
-            transform: translateX(5px);
+            background-color: #03485f;
+            transform: translateY(-1px);
         }
-        
-        .sidebar a:hover i {
-            transform: scale(1.1);
-        }
-        
+
         .sidebar a.active {
-            background-color: rgba(76, 175, 80, 0.15);
-            border-left: 4px solid #4CAF50;
-            font-weight: 500;
+            background-color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .bottom-menu {
+
+        .sidebar a.active:hover {
+            background-color: #e55a2b;
+        }
+
+        .sidebar i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .sidebar span {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar .bottom-menu {
             margin-top: auto;
             width: 100%;
-            padding: 20px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        
+
         .logout-button {
-            color: #ff6b6b !important;
-            margin: 0 15px;
-            border-radius: 8px;
-        }
-        
-        .logout-button:hover {
-            background-color: rgba(255, 107, 107, 0.1) !important;
-            border-left: 4px solid #ff6b6b !important;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         /* Asegurar que el contenido principal no se oculte detrás del sidebar */
         .content {
-            margin-left: 280px;
-            width: calc(100% - 280px);
+            margin-left: 275px;
+            width: calc(100% - 275px);
             padding: 30px;
         }
         
@@ -322,156 +313,6 @@ $conn->close();
                 box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             }
         }
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar.collapsed {
-            width: 80px;
-        }
-
-        .sidebar.collapsed .user-name,
-        .sidebar.collapsed span {
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.2s ease;
-        }
-
-        .sidebar.collapsed .profile-section {
-            text-align: center;
-        }
-
-        .sidebar .toggle-menu {
-            position: absolute;
-            top: 25px;
-            right: -18px;
-            cursor: pointer;
-            background: linear-gradient(135deg, #027a8d 0%, #025162 100%);
-            padding: 12px;
-            border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(2, 122, 141, 0.3);
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            z-index: 1000;
-        }
-
-        .sidebar .toggle-menu:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(2, 122, 141, 0.4);
-        }
-
-        .sidebar.collapsed .toggle-menu {
-            right: -18px;
-        }
-
-        .profile-section {
-            text-align: center;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-        }
-
-        .profile-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar.collapsed .profile-image {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 10px;
-        }
-
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            color: #ecf0f1;
-            text-decoration: none;
-            padding: 16px 24px;
-            width: calc(100% - 30px);
-            margin: 0 15px 12px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sidebar a::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .sidebar a:hover::before {
-            left: 100%;
-        }
-
-        .sidebar.collapsed a {
-            justify-content: center;
-            padding: 16px;
-            width: 50px;
-            margin: 0 15px 12px 15px;
-        }
-
-        .sidebar a:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar.collapsed a:hover {
-            transform: translateX(0) scale(1.05);
-        }
-
-        .sidebar i {
-            margin-right: 12px;
-            font-size: 18px;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar.collapsed i {
-            margin-right: 0;
-        }
-
-        .sidebar .bottom-menu {
-            margin-top: auto;
-            width: 100%;
-            padding-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .content {
-            flex-grow: 1;
-            padding: 40px 30px;
-            text-align: center;
-            height: 100vh;
-            margin-left: 280px;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            overflow-y: auto;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .sidebar.collapsed ~ .content {
-            margin-left: 80px; 
-        }
 
         h1 {
             margin: 0 0 40px 0;
@@ -483,6 +324,7 @@ $conn->close();
             font-weight: 700;
             letter-spacing: -0.5px;
             position: relative;
+            text-align: center;
         }
 
         h1::after {
@@ -811,36 +653,31 @@ $conn->close();
             }
         }
     </style>
-    <style>
-        /* Override para unificar estilos del sidebar con el dashboard de doctor */
-        .sidebar { width: 275px; background-color: #025162; padding-top: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
-        .sidebar a { background-color: #027a8d; padding: 15px 20px; width: calc(100% - 40px); margin-bottom: 15px; border-radius: 12px; font-size: 16px; }
-        .sidebar a:hover { background-color: #03485f; transform: translateY(-1px); }
-        .sidebar a.active { background-color: #ff6b35; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); border: 2px solid rgba(255, 255, 255, 0.2); }
-        .sidebar i { margin-right: 10px; font-size: 18px; }
-        .content { margin-left: 275px; }
-    </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="toggle-menu">
-            <i class='bx bx-chevron-left' id="menu-toggle"></i> 
-        </div>
-        <div class="profile-section">
-            <img src="logo_perro.jpg" alt="Perfil" class="profile-image">
-        </div>
-        <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
-        <a href="sacar_turno.php" class="active"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
-        <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
-        <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
-        <a href="registrar_mascota.php"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
-        <a href="historial_cliente.php"><i class='bx bx-notepad'></i><span>Historial Clínico</span></a>
-        <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
+<!-- Botón de menú móvil -->
+<button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+    <i class='bx bx-menu'></i>
+</button>
 
-        <div class="bottom-menu">
-            <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
-        </div>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="profile-section">
+        <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
     </div>
+  
+    <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
+    <a href="sacar_turno.php" class="active"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
+    <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
+    <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
+    <a href="registrar_mascota.php"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
+    <a href="historial_cliente.php"><i class='bx bx-notepad'></i><span>Historial Clínico</span></a>
+    <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
+
+    <div class="bottom-menu">
+        <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
+    </div>
+</div>
 
     <div class="content">
         <h1>Reservar Turno</h1>
@@ -946,14 +783,34 @@ $conn->close();
             });
         <?php endif; ?>
 
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const body = document.body;
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            menuToggle.classList.toggle('bx-chevron-left');
-            menuToggle.classList.toggle('bx-chevron-right');
+        if (window.innerWidth <= 992) {
+            mobileMenuToggle.style.display = 'block';
+            
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+            
+            // Cerrar menú al hacer clic en un enlace
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+        // Actualizar en caso de cambio de tamaño de ventana
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 992) {
+                mobileMenuToggle.style.display = 'none';
+                sidebar.classList.remove('active');
+            } else {
+                mobileMenuToggle.style.display = 'block';
+            }
         });
 
         const logoutButton = document.getElementById('logout-button');

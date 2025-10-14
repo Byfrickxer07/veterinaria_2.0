@@ -48,16 +48,19 @@ $conn->close();
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
- body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; background: #f4f4f9; color: #2c3e50; }
- .sidebar { width: 275px; background: #025162; color: #ecf0f1; padding-top: 40px; display:flex; flex-direction:column; align-items:center; height:100vh; position: fixed; top:0; left:0; box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
- .sidebar .profile-section{ text-align:center; margin-bottom: 20px; }
- .sidebar .profile-image{ width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid rgba(255,255,255,0.2); }
- .sidebar a{ display:flex; align-items:center; color:#ecf0f1; text-decoration:none; padding:14px 20px; width: calc(100% - 40px); margin: 0 20px 12px 20px; background:#027a8d; border-radius:12px; transition:.2s; }
- .sidebar a i{ margin-right:10px; font-size:18px; }
- .sidebar a:hover{ background:#03485f; transform: translateY(-1px); }
- .sidebar a.active{ background:#ff6b35; border:2px solid rgba(255,255,255,0.2); }
- .bottom-menu{ margin-top:auto; width:100%; padding-bottom:20px; display:flex; flex-direction:column; align-items:center; }
- .content{ margin-left:275px; padding:30px; }
+ body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f9; color: #333; }
+ .sidebar { width: 275px; background-color: #025162; color: #ecf0f1; padding-top: 40px; display: flex; flex-direction: column; align-items: center; height: 100vh; transition: width 0.3s, background-color 0.3s, box-shadow 0.3s; position: fixed; top: 0; left: 0; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+ .sidebar .profile-section{ text-align: center; margin-bottom: 20px; transition: margin-bottom 0.3s; }
+ .sidebar .profile-image{ width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; transition: width 0.3s, height 0.3s; }
+ .sidebar a{ display: flex; align-items: center; justify-content: flex-start; color: #ecf0f1; text-decoration: none; padding: 15px 20px; width: calc(100% - 40px); margin-bottom: 15px; background-color: #027a8d; border-radius: 12px; font-size: 16px; transition: background-color 0.3s, padding 0.3s, transform 0.15s ease-in-out; box-sizing: border-box; position: relative; }
+ .sidebar a i{ margin-right: 10px; font-size: 18px; }
+ .sidebar a:hover{ background-color: #03485f; transform: translateY(-1px); }
+ .sidebar a.active{ background-color: #ff6b35; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); border: 2px solid rgba(255, 255, 255, 0.2); }
+ .sidebar a.active:hover{ background-color: #e55a2b; }
+ .sidebar span{ transition: opacity 0.3s ease; }
+ .bottom-menu{ margin-top: auto; width: 100%; padding-bottom: 60px; display: flex; flex-direction: column; align-items: center; }
+ .logout-button{ margin-top: 10px; display: flex; align-items: center; justify-content: center; }
+ .content{ margin-left: 275px; padding: 30px; }
  h1{ color:#025162; margin-bottom: 20px; }
  .pets-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:16px; }
  .pet-card{ background:#fff; border:1px solid #e6e6e6; border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:10px; }
@@ -72,62 +75,33 @@ $conn->close();
  .history-title{ margin-top:16px; margin-bottom:8px; color:#025162; }
  .history-section .empty{ grid-column: 1 / -1; }
  .empty{ background:#fff; border:1px dashed #cfd8dc; color:#607d8b; padding:16px; border-radius:12px; }
- @media(max-width: 992px){ .content{ margin-left:0; } .sidebar{ position: static; height:auto; width:100%; } }
+ @media(max-width: 992px){ 
+     .content{ margin-left:0; } 
+     .sidebar{ 
+         transform: translateX(-100%);
+         transition: transform 0.3s ease;
+     }
+     .sidebar.active {
+         transform: translateX(0);
+     }
+     .mobile-menu-toggle {
+         display: block !important;
+         position: fixed;
+         top: 20px;
+         left: 20px;
+         z-index: 1100;
+         background: #025162;
+         border: none;
+         color: white;
+         width: 40px;
+         height: 40px;
+         border-radius: 50%;
+         font-size: 1.5rem;
+         cursor: pointer;
+         box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+     }
+ }
 </style>
-    <style>
-        /* Override para igualar el diseño del sidebar de la imagen */
-        .sidebar { 
-            width: 275px; 
-            background: linear-gradient(180deg, #025162 0%, #034854 100%);
-            padding-top: 40px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15); 
-        }
-        .profile-section { margin-bottom: 24px; }
-        .sidebar .profile-image { 
-            width: 110px; height: 110px; border-radius: 50%; 
-            border: 3px solid rgba(255,255,255,0.85);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-        }
-        .sidebar a { 
-            background: linear-gradient(180deg, #10919c 0%, #0d7680 100%);
-            padding: 16px 20px; 
-            width: calc(100% - 40px); 
-            margin: 0 20px 18px; 
-            border-radius: 18px; 
-            font-size: 16px; 
-            font-weight: 600;
-            color: #eef9fb; 
-            box-sizing: border-box;
-            display: flex; align-items: center;
-            box-shadow: 0 10px 16px rgba(0,0,0,0.16);
-            border: 1px solid rgba(255,255,255,0.10);
-        }
-        .sidebar a i { margin-right: 12px; font-size: 18px; }
-        .sidebar a:hover { filter: brightness(0.98); transform: translateY(-1px); }
-        .sidebar a.active { 
-            background: linear-gradient(180deg, #ff8652 0%, #ff6b35 100%);
-            color: #ffffff;
-            box-shadow: 0 12px 22px rgba(255, 107, 53, 0.45); 
-            border: 1px solid rgba(255, 255, 255, 0.20); 
-        }
-        .bottom-menu { margin-top: auto; width: 100%; padding: 12px 0 24px; margin-bottom: 72px; }
-        .logout-button { 
-            display: block; 
-            width: calc(100% - 40px); 
-            margin: 0 20px; 
-            box-sizing: border-box;
-            background: linear-gradient(180deg, #10919c 0%, #0d7680 100%);
-            color: #ff6b6b !important; 
-            text-align: center; 
-            padding: 14px 18px; 
-            border-radius: 18px; 
-            box-shadow: 0 10px 16px rgba(0,0,0,0.16);
-            border: 1px solid rgba(255,255,255,0.10);
-        }
-        .logout-button i { color: #ff6b6b !important; }
-        .logout-button:hover { filter: brightness(0.98); }
-        .content { margin-left: 275px; }
-    </style>
 </head>
 <body>
 <!-- Botón de menú móvil -->
@@ -135,19 +109,21 @@ $conn->close();
   <i class='bx bx-menu'></i>
  </button>
 <div class="sidebar" id="sidebar">
-  <div class="profile-section">
-    <img src="logo_perro.jpg" class="profile-image" alt="Usuario">
-  </div>
-  <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
-  <a href="sacar_turno.php"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
-  <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
-  <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
-  <a href="registrar_mascota.php"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
-  <a href="historial_cliente.php" class="active"><i class='bx bx-notepad'></i><span>Historial Clínico</span></a>
-  <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
-  <div class="bottom-menu">
-    <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
-  </div>
+    <div class="profile-section">
+        <img src="logo_perro.jpg" alt="Foto de Usuario" class="profile-image">
+    </div>
+  
+    <a href="client_dashboard.php"><i class='bx bx-home'></i><span>Inicio</span></a>
+    <a href="sacar_turno.php"><i class='bx bx-calendar-plus'></i><span>Sacar Turno</span></a>
+    <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
+    <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
+    <a href="registrar_mascota.php"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
+    <a href="historial_cliente.php" class="active"><i class='bx bx-notepad'></i><span>Historial Clínico</span></a>
+    <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
+
+    <div class="bottom-menu">
+        <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
+    </div>
 </div>
 <div class="content">
   <h1 style="text-align: center;">Historial clínico</h1>
@@ -198,9 +174,12 @@ $conn->close();
 
   if (window.innerWidth <= 992) {
       mobileMenuToggle.style.display = 'block';
+      
       mobileMenuToggle.addEventListener('click', () => {
           sidebar.classList.toggle('active');
       });
+      
+      // Cerrar menú al hacer clic en un enlace
       document.querySelectorAll('.sidebar a').forEach(link => {
           link.addEventListener('click', () => {
               if (window.innerWidth <= 992) {
@@ -209,6 +188,8 @@ $conn->close();
           });
       });
   }
+
+  // Actualizar en caso de cambio de tamaño de ventana
   window.addEventListener('resize', () => {
       if (window.innerWidth > 992) {
           mobileMenuToggle.style.display = 'none';
