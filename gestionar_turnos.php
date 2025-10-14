@@ -26,15 +26,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $cliente_id = (int)($_POST['cliente_id'] ?? 0);
         $mascota_id = (int)($_POST['mascota_id'] ?? 0);
 
-        // Validar hora de 08 a 18
-        $horaObj = new DateTime($hora);
-        $hora_inicio = new DateTime('08:00:00');
-        $hora_fin = new DateTime('18:00:00');
-        $hora_str = $horaObj->format('H:i:s');
-        if ($hora_str < $hora_inicio->format('H:i:s') || $hora_str > $hora_fin->format('H:i:s')) {
-            $message = "La hora debe estar entre 08:00 y 18:00.";
+        // Validar que la fecha no sea pasada
+        $fechaObj = new DateTime($fecha);
+        $fechaObj->setTime(0, 0, 0);
+        $hoy = new DateTime();
+        $hoy->setTime(0, 0, 0);
+        
+        if ($fechaObj < $hoy) {
+            $message = "No se pueden crear turnos para fechas pasadas.";
             $message_type = "error";
         } else {
+            // Validar hora de 08 a 18
+            $horaObj = new DateTime($hora);
+            $hora_inicio = new DateTime('08:00:00');
+            $hora_fin = new DateTime('18:00:00');
+            $hora_str = $horaObj->format('H:i:s');
+            if ($hora_str < $hora_inicio->format('H:i:s') || $hora_str > $hora_fin->format('H:i:s')) {
+                $message = "La hora debe estar entre 08:00 y 18:00.";
+                $message_type = "error";
+            } else {
             // Chequear duplicado
             $stmt = $mysqli->prepare("SELECT COUNT(*) FROM turnos WHERE fecha = ? AND hora = ? AND tipo_servicio = ? AND user_id = ? AND mascota_id = ?");
             $stmt->bind_param('sssii', $fecha, $hora_str, $tipo_servicio, $cliente_id, $mascota_id);
@@ -50,8 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($stmt) {
                     $stmt->bind_param('sssii', $fecha, $hora_str, $tipo_servicio, $cliente_id, $mascota_id);
                     if ($stmt->execute()) {
-                        $message = "Turno creado correctamente.";
-                        $message_type = "success";
+                        header("Location: gestionar_turnos.php?success=2");
+                        exit();
                     } else {
                         $message = "Error creando el turno: " . $mysqli->error;
                         $message_type = "error";
@@ -63,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
         }
+        }
     }
 
     if (isset($_POST['edit'])) {
@@ -71,20 +82,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hora = $_POST['hora'];
         $tipo_servicio = $_POST['tipo_servicio'];
         
-       
-        $hora = new DateTime($hora);
-        $hora_inicio = new DateTime('08:00:00');
-        $hora_fin = new DateTime('18:00:00');
+        // Validar que la fecha no sea pasada
+        $fechaObj = new DateTime($fecha);
+        $fechaObj->setTime(0, 0, 0);
+        $hoy = new DateTime();
+        $hoy->setTime(0, 0, 0);
         
-       
-        $hora_str = $hora->format('H:i:s');
-        $hora_inicio_str = $hora_inicio->format('H:i:s');
-        $hora_fin_str = $hora_fin->format('H:i:s');
-        
-        if ($hora_str < $hora_inicio_str || $hora_str > $hora_fin_str) {
-            $message = "La hora debe estar entre 08:00 y 18:00.";
+        if ($fechaObj < $hoy) {
+            $message = "No se pueden editar turnos para fechas pasadas.";
             $message_type = "error";
         } else {
+            $hora = new DateTime($hora);
+            $hora_inicio = new DateTime('08:00:00');
+            $hora_fin = new DateTime('18:00:00');
+            
+           
+            $hora_str = $hora->format('H:i:s');
+            $hora_inicio_str = $hora_inicio->format('H:i:s');
+            $hora_fin_str = $hora_fin->format('H:i:s');
+            
+            if ($hora_str < $hora_inicio_str || $hora_str > $hora_fin_str) {
+                $message = "La hora debe estar entre 08:00 y 18:00.";
+                $message_type = "error";
+            } else {
 
             $stmt = $mysqli->prepare("SELECT COUNT(*) FROM turnos WHERE fecha=? AND hora=? AND tipo_servicio=? AND id != ?");
             $stmt->bind_param('sssi', $fecha, $hora_str, $tipo_servicio, $id);
@@ -97,17 +117,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $message = "Ya existe un turno con la misma fecha, hora y servicio.";
                 $message_type = "error";
             } else {
-                $stmt = $mysqli->prepare("UPDATE turnos SET fecha=?, hora=?, tipo_servicio=? WHERE id=?");
+                $stmt = $mysqli->prepare("UPDATE turnos SET fecha=?, hora=?, tipo_servicio=?, estado='Pendiente' WHERE id=?");
                 $stmt->bind_param('sssi', $fecha, $hora_str, $tipo_servicio, $id);
                 if ($stmt->execute()) {
-                    $message = "Turno actualizado correctamente.";
-                    $message_type = "success";
+                    header("Location: gestionar_turnos.php?success=1");
+                    exit();
                 } else {
                     $message = "Error actualizando el turno: " . $mysqli->error;
                     $message_type = "error";
                 }
                 $stmt->close();
             }
+        }
         }
     }
 
@@ -118,8 +139,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt) {
             $stmt->bind_param('i', $id);
             if ($stmt->execute()) {
-                $message = "Turno eliminado correctamente.";
-                $message_type = "success";
+                header("Location: gestionar_turnos.php?success=3");
+                exit();
             } else {
                 $message = "Error eliminando el turno: " . $mysqli->error;
                 $message_type = "error";
@@ -131,28 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // Reasignación de turno entre veterinarios (requiere columna doctor_id en turnos)
-    if (isset($_POST['reassign'])) {
-        $id = (int)($_POST['id'] ?? 0);
-        $doctor_id = (int)($_POST['doctor_id'] ?? 0);
-        if ($id > 0 && $doctor_id > 0) {
-            $stmt = $mysqli->prepare("UPDATE turnos SET doctor_id=? WHERE id=?");
-            if ($stmt) {
-                $stmt->bind_param('ii', $doctor_id, $id);
-                if ($stmt->execute()) {
-                    $message = "Turno reasignado correctamente.";
-                    $message_type = "success";
-                } else {
-                    $message = "No se pudo reasignar el turno. Verifique que exista la columna doctor_id en la tabla turnos.";
-                    $message_type = "error";
-                }
-                $stmt->close();
-            } else {
-                $message = "No se pudo preparar la reasignación. Es posible que la columna doctor_id no exista.";
-                $message_type = "error";
-            }
-        }
-    }
+    // (Reasignar eliminado por solicitud del usuario)
 }
 
 // Auto-completar: cualquier turno 'pendiente' en el pasado pasa a 'completado'
@@ -347,6 +347,15 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
             background-color: #026a80;
         }
 
+        .button-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .button-danger:hover {
+            background-color: #c82333;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -481,7 +490,7 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
     </div>
 
     <div class="content">
-        <h1>Panel de Usuario</h1>
+        <h1>Gestión de turnos</h1>
         
         <?php if ($message != ""): ?>
             <div class="message <?php echo $message_type; ?>">
@@ -490,8 +499,7 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
         <?php endif; ?>
 
         <div class="container">
-            <h2>Gestión de turnos</h2>
-            <p>Ver, crear, modificar o cancelar turnos. Reasignar turnos entre veterinarios.</p>
+            <p>Ver, crear, modificar o cancelar turnos.</p>
             <button class="button" onclick="openCreateModal()">Crear Turno</button>
             <table>
                 <thead>
@@ -516,8 +524,8 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                             <td><?php echo isset($row['estado']) ? htmlspecialchars($row['estado']) : 'pendiente'; ?></td>
                             <td>
                                 <button class="button" onclick="openEditModal(<?php echo $row['id']; ?>)">Editar</button>
-                                <button class="button" onclick="confirmDelete(<?php echo $row['id']; ?>)">Cancelar</button>
-                                <button class="button" onclick="openReassignModal(<?php echo $row['id']; ?>)">Reasignar</button>
+                                
+                                <button class="button button-danger" onclick="confirmDelete(<?php echo $row['id']; ?>)">Cancelar</button>
                             </td>
                         </tr>
                     <?php endwhile; ?>
@@ -535,7 +543,7 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                 <input type="hidden" id="editId" name="id">
                 <div class="modal-body">
                     <label for="editFecha">Fecha:</label>
-                    <input type="date" id="editFecha" name="fecha" required>
+                    <input type="date" id="editFecha" name="fecha" required min="<?php echo date('Y-m-d'); ?>">
 
                     <label for="editTipoServicio">Tipo de Servicio:</label>
                     <select id="editTipoServicio" name="tipo_servicio" required>
@@ -553,8 +561,9 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                     <small class="text-muted">Los horarios disponibles se actualizan según el servicio seleccionado</small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" onclick="closeEditModal()" class="close-button">Cancelar</button>
-                    <button type="submit" name="edit" class="save-button">Guardar Cambios</button>
+                <button type="submit" name="edit" class="save-button">Guardar Cambios</button>
+                <button type="button" onclick="closeEditModal()" class="close-button">Cancelar</button>
+                  
                 </div>
             </form>
         </div>
@@ -569,11 +578,11 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                 <p>¿Estás seguro de que deseas cancelar este turno?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" onclick="closeDeleteConfirmModal()" class="close-button">Cancelar</button>
                 <form method="POST">
                     <input type="hidden" id="deleteId" name="confirm_delete">
                     <button type="submit" class="save-button">Confirmar</button>
                 </form>
+                <button type="button" onclick="closeDeleteConfirmModal()" class="close-button">Cancelar</button>
             </div>
         </div>
     </div>
@@ -587,7 +596,7 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
             <form method="POST">
                 <div class="modal-body">
                     <label for="createFecha">Fecha:</label>
-                    <input type="date" id="createFecha" name="fecha" required>
+                    <input type="date" id="createFecha" name="fecha" required min="<?php echo date('Y-m-d'); ?>">
 
                     <label for="createTipoServicio">Tipo de Servicio:</label>
                     <select id="createTipoServicio" name="tipo_servicio" required>
@@ -618,37 +627,14 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" onclick="closeCreateModal()" class="close-button">Cancelar</button>
                     <button type="submit" name="create" class="save-button">Crear</button>
+                    <button type="button" onclick="closeCreateModal()" class="close-button">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Reasignar Turno -->
-    <div id="reassignModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Reasignar Turno</h2>
-            </div>
-            <form method="POST">
-                <input type="hidden" id="reassignId" name="id">
-                <div class="modal-body">
-                    <label for="reassignDoctor">Veterinario:</label>
-                    <select id="reassignDoctor" name="doctor_id" required>
-                        <option value="">Seleccione un veterinario</option>
-                        <?php if ($doctores) { while($d = $doctores->fetch_assoc()) { ?>
-                            <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['nombre_usuario']) ?></option>
-                        <?php } } ?>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" onclick="closeReassignModal()" class="close-button">Cancelar</button>
-                    <button type="submit" name="reassign" class="save-button">Reasignar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -702,14 +688,7 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
             document.getElementById('createModal').style.display = 'none';
         }
 
-        function openReassignModal(id) {
-            document.getElementById('reassignId').value = id;
-            document.getElementById('reassignModal').style.display = 'block';
-        }
-
-        function closeReassignModal() {
-            document.getElementById('reassignModal').style.display = 'none';
-        }
+        
 
         // Configuración de horarios según el tipo de servicio (como en la parte de usuario)
         const serviceTimeSlots = {
@@ -733,6 +712,20 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                 const opt = document.createElement('option');
                 opt.value = '';
                 opt.textContent = 'Selecciona el horario';
+                timeSelect.appendChild(opt);
+                return;
+            }
+
+            // Validar que la fecha no sea pasada
+            const fechaSeleccionada = new Date(fecha + 'T00:00:00');
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            if (fechaSeleccionada < hoy) {
+                timeSelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No se pueden crear turnos para fechas pasadas';
                 timeSelect.appendChild(opt);
                 return;
             }
@@ -793,6 +786,20 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                 timeSelect.appendChild(opt);
                 return;
             }
+
+            // Validar que la fecha no sea pasada
+            const fechaSeleccionada = new Date(fecha + 'T00:00:00');
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            if (fechaSeleccionada < hoy) {
+                timeSelect.disabled = true;
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No se pueden editar turnos para fechas pasadas';
+                timeSelect.appendChild(opt);
+                return;
+            }
             const interval = serviceTimeSlots[serviceType] || 30;
             timeSelect.disabled = false;
             const slots = [];
@@ -821,11 +828,93 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
 
         // Fecha mínima hoy y eventos
         document.addEventListener('DOMContentLoaded', function() {
+            // Detectar parámetros de éxito y mostrar SweetAlert2
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            
+            if (success) {
+                let title, text, icon;
+                switch(success) {
+                    case '1':
+                        title = '¡Éxito!';
+                        text = 'Turno actualizado correctamente.';
+                        icon = 'success';
+                        break;
+                    case '2':
+                        title = '¡Éxito!';
+                        text = 'Turno creado correctamente.';
+                        icon = 'success';
+                        break;
+                    case '3':
+                        title = '¡Éxito!';
+                        text = 'Turno eliminado correctamente.';
+                        icon = 'success';
+                        break;
+                    
+                }
+                
+                if (title) {
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: icon,
+                        confirmButtonText: 'Entendido'
+                    });
+                    
+                    // Limpiar la URL para evitar que se muestre de nuevo al recargar
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+                }
+            }
             const fechaInput = document.getElementById('createFecha');
             if (fechaInput) {
                 const hoy = new Date().toISOString().split('T')[0];
                 fechaInput.min = hoy;
                 if (!fechaInput.value) fechaInput.value = hoy;
+            }
+
+            // Validación antes de enviar formulario de creación
+            const createForm = document.querySelector('form[method="POST"]');
+            if (createForm) {
+                createForm.addEventListener('submit', function(e) {
+                    const fecha = document.getElementById('createFecha').value;
+                    const fechaSeleccionada = new Date(fecha + 'T00:00:00');
+                    const hoy = new Date();
+                    hoy.setHours(0, 0, 0, 0);
+                    
+                    if (fechaSeleccionada < hoy) {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pueden crear turnos para fechas pasadas.',
+                            icon: 'error',
+                            confirmButtonText: 'Entendido'
+                        });
+                        return false;
+                    }
+                });
+            }
+
+            // Validación antes de enviar formulario de edición
+            const editForm = document.querySelector('form input[name="edit"]')?.closest('form');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    const fecha = document.getElementById('editFecha').value;
+                    const fechaSeleccionada = new Date(fecha + 'T00:00:00');
+                    const hoy = new Date();
+                    hoy.setHours(0, 0, 0, 0);
+                    
+                    if (fechaSeleccionada < hoy) {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pueden editar turnos para fechas pasadas.',
+                            icon: 'error',
+                            confirmButtonText: 'Entendido'
+                        });
+                        return false;
+                    }
+                });
             }
             const tipoSelect = document.getElementById('createTipoServicio');
             if (tipoSelect) {
@@ -884,6 +973,8 @@ $mascotas = $mysqli->query("SELECT id, nombre FROM mascotas ORDER BY nombre ASC"
                     }
                 });
             }
+
+            
         });
 
         // Confirmación para cerrar sesión

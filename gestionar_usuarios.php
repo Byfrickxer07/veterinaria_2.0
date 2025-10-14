@@ -48,20 +48,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $rol = sanitize($_POST["rol"]);
 
         // Validaciones
-        if ($nombre_usuario === '' || strlen($nombre_usuario) < 2) {
-            $alertMessage = "El nombre de usuario debe tener al menos 2 caracteres.";
+        if ($nombre_usuario === '' || strlen($nombre_usuario) < 4) {
+            $alertMessage = "El nombre de usuario debe tener al menos 4 caracteres.";
+        } elseif (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/u', $nombre_usuario)) {
+            $alertMessage = "El nombre de usuario solo puede contener letras y espacios.";
+        } elseif (strlen($nombre_usuario) > 50) {
+            $alertMessage = "El nombre de usuario no puede superar 50 caracteres.";
         } elseif ($apellido === '' || strlen($apellido) < 2) {
             $alertMessage = "El apellido debe tener al menos 2 caracteres.";
+        } elseif (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/u', $apellido)) {
+            $alertMessage = "El apellido solo puede contener letras y espacios.";
+        } elseif (strlen($apellido) > 50) {
+            $alertMessage = "El apellido no puede superar 50 caracteres.";
         } elseif (!filter_var($correo_electronico, FILTER_VALIDATE_EMAIL)) {
             $alertMessage = "Correo electrónico no válido.";
         } elseif (strlen($contrasena) < 8 || !preg_match('/[A-Z]/', $contrasena) || !preg_match('/\d/', $contrasena)) {
             $alertMessage = "La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.";
         } elseif ($dni !== '' && !preg_match('/^\d+$/', $dni)) {
             $alertMessage = "El DNI solo puede contener números.";
+        } elseif ($dni !== '' && strlen($dni) !== 8) {
+            $alertMessage = "El DNI debe tener exactamente 8 dígitos.";
         } elseif ($telefono !== '' && !preg_match('/^\d+$/', $telefono)) {
             $alertMessage = "El teléfono solo puede contener números.";
-        } elseif (strlen($dni) > 15 || strlen($telefono) > 15) {
-            $alertMessage = "El DNI y el teléfono no pueden superar 15 dígitos.";
+        } elseif ($telefono !== '' && strlen($telefono) !== 10) {
+            $alertMessage = "El teléfono debe tener exactamente 10 dígitos.";
         } elseif (!in_array($rol, ['doctor','cliente','admin'])) {
             $alertMessage = "Rol inválido.";
         } else {
@@ -120,18 +130,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $dni = sanitize($_POST["dni"]);
         $rol = sanitize($_POST["rol"]);
 
-        if ($nombre_usuario === '' || strlen($nombre_usuario) < 2) {
-            $alertMessage = "El nombre de usuario debe tener al menos 2 caracteres.";
+        if ($nombre_usuario === '' || strlen($nombre_usuario) < 4) {
+            $alertMessage = "El nombre de usuario debe tener al menos 4 caracteres.";
+        } elseif (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/u', $nombre_usuario)) {
+            $alertMessage = "El nombre de usuario solo puede contener letras y espacios.";
+        } elseif (strlen($nombre_usuario) > 50) {
+            $alertMessage = "El nombre de usuario no puede superar 50 caracteres.";
         } elseif (!filter_var($correo_electronico, FILTER_VALIDATE_EMAIL)) {
             $alertMessage = "Correo electrónico no válido.";
         } elseif ($apellido === '' || strlen($apellido) < 2) {
             $alertMessage = "El apellido debe tener al menos 2 caracteres.";
+        } elseif (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/u', $apellido)) {
+            $alertMessage = "El apellido solo puede contener letras y espacios.";
+        } elseif (strlen($apellido) > 50) {
+            $alertMessage = "El apellido no puede superar 50 caracteres.";
         } elseif ($dni !== '' && !preg_match('/^\d+$/', $dni)) {
             $alertMessage = "El DNI solo puede contener números.";
+        } elseif ($dni !== '' && strlen($dni) !== 8) {
+            $alertMessage = "El DNI debe tener exactamente 8 dígitos.";
         } elseif ($telefono !== '' && !preg_match('/^\d+$/', $telefono)) {
             $alertMessage = "El teléfono solo puede contener números.";
-        } elseif (strlen($dni) > 15 || strlen($telefono) > 15) {
-            $alertMessage = "El DNI y el teléfono no pueden superar 15 dígitos.";
+        } elseif ($telefono !== '' && strlen($telefono) !== 10) {
+            $alertMessage = "El teléfono debe tener exactamente 10 dígitos.";
         } elseif (!in_array($rol, ['doctor','cliente','admin'])) {
             $alertMessage = "Rol inválido.";
         } else {
@@ -471,6 +491,16 @@ $result = $conn->query($sql);
             transform: translateY(-1px);
         }
 
+        .button-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .button-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -491,32 +521,62 @@ $result = $conn->query($sql);
             padding: 0;
             border: none;
             width: 92%;
-            max-width: 620px;
-            border-radius: 18px;
+            max-width: 650px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 30px 70px rgba(2,122,141,0.22);
+            box-shadow: 0 30px 70px rgba(2,122,141,0.25);
             transform: translateY(10px);
-            animation: modalIn .25s ease-out;
+            animation: modalIn .3s ease-out;
         }
 
         @keyframes modalIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0);} }
 
         .modal-header {
-            padding: 16px 20px;
+            padding: 20px 25px;
             background: linear-gradient(135deg,#027a8d,#035c6b);
             color: white;
-            display:flex; align-items:center; justify-content:space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .modal-close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
         }
 
         .modal-body {
-            padding: 20px;
+            padding: 30px;
+            background: #fafbfc;
         }
 
         /* Inputs y selects más amigables en los modales */
         .modal-body label {
             display: block;
-            margin: 10px 0 6px;
+            margin: 15px 0 8px;
             font-weight: 600;
+            color: #374151;
+            font-size: 14px;
         }
 
         .modal-body input[type="text"],
@@ -524,18 +584,40 @@ $result = $conn->query($sql);
         .modal-body input[type="password"],
         .modal-body select {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccd4dd;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
             border-radius: 12px;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.2s ease;
+            background: #fff;
+            font-size: 14px;
+            color: #374151;
         }
 
         .modal-body input:focus,
         .modal-body select:focus {
             border-color: #027a8d;
-            box-shadow: 0 0 0 3px rgba(2, 122, 141, 0.15);
+            box-shadow: 0 0 0 4px rgba(2, 122, 141, 0.1);
+            background: #fff;
+        }
+
+        .modal-body input:hover,
+        .modal-body select:hover {
+            border-color: #9ca3af;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
         }
 
         .modal-footer {
@@ -603,7 +685,7 @@ $result = $conn->query($sql);
                         <td><?= $row["rol"] ?></td>
                         <td>
                             <button class="button" onclick="openEditModal(<?= $row['id'] ?>, '<?= htmlspecialchars($row['nombre_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['apellido'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['correo_electronico'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['telefono'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['dni'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['rol'], ENT_QUOTES) ?>')">Editar</button>
-                            <button class="button" onclick="openDeleteModal(<?= $row['id'] ?>)">Eliminar</button>
+                            <button class="button button-danger" onclick="openDeleteModal(<?= $row['id'] ?>)">Eliminar</button>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -619,29 +701,52 @@ $result = $conn->query($sql);
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="close" onclick="closeEditModal()">&times;</span>
                 <h2>Editar Usuario</h2>
+                <button class="modal-close-btn" onclick="closeEditModal()">Cerrar</button>
             </div>
             <div class="modal-body">
                 <form id="editForm" method="post">
                     <input type="hidden" name="id" id="editId">
-                    <label for="editNombreUsuario">Nombre de Usuario:</label>
-                    <input type="text" id="editNombreUsuario" name="nombre_usuario" required>
-                    <label for="editApellido">Apellido:</label>
-                    <input type="text" id="editApellido" name="apellido" required>
-                    <label for="editCorreoElectronico">Correo Electrónico:</label>
-                    <input type="email" id="editCorreoElectronico" name="correo_electronico" required>
-                    <label for="editTelefono">Teléfono:</label>
-                    <input type="text" id="editTelefono" name="telefono" maxlength="15">
-                    <label for="editDNI">DNI:</label>
-                    <input type="text" id="editDNI" name="dni" maxlength="15">
-                    <label for="editRol">Rol:</label>
-                    <select id="editRol" name="rol" required>
-                        <option value="doctor">Doctor</option>
-                        <option value="cliente">Cliente</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                    <input type="submit" name="edit" value="Actualizar" class="button">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editNombreUsuario">Nombre de Usuario:</label>
+                            <input type="text" id="editNombreUsuario" name="nombre_usuario" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editApellido">Apellido:</label>
+                            <input type="text" id="editApellido" name="apellido" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editCorreoElectronico">Correo Electrónico:</label>
+                        <input type="email" id="editCorreoElectronico" name="correo_electronico" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTelefono">Teléfono:</label>
+                            <input type="text" id="editTelefono" name="telefono" maxlength="10" pattern="[0-9]{10}" title="El teléfono debe tener exactamente 10 dígitos">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDNI">DNI:</label>
+                            <input type="text" id="editDNI" name="dni" maxlength="8" pattern="[0-9]{8}" title="El DNI debe tener exactamente 8 dígitos">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editRol">Rol:</label>
+                        <select id="editRol" name="rol" required>
+                            <option value="doctor">Doctor</option>
+                            <option value="cliente">Cliente</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 25px;">
+                        <input type="submit" name="edit" value="Actualizar Usuario" class="button" style="padding: 12px 30px; font-size: 16px; font-weight: 600;">
+                    </div>
                 </form>
             </div>
         </div>
@@ -651,16 +756,18 @@ $result = $conn->query($sql);
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="close" onclick="closeDeleteModal()">&times;</span>
                 <h2>Eliminar Usuario</h2>
+                <button class="modal-close-btn" onclick="closeDeleteModal()">Cerrar</button>
             </div>
             <div class="modal-body">
-                <p>¿Estás seguro de que deseas eliminar este usuario?</p>
-                <form id="deleteForm" method="post">
-                    <input type="hidden" name="confirm_delete" id="deleteId">
-                    <input type="submit" value="Eliminar" class="button">
-                </form>
-                <button class="button" onclick="closeDeleteModal()">Cancelar</button>
+                <div style="text-align: center; padding: 20px 0;">
+                    <p style="font-size: 16px; color: #374151; margin-bottom: 25px;">¿Estás seguro de que deseas eliminar este usuario?</p>
+                    <form id="deleteForm" method="post" style="display: inline-block;">
+                        <input type="hidden" name="confirm_delete" id="deleteId">
+                        <input type="submit" value="Eliminar" class="button button-danger" style="margin-right: 10px;">
+                    </form>
+                    <button class="button" onclick="closeDeleteModal()">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -669,30 +776,55 @@ $result = $conn->query($sql);
     <div id="createModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="close" onclick="closeCreateModal()">&times;</span>
                 <h2>Crear Usuario</h2>
+                <button class="modal-close-btn" onclick="closeCreateModal()">Cerrar</button>
             </div>
             <div class="modal-body">
                 <form id="createForm" method="post">
-                    <label for="createNombreUsuario">Nombre de Usuario:</label>
-                    <input type="text" id="createNombreUsuario" name="nombre_usuario" required>
-                    <label for="createApellido">Apellido:</label>
-                    <input type="text" id="createApellido" name="apellido" required>
-                    <label for="createCorreoElectronico">Correo Electrónico:</label>
-                    <input type="email" id="createCorreoElectronico" name="correo_electronico" required>
-                    <label for="createContrasena">Contraseña:</label>
-                    <input type="password" id="createContrasena" name="contrasena" required>
-                    <label for="createTelefono">Teléfono:</label>
-                    <input type="text" id="createTelefono" name="telefono" maxlength="15">
-                    <label for="createDNI">DNI:</label>
-                    <input type="text" id="createDNI" name="dni" maxlength="15">
-                    <label for="createRol">Rol:</label>
-                    <select id="createRol" name="rol" required>
-                        <option value="doctor">Doctor</option>
-                        <option value="cliente">Cliente</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                    <input type="submit" name="create" value="Crear" class="button">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="createNombreUsuario">Nombre de Usuario:</label>
+                            <input type="text" id="createNombreUsuario" name="nombre_usuario" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="createApellido">Apellido:</label>
+                            <input type="text" id="createApellido" name="apellido" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="createCorreoElectronico">Correo Electrónico:</label>
+                        <input type="email" id="createCorreoElectronico" name="correo_electronico" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="createContrasena">Contraseña:</label>
+                        <input type="password" id="createContrasena" name="contrasena" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="createTelefono">Teléfono:</label>
+                            <input type="text" id="createTelefono" name="telefono" maxlength="10" pattern="[0-9]{10}" title="El teléfono debe tener exactamente 10 dígitos">
+                        </div>
+                        <div class="form-group">
+                            <label for="createDNI">DNI:</label>
+                            <input type="text" id="createDNI" name="dni" maxlength="8" pattern="[0-9]{8}" title="El DNI debe tener exactamente 8 dígitos">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="createRol">Rol:</label>
+                        <select id="createRol" name="rol" required>
+                            <option value="doctor">Doctor</option>
+                            <option value="cliente">Cliente</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 25px;">
+                        <input type="submit" name="create" value="Crear Usuario" class="button" style="padding: 12px 30px; font-size: 16px; font-weight: 600;">
+                    </div>
                 </form>
             </div>
         </div>
@@ -733,6 +865,105 @@ $result = $conn->query($sql);
         function closeCreateModal() {
             document.getElementById('createModal').style.display = 'none';
         }
+
+        // Validaciones del lado del cliente
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            const nombreUsuario = form.querySelector('input[name="nombre_usuario"]').value.trim();
+            const apellido = form.querySelector('input[name="apellido"]').value.trim();
+            const telefono = form.querySelector('input[name="telefono"]').value.trim();
+            const dni = form.querySelector('input[name="dni"]').value.trim();
+            
+            // Validar nombre de usuario
+            if (nombreUsuario.length < 4) {
+                Swal.fire('Error', 'El nombre de usuario debe tener al menos 4 caracteres.', 'error');
+                return false;
+            }
+            if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/u.test(nombreUsuario)) {
+                Swal.fire('Error', 'El nombre de usuario solo puede contener letras y espacios.', 'error');
+                return false;
+            }
+            if (nombreUsuario.length > 50) {
+                Swal.fire('Error', 'El nombre de usuario no puede superar 50 caracteres.', 'error');
+                return false;
+            }
+            
+            // Validar apellido
+            if (apellido.length < 2) {
+                Swal.fire('Error', 'El apellido debe tener al menos 2 caracteres.', 'error');
+                return false;
+            }
+            if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/u.test(apellido)) {
+                Swal.fire('Error', 'El apellido solo puede contener letras y espacios.', 'error');
+                return false;
+            }
+            if (apellido.length > 50) {
+                Swal.fire('Error', 'El apellido no puede superar 50 caracteres.', 'error');
+                return false;
+            }
+            
+            // Validar teléfono
+            if (telefono !== '' && !/^\d{10}$/.test(telefono)) {
+                Swal.fire('Error', 'El teléfono debe tener exactamente 10 dígitos.', 'error');
+                return false;
+            }
+            
+            // Validar DNI
+            if (dni !== '' && !/^\d{8}$/.test(dni)) {
+                Swal.fire('Error', 'El DNI debe tener exactamente 8 dígitos.', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Agregar validación a los formularios
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            if (!validateForm('editForm')) {
+                e.preventDefault();
+            }
+        });
+        
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            if (!validateForm('createForm')) {
+                e.preventDefault();
+            }
+        });
+        
+        // Restricciones en tiempo real para teléfono y DNI
+        document.querySelectorAll('input[name="telefono"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                // Solo permitir números
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                // Limitar a 10 dígitos
+                if (e.target.value.length > 10) {
+                    e.target.value = e.target.value.substring(0, 10);
+                }
+            });
+        });
+        
+        document.querySelectorAll('input[name="dni"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                // Solo permitir números
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                // Limitar a 8 dígitos
+                if (e.target.value.length > 8) {
+                    e.target.value = e.target.value.substring(0, 8);
+                }
+            });
+        });
+        
+        // Restricciones para nombres (solo letras y espacios)
+        document.querySelectorAll('input[name="nombre_usuario"], input[name="apellido"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                // Solo permitir letras, espacios y caracteres especiales del español
+                e.target.value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, '');
+                // Limitar longitud
+                if (e.target.value.length > 50) {
+                    e.target.value = e.target.value.substring(0, 50);
+                }
+            });
+        });
 
         // Confirmación para cerrar sesión
         document.getElementById('logout-button').addEventListener('click', (e) => {

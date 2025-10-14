@@ -20,6 +20,14 @@ try {
                               AND (fecha < CURDATE() OR (fecha = CURDATE() AND hora < CURTIME()))");
     $auto->execute([':uid' => $user_id]);
 
+    // Corregir turnos con fechas futuras que estén marcados como 'Terminado' (estado inválido)
+    $corregir = $conn->prepare("UPDATE turnos 
+                                SET estado = 'Pendiente'
+                                WHERE user_id = :uid
+                                  AND estado = 'Terminado'
+                                  AND (fecha > CURDATE() OR (fecha = CURDATE() AND hora > CURTIME()))");
+    $corregir->execute([':uid' => $user_id]);
+
     // Manejo de acciones POST: editar/eliminar turno
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'], $_POST['id'])) {
         $accion = $_POST['accion'];
@@ -44,17 +52,33 @@ try {
                 exit();
             }
 
+            // Validar que no se pueda editar a una fecha pasada
+            $fechaActual = date('Y-m-d');
+            if ($fecha < $fechaActual) {
+                header("Location: ver_turnos.php?error=fecha_pasada");
+                exit();
+            }
+
+            // Validar que no se pueda editar a una fecha/hora pasada (mismo día)
+            if ($fecha === $fechaActual) {
+                $horaActual = date('H:i');
+                if ($hora < $horaActual) {
+                    header("Location: ver_turnos.php?error=hora_pasada");
+                    exit();
+                }
+            }
+
             // Evitar doble reserva: si existe otro turno pendiente mismo dia/hora/servicio
             $chk = $conn->prepare("SELECT COUNT(*) FROM turnos WHERE id <> :id AND fecha = :fecha AND hora = :hora AND tipo_servicio = :serv AND estado = 'Pendiente'");
             $chk->execute([':id'=>$id, ':fecha'=>$fecha, ':hora'=>$hora, ':serv'=>$tipo_servicio]);
             if ((int)$chk->fetchColumn() > 0) {
-                header("Location: ver_turnos.php");
+                header("Location: ver_turnos.php?error=horario_ocupado");
                 exit();
             }
 
             $upd = $conn->prepare("UPDATE turnos SET fecha = :fecha, hora = :hora, tipo_servicio = :serv WHERE id = :id AND user_id = :uid");
             $upd->execute([':fecha' => $fecha, ':hora' => $hora, ':serv' => $tipo_servicio, ':id' => $id, ':uid' => $user_id]);
-            header("Location: ver_turnos.php");
+            header("Location: ver_turnos.php?success=editado");
             exit();
         }
     }
@@ -239,15 +263,23 @@ try {
             background-color: #f1f1f1;
         }
         .status-pending {
-            color: red;
+            color: #dc2626;
             font-weight: bold;
         }
         .status-completed {
-            color: green;
+            color: #16a34a;
             font-weight: bold;
         }
+        .status-terminado {
+            color: #dc2626;
+            font-weight: bold;
+            background-color: #fee2e2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #fecaca;
+        }
         .status-lost {
-            color: gray;
+            color: #6b7280;
             font-weight: bold;
         }
         .action-btn {
@@ -296,6 +328,8 @@ try {
         .cal-turnos { margin-top:8px; display:flex; flex-direction:column; gap:8px; max-height:88px; overflow-y:auto; }
         .cal-turno { font-size:12px; background:#e6f7ff; color:#055b7d; padding:7px 9px; border-radius:10px; cursor:pointer; border:1px solid #cbefff; transition:.15s ease; }
         .cal-turno:hover { background:#dff3ff; transform: translateY(-1px); }
+        .cal-turno.terminado { background:#fee2e2; color:#dc2626; border:1px solid #fecaca; cursor:not-allowed; opacity:0.7; }
+        .cal-turno.terminado:hover { background:#fee2e2; transform:none; }
         .cal-more { font-size:12px; color:#6b7280; text-align:center; }
         .cal-add-btn { margin-left:auto; background:#e6fffa; color:#047857; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; }
         .cal-top { display:flex; align-items:center; gap:6px; justify-content:space-between; }
@@ -383,6 +417,36 @@ try {
 
 <div class="content">
     <h1>Mis Turnos</h1>
+    
+    <?php
+    // Mostrar mensajes de éxito y error
+    if (isset($_GET['success']) && $_GET['success'] === 'editado') {
+        echo '<div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #c3e6cb;">
+                <strong>¡Éxito!</strong> El turno ha sido actualizado correctamente.
+              </div>';
+    }
+    
+    if (isset($_GET['error'])) {
+        $mensaje = '';
+        switch ($_GET['error']) {
+            case 'fecha_pasada':
+                $mensaje = 'No se pueden editar turnos a fechas pasadas.';
+                break;
+            case 'hora_pasada':
+                $mensaje = 'No se pueden editar turnos a horas pasadas para el día actual.';
+                break;
+            case 'horario_ocupado':
+                $mensaje = 'El horario seleccionado ya está ocupado. Por favor elige otro horario.';
+                break;
+            default:
+                $mensaje = 'Ha ocurrido un error al procesar la solicitud.';
+        }
+        
+        echo '<div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #f5c6cb;">
+                <strong>Error:</strong> ' . htmlspecialchars($mensaje) . '
+              </div>';
+    }
+    ?>
 
     <!-- Calendario de Turnos (solo visualización) -->
     <div class="cal-container" id="calendario">
@@ -408,6 +472,11 @@ try {
         <div class="cal-grid" id="cal-grid"></div>
     </div>
 
+    <!-- Lista de Turnos -->
+    
+        
+    </div>
+
     <!-- Modal: editar / eliminar turno -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -421,7 +490,8 @@ try {
                 <div class="modal-body">
                     <div>
                         <label><strong>Fecha</strong></label>
-                        <input type="date" name="fecha" id="form-fecha" class="btn-secondary" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d1d5db;">
+                        <input type="date" name="fecha" id="form-fecha" class="btn-secondary" style="width:100%;padding:10px;border-radius:10px;border:1px solid #d1d5db;" min="<?php echo date('Y-m-d'); ?>">
+                        <div style="font-size:12px;color:#6b7280;margin-top:6px;">No se pueden seleccionar fechas pasadas.</div>
                     </div>
                     <div>
                         <label><strong>Hora</strong></label>
@@ -440,9 +510,8 @@ try {
                     <div id="form-detalles" style="font-size:14px;color:#374151"></div>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-danger" id="btn-eliminar">Eliminar</button>
-                    <button type="button" class="btn btn-secondary" id="modal-cancel">Cancelar</button>
                     <button type="submit" class="btn btn-primary" id="btn-guardar">Guardar cambios</button>
+                    <button type="button" class="btn btn-danger" id="btn-eliminar">Eliminar</button>
                 </div>
             </form>
         </div>
@@ -568,8 +637,27 @@ try {
             items.slice(0,2).forEach(t => {
                 const pill = document.createElement('div');
                 pill.className = 'cal-turno';
+                
+                // Verificar si la fecha es futura
+                const fechaTurno = new Date(k);
+                const fechaActual = new Date();
+                fechaActual.setHours(0, 0, 0, 0);
+                const esFechaFutura = fechaTurno > fechaActual;
+                
+                // Aplicar clase 'terminado' solo si el estado es 'Terminado' Y la fecha no es futura
+                if (t.estado === 'Terminado' && !esFechaFutura) {
+                    pill.classList.add('terminado');
+                }
+                
                 pill.textContent = `${t.hora} · ${t.mascota} · ${t.servicio}`;
-                pill.addEventListener('click', ()=> openModal(k, t));
+                
+                // Solo permitir edición si el turno no está terminado O si es fecha futura
+                if (t.estado !== 'Terminado' || esFechaFutura) {
+                    pill.addEventListener('click', ()=> openModal(k, t));
+                } else {
+                    pill.title = 'Este turno ya está terminado y no se puede editar';
+                }
+                
                 list.appendChild(pill);
             });
             if(items.length>2){
@@ -584,6 +672,23 @@ try {
     }
 
     function openModal(fechaKey, turno){
+        // Verificar si la fecha es futura
+        const fechaTurno = new Date(fechaKey);
+        const fechaActual = new Date();
+        fechaActual.setHours(0, 0, 0, 0);
+        const esFechaFutura = fechaTurno > fechaActual;
+        
+        // Verificar si el turno está terminado Y no es fecha futura
+        if (turno.estado === 'Terminado' && !esFechaFutura) {
+            Swal.fire({
+                title: 'Turno Terminado',
+                text: 'Este turno ya está terminado y no se puede editar.',
+                icon: 'info',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+        
         // Prefill form
         document.getElementById('form-id').value = turno.id;
         document.getElementById('form-fecha').value = fechaKey;
@@ -599,13 +704,17 @@ try {
         modalOverlay.style.display = 'flex';
     }
 
+    // Función para abrir modal desde la tabla
+    function openModalFromTable(fechaKey, turno){
+        openModal(fechaKey, turno);
+    }
+
     function closeModal(){ modalOverlay.style.display = 'none'; }
 
     btnPrev.addEventListener('click', ()=>{ const d=new Date(fechaActual); d.setMonth(d.getMonth()-1); fechaActual=d; renderCalendar(); });
     btnNext.addEventListener('click', ()=>{ const d=new Date(fechaActual); d.setMonth(d.getMonth()+1); fechaActual=d; renderCalendar(); });
     document.getElementById('btn-today').addEventListener('click', ()=>{ fechaActual = new Date(); renderCalendar(); });
     modalClose.addEventListener('click', closeModal);
-    document.getElementById('modal-cancel').addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', (e)=>{ if(e.target===modalOverlay) closeModal(); });
 
     // Reactualizar horas al cambiar servicio o fecha
@@ -616,21 +725,104 @@ try {
     formFecha.addEventListener('change', ()=>{
         const id = document.getElementById('form-id').value;
         refreshHoraOptions(id);
+        
+        // Validar que no se pueda seleccionar una hora pasada si es el día actual
+        const fechaSeleccionada = formFecha.value;
+        const fechaActual = new Date().toISOString().split('T')[0];
+        
+        if (fechaSeleccionada === fechaActual) {
+            const horaActual = new Date();
+            const horaActualStr = horaActual.getHours().toString().padStart(2, '0') + ':' + 
+                                 horaActual.getMinutes().toString().padStart(2, '0');
+            
+            // Filtrar opciones de hora para excluir horas pasadas
+            const opciones = formHora.querySelectorAll('option');
+            opciones.forEach(opcion => {
+                if (opcion.value < horaActualStr) {
+                    opcion.style.display = 'none';
+                } else {
+                    opcion.style.display = 'block';
+                }
+            });
+        } else {
+            // Mostrar todas las opciones si no es el día actual
+            const opciones = formHora.querySelectorAll('option');
+            opciones.forEach(opcion => {
+                opcion.style.display = 'block';
+            });
+        }
     });
 
     document.addEventListener('DOMContentLoaded', renderCalendar);
 
     // Submit handlers
     const form = document.getElementById('form-turno');
-    document.getElementById('btn-guardar').addEventListener('click', ()=>{
+    document.getElementById('btn-guardar').addEventListener('click', (e)=>{
+        e.preventDefault();
+        
+        // Validaciones del lado del cliente
+        const fecha = formFecha.value;
+        const hora = formHora.value;
+        const fechaActual = new Date().toISOString().split('T')[0];
+        
+        // Validar fecha pasada
+        if (fecha < fechaActual) {
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pueden seleccionar fechas pasadas.',
+                icon: 'error',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+        
+        // Validar hora pasada si es el día actual
+        if (fecha === fechaActual) {
+            const horaActual = new Date();
+            const horaActualStr = horaActual.getHours().toString().padStart(2, '0') + ':' + 
+                                 horaActual.getMinutes().toString().padStart(2, '0');
+            
+            if (hora < horaActualStr) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pueden seleccionar horas pasadas para el día actual.',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+        }
+        
+        // Validar que se haya seleccionado una hora
+        if (!hora) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Por favor selecciona una hora disponible.',
+                icon: 'error',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+        
         document.getElementById('form-accion').value = 'editar';
         form.submit();
     });
     document.getElementById('btn-eliminar').addEventListener('click', ()=>{
-        if (confirm('¿Seguro que deseas eliminar este turno?')) {
-            document.getElementById('form-accion').value = 'eliminar';
-            form.submit();
-        }
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'No podrás revertir esta acción. El turno será eliminado permanentemente.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-accion').value = 'eliminar';
+                form.submit();
+            }
+        });
     });
 
     // Script para el menú móvil (igual a client_dashboard)

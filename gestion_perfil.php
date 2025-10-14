@@ -44,20 +44,121 @@ try {
             $especie = $_POST['especie'] ?? '';
             $raza = $_POST['raza'] ?? '';
             $edad = $_POST['edad'] ?? '';
+            $sexo = $_POST['sexo'] ?? '';
+            $peso = $_POST['peso'] ?? '';
+            $esterilizado = $_POST['esterilizado'] ?? '';
             
             if (!$pet_id) {
                 throw new Exception('ID de mascota no proporcionado');
             }
             
-            $query = "UPDATE mascotas SET nombre = :nombre, especie = :especie, raza = :raza, edad = :edad 
-                      WHERE id = :id AND user_id = :user_id";
+            // Validaciones
+            if (empty($nombre) || empty($especie) || empty($raza) || empty($edad) || empty($sexo) || empty($peso) || $esterilizado === '') {
+                throw new Exception('Todos los campos son obligatorios');
+            }
+            
+            // Obtener los datos actuales de la mascota para comparar
+            $query_check = "SELECT nombre, especie, raza, edad, sexo, peso, esterilizado FROM mascotas WHERE id = :id AND user_id = :user_id";
+            $stmt_check = $conn->prepare($query_check);
+            $stmt_check->bindParam(':id', $pet_id);
+            $stmt_check->bindParam(':user_id', $user_id);
+            $stmt_check->execute();
+            $current_pet = $stmt_check->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$current_pet) {
+                throw new Exception('Mascota no encontrada');
+            }
+            
+            // Verificar si hay cambios
+            $has_changes = false;
+            if ($current_pet['nombre'] !== $nombre || 
+                $current_pet['especie'] !== $especie || 
+                $current_pet['raza'] !== $raza || 
+                $current_pet['edad'] != $edad || 
+                $current_pet['sexo'] !== $sexo || 
+                $current_pet['peso'] != $peso || 
+                $current_pet['esterilizado'] != $esterilizado) {
+                $has_changes = true;
+            }
+            
+            // Verificar si se subió una nueva foto
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+                $has_changes = true;
+            }
+            
+            if (!$has_changes) {
+                throw new Exception('No se detectaron cambios en la información de la mascota');
+            }
+            
+            if (!is_numeric($edad) || $edad < 0 || $edad > 30) {
+                throw new Exception('La edad debe ser un número entre 0 y 30 años');
+            }
+            
+            if (!is_numeric($peso) || $peso <= 0 || $peso > 200) {
+                throw new Exception('El peso debe ser un número entre 0.1 y 200 kg');
+            }
+            
+            if (!in_array($sexo, ['Macho', 'Hembra'])) {
+                throw new Exception('El sexo debe ser Macho o Hembra');
+            }
+            
+            if (!in_array($esterilizado, ['0', '1'])) {
+                throw new Exception('El estado de esterilización debe ser válido');
+            }
+            
+            // Manejar la foto si se subió una nueva
+            $foto_path = null;
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = 'uploads/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+                
+                $file_extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                
+                if (!in_array($file_extension, $allowed_extensions)) {
+                    throw new Exception('Formato de archivo no permitido. Use JPG, PNG o GIF');
+                }
+                
+                if ($_FILES['foto']['size'] > 5 * 1024 * 1024) { // 5MB
+                    throw new Exception('El archivo es demasiado grande. Máximo 5MB');
+                }
+                
+                $foto_name = 'pet_' . $pet_id . '_' . time() . '.' . $file_extension;
+                $foto_path = $upload_dir . $foto_name;
+                
+                if (!move_uploaded_file($_FILES['foto']['tmp_name'], $foto_path)) {
+                    throw new Exception('Error al subir la imagen');
+                }
+            }
+            
+            // Construir la consulta SQL
+            if ($foto_path) {
+                $query = "UPDATE mascotas SET nombre = :nombre, especie = :especie, raza = :raza, edad = :edad, 
+                         sexo = :sexo, peso = :peso, esterilizado = :esterilizado, foto = :foto 
+                         WHERE id = :id AND user_id = :user_id";
+            } else {
+                $query = "UPDATE mascotas SET nombre = :nombre, especie = :especie, raza = :raza, edad = :edad, 
+                         sexo = :sexo, peso = :peso, esterilizado = :esterilizado 
+                         WHERE id = :id AND user_id = :user_id";
+            }
+            
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':nombre', $nombre);
             $stmt->bindParam(':especie', $especie);
             $stmt->bindParam(':raza', $raza);
             $stmt->bindParam(':edad', $edad);
+            $stmt->bindParam(':sexo', $sexo);
+            $stmt->bindParam(':peso', $peso);
+            $stmt->bindParam(':esterilizado', $esterilizado);
             $stmt->bindParam(':id', $pet_id);
             $stmt->bindParam(':user_id', $user_id);
+            
+            if ($foto_path) {
+                $stmt->bindParam(':foto', $foto_path);
+            }
+            
             $stmt->execute();
 
             // Set success message in session
@@ -662,7 +763,7 @@ try {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
-            height: 100%;
+            max-height: 420px; /* Altura para mostrar exactamente 2 mascotas completas */
             overflow-y: auto;
             padding-right: 0.5rem;
             align-content: flex-start;
@@ -694,12 +795,12 @@ try {
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
-            min-height: 180px;
-            width: calc(33.333% - 0.75rem);
+            min-height: 200px;
+            width: calc(50% - 0.5rem); /* 2 columnas en lugar de 3 */
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            min-width: 250px;
+            min-width: 280px;
         }
 
         .pet-card::before {
@@ -1039,6 +1140,18 @@ try {
             margin-bottom: 1rem;
             opacity: 0.5;
         }
+
+        /* Responsive para mascotas */
+        @media (max-width: 768px) {
+            .pet-card {
+                width: 100%; /* Una columna en móviles */
+                min-width: auto;
+            }
+            
+            .pets-grid {
+                max-height: 400px; /* Altura para mostrar 2 mascotas en móviles */
+            }
+        }
     </style>
     <script>
         // Datos de razas por especie
@@ -1074,26 +1187,58 @@ try {
             }
         }
 
-        function openModal(id, nombre, especie, raza, edad) {
+        function openModal(id, nombre, especie, raza, edad, sexo, peso, esterilizado, foto) {
             // Set the pet ID
             document.getElementById('edit-pet-id').value = id;
             
             // Set the pet name
-            document.getElementById('edit-nombre').value = nombre;
+            const nombreInput = document.getElementById('edit-nombre');
+            nombreInput.value = nombre;
+            nombreInput.dataset.original = nombre; // Store original value
             
             // Set the species and update the breeds
             const especieSelect = document.getElementById('edit-especie');
             especieSelect.value = especie;
+            especieSelect.dataset.original = especie; // Store original value
             actualizarRazas(especie);
             
             // Set the breed after the options are loaded
             setTimeout(() => {
                 const razaSelect = document.getElementById('edit-raza');
                 razaSelect.value = raza;
+                razaSelect.dataset.original = raza; // Store original value
             }, 100); // Increased timeout to ensure options are loaded
             
             // Set the age
-            document.getElementById('edit-edad').value = edad;
+            const edadInput = document.getElementById('edit-edad');
+            edadInput.value = edad;
+            edadInput.dataset.original = edad; // Store original value
+            
+            // Set the sex
+            const sexoSelect = document.getElementById('edit-sexo');
+            sexoSelect.value = sexo;
+            sexoSelect.dataset.original = sexo; // Store original value
+            
+            // Set the weight
+            const pesoInput = document.getElementById('edit-peso');
+            pesoInput.value = parseFloat(peso);
+            pesoInput.dataset.original = peso; // Store original value
+            
+            // Set the sterilization status
+            const esterilizadoSelect = document.getElementById('edit-esterilizado');
+            esterilizadoSelect.value = esterilizado;
+            esterilizadoSelect.dataset.original = esterilizado; // Store original value
+            
+            // Set the photo preview if exists
+            const fotoPreview = document.getElementById('foto-preview');
+            const fotoInput = document.getElementById('edit-foto');
+            if (foto && foto !== 'null' && foto !== '') {
+                fotoPreview.src = foto;
+                fotoPreview.style.display = 'block';
+            } else {
+                fotoPreview.style.display = 'none';
+            }
+            fotoInput.value = ''; // Clear the file input
             
             // Show the modal with animation
             const modal = document.getElementById('editModal');
@@ -1117,39 +1262,6 @@ try {
     </script>
     <script>
         // Funciones para el modal
-        function openModal(id, nombre, especie, raza, edad) {
-            // Set the pet ID
-            document.getElementById('edit-pet-id').value = id;
-            
-            // Set the pet name
-            document.getElementById('edit-nombre').value = nombre;
-            
-            // Set the species and update the breeds
-            const especieSelect = document.getElementById('edit-especie');
-            especieSelect.value = especie;
-            actualizarRazas(especie);
-            
-            // Set the breed after the options are loaded
-            setTimeout(() => {
-                const razaSelect = document.getElementById('edit-raza');
-                if (razaSelect) {
-                    razaSelect.value = raza;
-                }
-            }, 100);
-            
-            // Set the age
-            document.getElementById('edit-edad').value = edad;
-            
-            // Show the modal with animation
-            const modal = document.getElementById('editModal');
-            modal.style.display = 'flex';
-            // Force reflow for animation
-            void modal.offsetWidth;
-            modal.classList.add('active');
-            
-            // Focus on the first input field for better UX
-            document.getElementById('edit-nombre').focus();
-        }
 
         function closeModal() {
             const modal = document.getElementById('editModal');
@@ -1158,6 +1270,43 @@ try {
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
+        }
+
+        // Función para confirmar eliminación de mascota con SweetAlert2
+        function confirmDeletePet(petId, petName) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: `¿Estás seguro de que quieres eliminar a ${petName}? Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Crear formulario dinámico para enviar la eliminación
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'gestion_perfil.php';
+                    
+                    const idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.name = 'id';
+                    idInput.value = petId;
+                    
+                    const deleteInput = document.createElement('input');
+                    deleteInput.type = 'hidden';
+                    deleteInput.name = 'delete_pet';
+                    deleteInput.value = '1';
+                    
+                    form.appendChild(idInput);
+                    form.appendChild(deleteInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
 
         // Funcionalidad para mostrar/ocultar contraseñas
@@ -1684,7 +1833,16 @@ try {
                                 <div class="pet-card">
                                     <div class="pet-header">
                                         <div class="pet-avatar">
-                                            <?php echo strtoupper(substr($pet['nombre'], 0, 1)); ?>
+                                            <?php 
+                                            // Debug temporal
+                                            echo "<!-- Debug: Foto = '" . ($pet['foto'] ?? 'NULL') . "' -->";
+                                            echo "<!-- Debug: File exists = " . (file_exists($pet['foto'] ?? '') ? 'YES' : 'NO') . " -->";
+                                            echo "<!-- Debug: Empty check = " . (empty($pet['foto']) ? 'EMPTY' : 'NOT EMPTY') . " -->";
+                                            if (!empty($pet['foto']) && file_exists($pet['foto'])): ?>
+                                                <img src="<?php echo htmlspecialchars($pet['foto']); ?>" alt="<?php echo htmlspecialchars($pet['nombre']); ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                            <?php else: ?>
+                                                <?php echo strtoupper(substr($pet['nombre'], 0, 1)); ?>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="pet-info">
                                             <h3><?php echo htmlspecialchars($pet['nombre']); ?></h3>
@@ -1708,20 +1866,29 @@ try {
                                             <div class="pet-detail-label">Edad</div>
                                             <div class="pet-detail-value"><?php echo htmlspecialchars($pet['edad']); ?> años</div>
                                         </div>
+                                        <div class="pet-detail">
+                                            <div class="pet-detail-label">Sexo</div>
+                                            <div class="pet-detail-value"><?php echo htmlspecialchars($pet['sexo']); ?></div>
+                                        </div>
+                                        <div class="pet-detail">
+                                            <div class="pet-detail-label">Peso</div>
+                                            <div class="pet-detail-value"><?php echo htmlspecialchars($pet['peso']); ?> kg</div>
+                                        </div>
+                                        <div class="pet-detail">
+                                            <div class="pet-detail-label">Esterilizado</div>
+                                            <div class="pet-detail-value"><?php echo $pet['esterilizado'] ? 'Sí' : 'No'; ?></div>
+                                        </div>
                                     </div>
                                     
                                     <div class="pet-actions">
                                         <button class="btn btn-secondary" 
-                                                onclick="openModal('<?php echo $pet['id']; ?>', '<?php echo htmlspecialchars($pet['nombre']); ?>', '<?php echo htmlspecialchars($pet['especie']); ?>', '<?php echo htmlspecialchars($pet['raza']); ?>', '<?php echo htmlspecialchars($pet['edad']); ?>')"> 
+                                                onclick="openModal('<?php echo $pet['id']; ?>', '<?php echo htmlspecialchars($pet['nombre']); ?>', '<?php echo htmlspecialchars($pet['especie']); ?>', '<?php echo htmlspecialchars($pet['raza']); ?>', '<?php echo htmlspecialchars($pet['edad']); ?>', '<?php echo htmlspecialchars($pet['sexo']); ?>', '<?php echo htmlspecialchars($pet['peso']); ?>', '<?php echo htmlspecialchars($pet['esterilizado']); ?>', '<?php echo htmlspecialchars($pet['foto']); ?>')"> 
                                             Editar
                                         </button>
-                                        <form action="gestion_perfil.php" method="post" style="display: inline;">
-                                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($pet['id']); ?>">
-                                            <button type="submit" name="delete_pet" class="btn btn-danger" 
-                                                    onclick="return confirm('¿Estás seguro de que quieres eliminar a <?php echo htmlspecialchars($pet['nombre']); ?>?')">
-                                                Eliminar
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger" 
+                                                onclick="confirmDeletePet('<?php echo $pet['id']; ?>', '<?php echo htmlspecialchars($pet['nombre']); ?>')">
+                                            Eliminar
+                                        </button>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -1741,22 +1908,20 @@ try {
                 <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body">
-                <form action="gestion_perfil.php" method="post" id="editPetForm">
+                <form action="gestion_perfil.php" method="post" id="editPetForm" enctype="multipart/form-data">
                     <input type="hidden" id="edit-pet-id" name="id">
                     <input type="hidden" name="edit_pet" value="1">
                     
                     <div class="form-group">
-                        <label class="form-label" for="edit-nombre">Nombre de la Mascota</label>
+                        <label class="form-label" for="edit-nombre"><i class='bx bx-user' style="margin-right: 5px;"></i>Nombre de la Mascota</label>
                         <div class="input-group">
-                            <span class="input-icon">◆</span>
                             <input type="text" id="edit-nombre" name="nombre" class="form-input" required>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="edit-especie">Especie</label>
+                        <label class="form-label" for="edit-especie"><i class='bx bx-category' style="margin-right: 5px;"></i>Especie</label>
                         <div class="input-group">
-                            <span class="input-icon">▲</span>
                             <select id="edit-especie" name="especie" class="form-input" required onchange="actualizarRazas(this.value)">
                                 <option value="" disabled selected>Seleccionar especie...</option>
                                 <option value="Perro">Perro</option>
@@ -1769,9 +1934,8 @@ try {
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="edit-raza">Raza</label>
+                        <label class="form-label" for="edit-raza"><i class='bx bx-dna' style="margin-right: 5px;"></i>Raza</label>
                         <div class="input-group">
-                            <span class="input-icon">◆</span>
                             <select id="edit-raza" name="raza" class="form-input" required>
                                 <option value="" disabled selected>Seleccione una especie primero</option>
                             </select>
@@ -1779,10 +1943,51 @@ try {
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="edit-edad">Edad (años)</label>
+                        <label class="form-label" for="edit-edad"><i class='bx bx-time' style="margin-right: 5px;"></i>Edad (años)</label>
                         <div class="input-group">
-                            <span class="input-icon">+</span>
                             <input type="number" id="edit-edad" name="edad" class="form-input" min="0" max="30" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-sexo"><i class='bx bx-male-sign' style="margin-right: 5px;"></i>Sexo</label>
+                        <div class="input-group">
+                            <select id="edit-sexo" name="sexo" class="form-input" required>
+                                <option value="" disabled>Seleccionar sexo...</option>
+                                <option value="Macho">Macho</option>
+                                <option value="Hembra">Hembra</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-peso"><i class='bx bx-chart' style="margin-right: 5px;"></i>Peso (kg)</label>
+                        <div class="input-group">
+                            <input type="number" id="edit-peso" name="peso" class="form-input" min="0.1" max="200" step="0.1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-esterilizado"><i class='bx bx-check-shield' style="margin-right: 5px;"></i>Estado de Esterilización</label>
+                        <div class="input-group">
+                            <select id="edit-esterilizado" name="esterilizado" class="form-input" required>
+                                <option value="" disabled>Seleccionar estado...</option>
+                                <option value="1">Esterilizado</option>
+                                <option value="0">No esterilizado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-foto"><i class='bx bx-image' style="margin-right: 5px;"></i>Foto de la Mascota</label>
+                        <div class="input-group">
+                            <input type="file" id="edit-foto" name="foto" class="form-input" accept="image/*">
+                        </div>
+                        <small class="form-hint">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                        
+                        <!-- Preview de la imagen actual -->
+                        <div id="current-photo-preview" style="margin-top: 10px;">
+                            <img id="foto-preview" src="" alt="Foto actual" style="max-width: 150px; max-height: 150px; border-radius: 8px; display: none;">
                         </div>
                     </div>
                     
@@ -1803,6 +2008,138 @@ try {
                     });
                     <?php unset($_SESSION['success_message']); ?>
                 <?php endif; ?>
+                
+                // Validación del formulario de edición de mascota
+                document.getElementById('editPetForm').addEventListener('submit', function(e) {
+                    const nombre = document.getElementById('edit-nombre').value.trim();
+                    const especie = document.getElementById('edit-especie').value;
+                    const raza = document.getElementById('edit-raza').value;
+                    const edad = document.getElementById('edit-edad').value;
+                    const sexo = document.getElementById('edit-sexo').value;
+                    const peso = document.getElementById('edit-peso').value;
+                    const esterilizado = document.getElementById('edit-esterilizado').value;
+                    const foto = document.getElementById('edit-foto').files[0];
+                    
+                    // Validar campos obligatorios
+                    if (!nombre || !especie || !raza || !edad || !sexo || !peso || esterilizado === '') {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Todos los campos son obligatorios',
+                            icon: 'error',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        return false;
+                    }
+                    
+                    // Verificar si hay cambios (datos originales se almacenan en data attributes)
+                    const originalData = {
+                        nombre: document.getElementById('edit-nombre').dataset.original || '',
+                        especie: document.getElementById('edit-especie').dataset.original || '',
+                        raza: document.getElementById('edit-raza').dataset.original || '',
+                        edad: document.getElementById('edit-edad').dataset.original || '',
+                        sexo: document.getElementById('edit-sexo').dataset.original || '',
+                        peso: document.getElementById('edit-peso').dataset.original || '',
+                        esterilizado: document.getElementById('edit-esterilizado').dataset.original || ''
+                    };
+                    
+                    const hasChanges = (
+                        originalData.nombre !== nombre ||
+                        originalData.especie !== especie ||
+                        originalData.raza !== raza ||
+                        originalData.edad !== edad ||
+                        originalData.sexo !== sexo ||
+                        originalData.peso !== peso ||
+                        originalData.esterilizado !== esterilizado ||
+                        foto // Si hay una nueva foto
+                    );
+                    
+                    if (!hasChanges) {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Sin cambios',
+                            text: 'No se detectaron cambios en la información de la mascota',
+                            icon: 'info',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        return false;
+                    }
+                    
+                    // Validar edad
+                    if (isNaN(edad) || edad < 0 || edad > 30) {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'La edad debe ser un número entre 0 y 30 años',
+                            icon: 'error',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        return false;
+                    }
+                    
+                    // Validar peso
+                    if (isNaN(peso) || peso <= 0 || peso > 200) {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'El peso debe ser un número entre 0.1 y 200 kg',
+                            icon: 'error',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        return false;
+                    }
+                    
+                    // Validar archivo de imagen si se seleccionó uno
+                    if (foto) {
+                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                        if (!allowedTypes.includes(foto.type)) {
+                            e.preventDefault();
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Formato de archivo no permitido. Use JPG, PNG o GIF',
+                                icon: 'error',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                            return false;
+                        }
+                        
+                        if (foto.size > 5 * 1024 * 1024) { // 5MB
+                            e.preventDefault();
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'El archivo es demasiado grande. Máximo 5MB',
+                                icon: 'error',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                // Preview de imagen cuando se selecciona un archivo
+                document.getElementById('edit-foto').addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    const preview = document.getElementById('foto-preview');
+                    
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.style.display = 'none';
+                    }
+                });
                 </script>
             </div>
         </div>

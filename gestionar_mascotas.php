@@ -17,6 +17,7 @@ $delete_feedback = null;
 // Eliminar mascota (admin)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_pet'])) {
     $pet_id = (int)($_POST['pet_id'] ?? 0);
+    $back_owner = (int)($_POST['filter_owner_id'] ?? 0);
     if ($pet_id <= 0) {
         $message = 'Mascota inválida.';
         $message_type = 'error';
@@ -25,8 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_pet'])) {
         if ($stmt) {
             $stmt->bind_param('i', $pet_id);
             if ($stmt->execute()) {
-                $message = 'Mascota eliminada correctamente.';
-                $message_type = 'success';
+                $qs = 'gestionar_mascotas.php?success=3';
+                if ($back_owner > 0) { $qs .= '&filter_owner_id=' . $back_owner; }
+                header("Location: $qs");
+                exit();
             } else {
                 $message = 'Error al eliminar la mascota.';
                 $message_type = 'error';
@@ -42,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_pet'])) {
 // Editar mascota (admin)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_pet'])) {
     $pet_id = (int)($_POST['pet_id'] ?? 0);
+    $back_owner = (int)($_POST['filter_owner_id'] ?? 0);
     $nombre = sanitize($_POST['e_nombre'] ?? '');
     $especie = sanitize($_POST['e_especie'] ?? '');
     $raza = sanitize($_POST['e_raza'] ?? '');
@@ -73,8 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_pet'])) {
         if ($stmt) {
             $stmt->bind_param('sssisdii', $nombre, $especie, $raza, $edad, $sexo, $peso, $esterilizado, $pet_id);
             if ($stmt->execute()) {
-                $message = 'Mascota actualizada exitosamente.';
-                $message_type = 'success';
+                $qs = 'gestionar_mascotas.php?success=2';
+                if ($back_owner > 0) { $qs .= '&filter_owner_id=' . $back_owner; }
+                header("Location: $qs");
+                exit();
             } else {
                 $message = 'Error al actualizar la mascota.';
                 $message_type = 'error';
@@ -122,8 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_pet'])) {
         if ($stmt) {
             $stmt->bind_param('isssisdi', $owner_id, $nombre, $especie, $raza, $edad, $sexo, $peso, $esterilizado);
             if ($stmt->execute()) {
-                $message = 'Mascota creada exitosamente.';
-                $message_type = 'success';
+                header("Location: gestionar_mascotas.php?success=1");
+                exit();
             } else {
                 $message = 'Error al crear la mascota.';
                 $message_type = 'error';
@@ -170,10 +176,29 @@ if ($filter_owner_id > 0) {
             margin: 0;
             padding: 0;
             display: flex;
-            overflow: hidden;
+            height: 100vh;
             color: #333;
             transition: background-color 0.3s, color 0.3s;
             background-color: #f4f4f9;
+        }
+        
+        /* Mejorar el scroll */
+        .content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
         .dark-mode { background-color:#1c1c1c; color:#e0e0e0; }
         .sidebar {
@@ -237,13 +262,16 @@ if ($filter_owner_id > 0) {
 
         .sidebar .bottom-menu { margin-top:auto; width:100%; padding-bottom:60px; display:flex; flex-direction:column; align-items:center; }
         .content {
-            flex-grow: 1;
+            flex: 1;
             margin-left: 275px;
             padding: 40px 30px;
-            min-height: 100vh;
-            height: 100vh;
             overflow-y: auto;
-            padding-bottom: 140px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        .content-wrapper {
+            padding-bottom: 60px;
         }
         .card {
             background:#fff;
@@ -251,9 +279,9 @@ if ($filter_owner_id > 0) {
             box-shadow:0 10px 25px rgba(0,0,0,0.08);
             padding:24px;
             max-width:980px;
-            margin:0 auto;
+            margin:0 auto 24px auto;
             border: 1px solid #edf2f7;
-            margin-bottom: 24px; /* separación entre tarjetas */
+            position: relative;
         }
         .card h1, .card h2, .card h3 { margin-top: 0; font-weight: 600; color: #025162; }
         .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -314,6 +342,7 @@ if ($filter_owner_id > 0) {
          </div>
     </div>
     <div class="content">
+        <div class="content-wrapper">
         <div class="card">
             <h1>Crear Mascota</h1>
             <?php if ($message): ?>
@@ -375,12 +404,13 @@ if ($filter_owner_id > 0) {
                 <button class="button" type="submit" name="create_pet">Crear Mascota</button>
             </form>
         </div>
-        <br>
+        
         <div class="card">
             <h2>Buscar mascotas por dueño</h2>
             <form method="GET" class="row">
                 <div class="full">
                     <label for="filter_owner_id">Dueño (Cliente)</label>
+                    <br>
                     <select id="filter_owner_id" name="filter_owner_id" onchange="this.form.submit()">
                         <option value="">Seleccione un cliente</option>
                         <?php if ($clientes) { $clientes->data_seek(0); while($c = $clientes->fetch_assoc()) { $sel = ($filter_owner_id == (int)$c['id']) ? 'selected' : ''; ?>
@@ -391,7 +421,7 @@ if ($filter_owner_id > 0) {
             </form>
 
             <?php if ($filter_owner_id > 0): ?>
-                <h3>Mascotas del cliente seleccionado</h3>
+               <br> <h3>Mascotas del cliente seleccionado</h3>
                 <table class="table">
                     <thead>
                         <tr>
@@ -444,10 +474,31 @@ if ($filter_owner_id > 0) {
                 </table>
             <?php endif; ?>
         </div>
+        </div>
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+        // Mostrar SweetAlert2 por creación/edición/eliminación
+        (function(){
+            const params = new URLSearchParams(window.location.search);
+            const s = params.get('success');
+            if (s === '1' || s === '2' || s === '3') {
+                let text = '';
+                if (s === '1') text = 'Mascota creada exitosamente.';
+                if (s === '2') text = 'Mascota actualizada exitosamente.';
+                if (s === '3') text = 'Mascota eliminada correctamente.';
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: text,
+                    icon: 'success',
+                    confirmButtonText: 'Entendido'
+                });
+                const cleanUrl = window.location.pathname + window.location.search.replace(/([?&])success=([123])(&|$)/, '$1').replace(/[?&]$/, '');
+                window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
+            }
+        })();
+
         // Razas por especie (igual que en registrar_mascota.php)
         const razasPorEspecie = {
             'Perro': ['Labrador Retriever', 'Pastor Alemán', 'Bulldog', 'Golden Retriever', 'Poodle', 'Beagle', 'Chihuahua', 'Boxer', 'Dálmata', 'Husky Siberiano', 'Sin raza definida'],
@@ -485,11 +536,24 @@ if ($filter_owner_id > 0) {
         }
         especieSelect.addEventListener('change', actualizarRazas);
 
-        // Confirmación al eliminar mascota
+        // Confirmación al eliminar mascota con SweetAlert2
         document.querySelectorAll('.delete-pet-form').forEach(form => {
             form.addEventListener('submit', function(e) {
-                const ok = confirm('¿Seguro que deseas eliminar esta mascota? Esta acción no se puede deshacer.');
-                if (!ok) e.preventDefault();
+                e.preventDefault();
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: 'Esta acción no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
             });
         });
 
@@ -581,9 +645,9 @@ if ($filter_owner_id > 0) {
 
                     <label><input type="checkbox" id="e_esterilizado" name="e_esterilizado" value="1"> Esterilizado</label>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="button secondary" onclick="closeEditPetModal()"><i class='bx bx-x'></i> Cancelar</button>
+                <div class="modal-footer" style="justify-content: space-between;">
                     <button type="submit" name="edit_pet" class="button"><i class='bx bx-save'></i> Guardar</button>
+                    <button type="button" class="button danger" onclick="closeEditPetModal()"><i class='bx bx-x'></i> Cancelar</button>
                 </div>
             </form>
          </div>
