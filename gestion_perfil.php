@@ -1677,11 +1677,8 @@ try {
                             <div style="font-size: 4rem; margin-bottom: 1rem;">🐾</div>
                             <h3 style="color: var(--text-secondary); margin-bottom: 0.5rem;">No tienes mascotas registradas</h3>
                             <p style="color: var(--text-tertiary); margin-bottom: 1.5rem;">¡Agrega tu primera mascota para comenzar!</p>
-                            <a href="registrar_mascota.php" class="btn btn-primary">
-                                <i class='bx bx-plus'></i> Agregar Mascota
-                            </a>
-                        </div>
-                    <?php else: ?>
+                            <!-- Aquí podrían ir botones de acción si se desean, pero no links de navegación del sidebar -->
+                        <?php else: ?>
                         <div class="pets-grid">
                             <?php foreach ($mascotas as $pet): ?>
                                 <div class="pet-card">

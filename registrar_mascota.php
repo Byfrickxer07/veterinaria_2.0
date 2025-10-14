@@ -625,6 +625,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         <a href="ver_turnos.php"><i class='bx bx-list-ul'></i><span>Mis Turnos</span></a>
         <a href="gestion_perfil.php"><i class='bx bx-user'></i><span>Mi Perfil</span></a>
         <a href="registrar_mascota.php" class="active"><i class='bx bx-plus-circle'></i><span>Mis Mascotas</span></a>
+        <a href="historial_cliente.php"><i class='bx bx-notepad'></i><span>Historial Clínico</span></a>
         <a href="adopcion_page.php?view=client"><i class='bx bx-heart'></i><span>Adopción</span></a>
         <div class="bottom-menu">
             <a href="index.php" id="logout-button" class="logout-button"><i class='bx bx-log-out'></i><span>Cerrar Sesión</span></a>
