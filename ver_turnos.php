@@ -419,12 +419,7 @@ try {
     <h1>Mis Turnos</h1>
     
     <?php
-    // Mostrar mensajes de éxito y error
-    if (isset($_GET['success']) && $_GET['success'] === 'editado') {
-        echo '<div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #c3e6cb;">
-                <strong>¡Éxito!</strong> El turno ha sido actualizado correctamente.
-              </div>';
-    }
+   
     
     if (isset($_GET['error'])) {
         $mensaje = '';

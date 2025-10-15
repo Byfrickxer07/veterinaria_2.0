@@ -621,6 +621,7 @@ $conn->close();
 </body>
 </html>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="alertas_clientes.js"></script>
 <script>
   // Script para el menú móvil (igual a client_dashboard)
   const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -653,21 +654,7 @@ $conn->close();
       }
   });
 
-  document.getElementById('logout-button').addEventListener('click', function(e){
-    e.preventDefault();
-    Swal.fire({ 
-      title:'¿Estás seguro?', 
-      text:'¿Deseás cerrar sesión?', 
-      icon:'warning',
-      iconColor:'#f5a25d',
-      showCancelButton:true, 
-      confirmButtonText:'Sí, cerrar sesión',
-      cancelButtonText:'Cancelar',
-      confirmButtonColor:'#6c63ff',
-      cancelButtonColor:'#6c757d'
-    })
-      .then((r)=>{ if(r.isConfirmed){ window.location.href='index.php'; } });
-  });
+  // Manejador de logout centralizado en alertas_clientes.js
 </script>
 </body>
 </html>
